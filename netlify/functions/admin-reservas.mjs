@@ -11,7 +11,7 @@ import { asegurarCuenta } from "../lib/fidelidad.mjs";
 export const config = { path: "/api/admin/reservas" };
 
 export default async (req) => {
-  if (!isAdmin(req)) return denied();
+  if (!(await isAdmin(req))) return denied();
 
   try {
     const sql = db();

@@ -38,6 +38,7 @@ Sitio estático (HTML, CSS y JavaScript sin frameworks) publicado en **Netlify**
 │   ├── functions/recordatorios.mjs    ← Programada cada 10 min: recordatorio 2 h antes
 │   ├── functions/contenido.mjs        ← GET /api/contenido: textos/fotos/precios editados
 │   ├── functions/cuenta.mjs           ← Cuentas de clientas: login, contraseña, mi cuenta
+│   ├── functions/admin-login.mjs      ← Entrar/salir del panel (usuario + contraseña)
 │   ├── functions/admin-*.mjs          ← Panel: reservas, clientas, contenido y fotos
 │   ├── functions/fotos.mjs            ← Sirve las fotos subidas (/fotos/…)
 │   ├── lib/fidelidad.mjs              ← Niveles, sellos, cuentas y contraseñas
@@ -184,6 +185,7 @@ También existe una copia en GitHub Pages (https://noirstudio-web.github.io/eliz
 | Variable | Para qué |
 |---|---|
 | `DATABASE_URL` | Conexión a la base de datos Neon |
+| `ADMIN_USER` | Usuario del panel `/admin` |
 | `ADMIN_PASSWORD` | Contraseña del panel `/admin` |
 
 Si cambias una variable, vuelve a publicar (*Deploys → Trigger deploy*) para que se aplique.
@@ -201,7 +203,7 @@ Cada vez que alguien usa el formulario **Agenda tu cita**:
 El servidor vuelve a validar todo (no se fía del navegador), rechaza fechas pasadas y descarta los envíos de bots (campo trampa oculto).
 
 ### Panel privado `/admin`
-Entra a **https://eliza-rodriguez-beauty.netlify.app/admin/** con la contraseña (`ADMIN_PASSWORD`). Tiene 5 pestañas:
+Entra a **https://eliza-rodriguez-beauty.netlify.app/admin/** con tu usuario y contraseña. Pestañas: Reservas, **Clientas**, **Fidelidad**, Servicios y precios, Resultados, Textos y Fotos.
 
 | Pestaña | Qué se puede hacer |
 |---|---|
@@ -217,16 +219,16 @@ Entra a **https://eliza-rodriguez-beauty.netlify.app/admin/** con la contraseña
 
 
 ### Club de clientas (cuentas y fidelidad)
-- **Cuándo se crea la cuenta:** sola, cuando marcas **“Asistió” por 2.ª vez** a una clienta (se identifica por su correo). Le llega un correo con un enlace para **crear su propia contraseña**, y el panel te ofrece enviárselo también por WhatsApp. El usuario es su correo. Nadie más conoce su contraseña (se guarda cifrada).
-- **Dónde entra la clienta:** “Iniciar sesión” en el menú y en el pie de página → `/cuenta/`. Ahí ve su **nivel** (Essential, Glow, Gold, VIP, Luxury) con el progreso al siguiente, su **tarjeta de sellos**, sus visitas y sus citas (y puede cancelar las próximas hasta 3 h antes).
-- **Si olvida la contraseña:** “¿Olvidaste tu contraseña?” en `/cuenta/`, o desde el panel → **Clientas → Enviar acceso**.
-- **Valor pagado:** al marcar “Asistió”, escribe cuánto pagó (opcional); suma al consumo para los niveles VIP y Luxury.
-- **Entregar el regalo:** cuando completa los sellos, en **Clientas** aparece **“Entregar regalo”** (descuenta los sellos y empieza una tarjeta nueva).
-- **Cambiar niveles, sellos o regalo:** panel → **Clientas → Niveles y tarjeta de sellos**.
-- Seguridad: sesiones de 30 días, bloqueo de 15 min tras 8 intentos fallidos, enlaces de acceso de un solo uso que vencen a los 7 días.
+- **Crear la cuenta (a mano):** panel → **Clientas → “+ Crear cuenta de clienta”**: nombre, correo (= su usuario), WhatsApp y contraseña (botón **Generar** para una al azar). Al crearla, el panel ofrece **enviarle el usuario y la contraseña por WhatsApp**. Usa el mismo correo con el que reserva para que se sumen sus visitas.
+- **Clientas con visitas pero sin cuenta:** filtro **“Sin cuenta”** → botón **Crear cuenta** (rellena sus datos).
+- **Gestionar a cada clienta:** **Cambiar contraseña**, **+1 / −1 sello** (con motivo), **Entregar regalo**, **Desactivar / Activar** la cuenta. Se ve su nivel, visitas, consumo, sellos e historial.
+- **Pestaña Fidelidad:** resumen (clientas con cuenta, regalos por entregar y entregados, clientas por nivel) y configuración de **niveles, sellos y regalo**.
+- **Dónde entra la clienta:** “Iniciar sesión” en el menú y el pie → `/cuenta/`. Ve su **nivel** con el progreso, su **tarjeta de sellos**, sus citas (puede cancelar hasta 3 h antes) y puede **cambiar su contraseña**.
+- Contraseñas cifradas (scrypt): nadie puede verlas, ni desde el panel. Sesiones de 30 días y bloqueo de 15 min tras 8 intentos fallidos.
+- Para volver a crear cuentas automáticamente en la 2.ª visita: `CREAR_CUENTA_AUTOMATICA = true` en `netlify/lib/fidelidad.mjs`.
 
-### Contraseña del panel de admin
-Es la variable `ADMIN_PASSWORD` en Netlify → *Project configuration → Environment variables* → `ADMIN_PASSWORD` → *Edit* → luego *Deploys → Trigger deploy*.
+### Usuario y contraseña del panel de admin
+Variables `ADMIN_USER` (usuario) y `ADMIN_PASSWORD` (contraseña) en Netlify → *Project configuration → Environment variables* → *Edit* → luego *Deploys → Trigger deploy*. Al entrar se abre una sesión de 12 horas; tras 8 intentos fallidos se bloquea 15 minutos.
 
 ### Correos automáticos
 | Cuándo | A quién |

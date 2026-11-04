@@ -13,6 +13,8 @@ import { sendMail, plantilla, siteUrl } from "./shared.mjs";
 const scrypt = promisify(_scrypt);
 
 export const VISITAS_PARA_CUENTA = 2;
+/** false = las cuentas las crea Eliza a mano desde el panel (Clientas → Crear cuenta). */
+export const CREAR_CUENTA_AUTOMATICA = false;
 export const DIAS_TOKEN = 7;     // validez del enlace para crear/recuperar contraseña
 export const DIAS_SESION = 30;   // duración de la sesión iniciada
 
@@ -67,13 +69,17 @@ export async function resumen(sql, correo, clientaId, cfg) {
            coalesce(sum(valor_pagado) FILTER (WHERE estado = 'atendida'), 0)::bigint AS consumo,
            to_char(max(fecha) FILTER (WHERE estado = 'atendida'), 'YYYY-MM-DD') AS ultima
     FROM reservas WHERE correo = ${correo}`;
-  let usados = 0, canjes = 0;
+  let usados = 0, canjes = 0, ajuste = 0;
   if (clientaId) {
-    const [c] = await sql`SELECT coalesce(sum(sellos_usados), 0)::int AS usados, count(*)::int AS canjes FROM canjes WHERE clienta_id = ${clientaId}`;
-    usados = c.usados; canjes = c.canjes;
+    const [c] = await sql`
+      SELECT coalesce((SELECT sum(sellos_usados) FROM canjes WHERE clienta_id = ${clientaId}), 0)::int AS usados,
+             (SELECT count(*) FROM canjes WHERE clienta_id = ${clientaId})::int AS canjes,
+             coalesce((SELECT sum(sellos) FROM ajustes_sellos WHERE clienta_id = ${clientaId}), 0)::int AS ajuste`;
+    usados = c.usados; canjes = c.canjes; ajuste = c.ajuste;
   }
   const visitas = r.visitas, consumo = Number(r.consumo);
-  const sellos = Math.max(0, visitas - usados);
+  // Sellos = visitas + ajustes manuales de Eliza − sellos ya canjeados por regalos
+  const sellos = Math.max(0, visitas + ajuste - usados);
   return {
     visitas,
     consumo,
@@ -116,7 +122,7 @@ export async function clientaDeSesion(sql, req) {
   if (token.length < 20) return null;
   const [c] = await sql`
     SELECT c.* FROM sesiones s JOIN clientas c ON c.id = s.clienta_id
-    WHERE s.token_hash = ${huella(token)} AND s.expira_en > now()`;
+    WHERE s.token_hash = ${huella(token)} AND s.expira_en > now() AND c.activa`;
   return c || null;
 }
 
@@ -151,6 +157,7 @@ export function correoAcceso(clienta, url, tipo = "bienvenida") {
  * Devuelve { creada, url } o null.
  */
 export async function asegurarCuenta(sql, correo) {
+  if (!CREAR_CUENTA_AUTOMATICA) return null;
   const [{ visitas }] = await sql`SELECT count(*)::int AS visitas FROM reservas WHERE correo = ${correo} AND estado = 'atendida'`;
   if (visitas < VISITAS_PARA_CUENTA) return null;
   const [existe] = await sql`SELECT id FROM clientas WHERE correo = ${correo}`;

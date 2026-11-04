@@ -11,7 +11,7 @@ const limpiar = (clave, valor) => (clave === "fidelidad" ? limpiarFidelidad(valo
 export const config = { path: "/api/admin/contenido" };
 
 export default async (req) => {
-  if (!isAdmin(req)) return denied();
+  if (!(await isAdmin(req))) return denied();
   const b = await readJson(req);
   const clave = String(b.clave || "");
   const sql = db();

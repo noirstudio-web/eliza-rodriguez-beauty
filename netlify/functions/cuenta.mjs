@@ -33,6 +33,10 @@ export default async (req) => {
       if (c?.bloqueada_hasta && new Date(c.bloqueada_hasta) > new Date()) {
         return json(429, { ok: false, error: "Demasiados intentos. Intenta de nuevo en 15 minutos." });
       }
+      if (c && !c.activa) {
+        await pausa(500);
+        return json(403, { ok: false, error: "Tu cuenta está desactivada. Escríbele a Eliza por WhatsApp." });
+      }
       const ok = c?.clave_hash && (await verificarClave(clave, c.clave_hash));
       if (!ok) {
         if (c) {
@@ -44,7 +48,7 @@ export default async (req) => {
         const sinClave = c && !c.clave_hash;
         return json(401, {
           ok: false,
-          error: sinClave ? "Aún no has creado tu contraseña. Usa “¿Olvidaste tu contraseña?” para recibir el enlace." : "Correo o contraseña incorrectos.",
+          error: sinClave ? "Tu cuenta aún no tiene contraseña. Pídesela a Eliza por WhatsApp." : "Correo o contraseña incorrectos.",
         });
       }
       await sql`UPDATE clientas SET fallos = 0, bloqueada_hasta = NULL, ultimo_acceso = now() WHERE id = ${c.id}`;
@@ -112,6 +116,23 @@ export default async (req) => {
                 WHERE id = ${c.id}`;
       await sql`DELETE FROM sesiones WHERE clienta_id = ${c.id}`; // cierra sesiones anteriores
       return json(200, { ok: true, token: await crearSesion(sql, c.id), nombre: c.nombre.split(" ")[0] });
+    }
+
+    /* ---------- Cambiar contraseña (con la sesión iniciada) ---------- */
+    if (accion === "cambiar" && req.method === "POST") {
+      const c = await clientaDeSesion(sql, req);
+      if (!c) return json(401, { ok: false, error: "Sesión vencida" });
+      const b = await readJson(req);
+      const nueva = String(b.nueva || "");
+      if (!(await verificarClave(String(b.actual || ""), c.clave_hash))) {
+        await pausa(600);
+        return json(400, { ok: false, error: "La contraseña actual no es correcta." });
+      }
+      if (nueva.length < 8 || nueva.length > 200) return json(400, { ok: false, error: "La nueva contraseña debe tener al menos 8 caracteres." });
+      await sql`UPDATE clientas SET clave_hash = ${await hashClave(nueva)}, clave_creada_en = now() WHERE id = ${c.id}`;
+      // Cierra las demás sesiones y deja abierta una nueva en este dispositivo
+      await sql`DELETE FROM sesiones WHERE clienta_id = ${c.id}`;
+      return json(200, { ok: true, token: await crearSesion(sql, c.id) });
     }
 
     /* ---------- Recuperar contraseña ---------- */

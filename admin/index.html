@@ -134,8 +134,11 @@
     <form class="login" id="login-form">
       <img src="../assets/img/logo.svg" alt="Eliza Rodríguez Beauty">
       <h1>Panel de Eliza</h1>
-      <p class="muted">Reservas y contenido de la página.</p>
-      <label class="f" for="pw" style="text-align:left;margin-top:1rem">Contraseña
+      <p class="muted">Reservas, clientas y contenido de la página.</p>
+      <label class="f" for="user" style="text-align:left;margin-top:1rem">Usuario
+        <input id="user" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+      </label>
+      <label class="f" for="pw" style="text-align:left;margin-top:.75rem">Contraseña
         <input id="pw" type="password" autocomplete="current-password" required>
       </label>
       <button class="btn btn--gold" type="submit">Entrar</button>
@@ -156,6 +159,7 @@
     <nav class="tabs" role="tablist" aria-label="Secciones del panel">
       <button class="tab" role="tab" data-tab="reservas" aria-selected="true">Reservas</button>
       <button class="tab" role="tab" data-tab="clientas" aria-selected="false">Clientas</button>
+      <button class="tab" role="tab" data-tab="fidelidad" aria-selected="false">Fidelidad</button>
       <button class="tab" role="tab" data-tab="servicios" aria-selected="false">Servicios y precios</button>
       <button class="tab" role="tab" data-tab="resultados" aria-selected="false">Resultados</button>
       <button class="tab" role="tab" data-tab="textos" aria-selected="false">Textos</button>
@@ -218,16 +222,44 @@
       </div>
     </section>
 
-    <!-- Clientas y fidelidad -->
+    <!-- Clientas -->
     <section id="tab-clientas" role="tabpanel" hidden>
-      <p class="intro">Las cuentas se crean <b>solas</b> cuando marcas “Asistió” por segunda vez: la clienta recibe un enlace para crear <b>su propia contraseña</b> (usuario = su correo). Con <b>“Enviar acceso”</b> le mandas ese enlace por WhatsApp cuando quieras.</p>
-      <div class="tools">
+      <details class="item" id="c-crear-box" style="display:block">
+        <summary class="item__num" style="cursor:pointer">+ Crear cuenta de clienta</summary>
+        <form id="c-crear" style="display:grid;gap:.6rem;margin-top:.9rem" autocomplete="off">
+          <div class="grid2">
+            <label class="f">Nombre<input type="text" id="cc-nombre" required></label>
+            <label class="f">WhatsApp<input type="text" id="cc-wa" inputmode="tel" placeholder="300 123 4567"></label>
+            <label class="f">Correo (será su usuario)<input type="text" id="cc-correo" inputmode="email" autocapitalize="none" required></label>
+            <label class="f">Contraseña (mín. 8 caracteres)
+              <span style="display:flex;gap:.4rem"><input type="text" id="cc-clave" autocomplete="new-password" required style="flex:1"><button class="btn btn--sm" type="button" id="cc-gen">Generar</button></span>
+            </label>
+          </div>
+          <p class="muted" style="margin:0;font-size:.8rem">Si la clienta ya reservó antes, usa el mismo correo de sus reservas para que se sumen sus visitas.</p>
+          <p><button class="btn btn--gold" type="submit">Crear cuenta</button></p>
+        </form>
+      </details>
+      <div class="tools" style="margin-top:1rem">
+        <div class="chips" role="group" aria-label="Filtrar clientas">
+          <button class="chip" type="button" data-cf="con" aria-pressed="true">Con cuenta</button>
+          <button class="chip" type="button" data-cf="sin" aria-pressed="false">Sin cuenta</button>
+          <button class="chip" type="button" data-cf="regalo" aria-pressed="false">Regalo listo</button>
+          <button class="chip" type="button" data-cf="todas" aria-pressed="false">Todas</button>
+        </div>
         <input id="cq" type="search" placeholder="Buscar clienta…" aria-label="Buscar clienta">
         <button class="btn btn--sm" type="button" id="c-refresh">Actualizar</button>
       </div>
       <div class="list" id="c-list"></div>
+    </section>
 
-      <div class="group" style="margin-top:2rem">
+    <!-- Fidelidad -->
+    <section id="tab-fidelidad" role="tabpanel" hidden>
+      <div class="stats" id="f-stats"></div>
+      <div class="group">
+        <h2>Clientas por nivel</h2>
+        <div class="stats" id="f-niveles" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))"></div>
+      </div>
+      <div class="group">
         <h2>Niveles y tarjeta de sellos</h2>
         <p class="muted" style="margin:0 0 .75rem">Regla “o”: basta cumplir las visitas <i>o</i> el consumo. Regla “y”: hay que cumplir ambos. Consumo 0 = solo cuentan las visitas.</p>
         <div id="fid-form"></div>
@@ -264,8 +296,9 @@
     const ESTADOS = { pendiente: "Pendiente", confirmada: "Confirmada", atendida: "Asistió", no_asistio: "No asistió", cancelada: "Cancelada" };
     const peso = (n) => "$" + Number(n || 0).toLocaleString("es-CO");
 
+    // Sesión del panel: token que entrega el servidor al entrar (no se guarda la contraseña)
     let pw = "";
-    try { pw = sessionStorage.getItem("erb-admin") || ""; } catch (_) {}
+    try { pw = sessionStorage.getItem("erb-admin-sesion") || ""; sessionStorage.removeItem("erb-admin"); } catch (_) {}
 
     function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("is-on"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("is-on"), 2600); }
 
@@ -287,18 +320,26 @@
         $("#view-login").hidden = true; $("#view-panel").hidden = false;
         loadContenido();
       } catch (e) {
-        if (e.auth) { logout(); $("#login-error").textContent = pw ? "Contraseña incorrecta." : ""; }
-        else toast("No se pudo conectar. Revisa tu internet.");
+        if (e.auth) logout(); else toast("No se pudo conectar. Revisa tu internet.");
       }
     }
     function logout() {
-      pw = ""; try { sessionStorage.removeItem("erb-admin"); } catch (_) {}
+      if (pw) fetch("/api/admin/sesion", { method: "DELETE", headers: { Authorization: "Bearer " + pw } }).catch(() => {});
+      pw = ""; try { sessionStorage.removeItem("erb-admin-sesion"); } catch (_) {}
       $("#view-panel").hidden = true; $("#view-login").hidden = false; $("#pw").value = "";
     }
-    $("#login-form").addEventListener("submit", (e) => {
-      e.preventDefault(); pw = $("#pw").value; $("#login-error").textContent = "";
-      try { sessionStorage.setItem("erb-admin", pw); } catch (_) {}
-      enter();
+    $("#login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = $("#login-form button[type=submit]"); btn.disabled = true; $("#login-error").textContent = "";
+      try {
+        const res = await fetch("/api/admin/sesion", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ usuario: $("#user").value, clave: $("#pw").value }) });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) { $("#login-error").textContent = d.error || "No se pudo entrar."; return; }
+        pw = d.token; try { sessionStorage.setItem("erb-admin-sesion", pw); } catch (_) {}
+        $("#pw").value = "";
+        enter();
+      } catch (_) { $("#login-error").textContent = "Sin conexión. Revisa tu internet."; }
+      finally { btn.disabled = false; }
     });
     $("#logout").addEventListener("click", () => { if (!dirty || confirm("Tienes cambios sin guardar. ¿Salir igual?")) { setDirty(null); logout(); } });
 
@@ -388,7 +429,6 @@
         if (r) { r.estado = estado; r.valor_pagado = res.reserva.valor_pagado; }
         renderReservas(); toast("Marcado: " + ESTADOS[estado]);
         clientasCargadas = false;
-        if (res.cuentaNueva) ofrecerAcceso(res.cuentaNueva, true);
       } catch (err) { if (err.auth) logout(); else { toast(err.message === "Valor pagado inválido" ? err.message : "No se pudo actualizar."); renderReservas(); } }
     }
     /** Mensaje de WhatsApp con el enlace de acceso a la cuenta. */
@@ -655,57 +695,139 @@
     });
 
     /* ======================= Clientas y fidelidad ======================= */
-    let clientas = [], fid = null, clientasCargadas = false;
-    const CUENTA = { activa: "Cuenta activa", sin_clave: "Sin contraseña aún", pendiente: "Cuenta por crear", no: "Sin cuenta (menos de 2 visitas)" };
+    let clientas = [], fid = null, resumen = null, clientasCargadas = false, cfiltro = "con";
+    const CUENTA = { activa: "Cuenta activa", sin_clave: "Sin contraseña", desactivada: "Desactivada", no: "Sin cuenta" };
+    const numWa = (w) => { let n = String(w || "").replace(/\D/g, ""); if (n.length === 10 && n.startsWith("3")) n = "57" + n; return n; };
+    function genClave() {
+      const c = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+      const a = new Uint32Array(10); crypto.getRandomValues(a);
+      return Array.from(a, (x) => c[x % c.length]).join("");
+    }
+    /** Ofrece enviar por WhatsApp el usuario y la contraseña a la clienta. */
+    function enviarCredenciales(c, clave) {
+      if (!c.whatsapp) { alert(`Cuenta lista.\n\nUsuario: ${c.correo}\nContraseña: ${clave}\n\nAnótala y entrégasela a la clienta.`); return; }
+      if (!confirm(`Cuenta lista para ${c.nombre}.\n\nUsuario: ${c.correo}\nContraseña: ${clave}\n\n¿Enviarle estos datos por WhatsApp?`)) return;
+      const msg = `Hola ${String(c.nombre).split(" ")[0]}, ¡bienvenida al club de clientas de Eliza Rodriguez Beauty! 💛\n\nEntra a ${location.origin}/cuenta/ con:\nUsuario: ${c.correo}\nContraseña: ${clave}\n\nAhí verás tu nivel, tus visitas y tu tarjeta de sellos. Puedes cambiar la contraseña desde tu cuenta.`;
+      window.open(`https://wa.me/${numWa(c.whatsapp)}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
+    }
     async function loadClientas() {
       const r = await api("/api/admin/clientas");
-      clientas = r.clientas; fid = r.config; clientasCargadas = true;
+      clientas = r.clientas; fid = r.config; resumen = r.resumen; clientasCargadas = true;
       renderClientas(); renderFid();
     }
     function renderClientas() {
       const q = $("#cq").value.trim().toLowerCase();
-      const list = clientas.filter((c) => !q || [c.nombre, c.correo, c.whatsapp, c.nivel].join(" ").toLowerCase().includes(q));
-      if (!list.length) { $("#c-list").innerHTML = '<p class="empty">Aún no hay clientas con visitas registradas. Marca “Asistió” en las reservas.</p>'; return; }
-      $("#c-list").innerHTML = list.map((c) => `
-        <article class="card">
+      const list = clientas.filter((c) => {
+        if (cfiltro === "con" && c.cuenta === "no") return false;
+        if (cfiltro === "sin" && c.cuenta !== "no") return false;
+        if (cfiltro === "regalo" && !(c.cuenta !== "no" && c.sellos >= c.sellosMeta)) return false;
+        return !q || [c.nombre, c.correo, c.whatsapp, c.nivel].join(" ").toLowerCase().includes(q);
+      });
+      if (!list.length) {
+        $("#c-list").innerHTML = `<p class="empty">${cfiltro === "con" ? "Aún no has creado cuentas. Usa “+ Crear cuenta de clienta”." : "No hay clientas en esta vista."}</p>`;
+        return;
+      }
+      $("#c-list").innerHTML = list.map((c) => {
+        const tiene = c.cuenta !== "no";
+        const hist = c.historial.slice(0, 4).map((h) => `<li>${new Date(h.fecha).toLocaleDateString("es-CO", { day: "numeric", month: "short" })} · ${h.tipo === "regalo" ? "Regalo entregado" : (h.sellos > 0 ? "+" : "") + h.sellos + " sello(s)"}${h.nota && h.tipo !== "regalo" ? " · " + esc(h.nota) : ""}</li>`).join("");
+        return `
+        <article class="card" data-correo="${esc(c.correo)}">
           <div class="card__head">
             <div><div class="card__when">${esc(c.nombre)}</div><div class="muted">${esc(c.correo)}</div></div>
-            <span class="badge badge--confirmada">${esc(c.nivel)}</span>
+            <span class="badge ${tiene ? "badge--confirmada" : "badge--pendiente"}">${tiene ? esc(c.nivel) : "Sin cuenta"}</span>
           </div>
           <dl>
             <dt>Visitas</dt><dd>${c.visitas}${c.faltas ? ` · ${c.faltas} sin asistir` : ""}</dd>
             <dt>Consumo</dt><dd>${esc(peso(c.consumo))}</dd>
-            <dt>Sellos</dt><dd>${Math.min(c.sellos, c.sellosMeta)} de ${c.sellosMeta}${c.sellos >= c.sellosMeta ? " · <b>¡regalo listo!</b>" : ""}</dd>
-            ${c.siguiente ? `<dt>Siguiente</dt><dd>${esc(c.siguiente.nombre)}${c.siguiente.faltanVisitas ? ` · ${c.siguiente.faltanVisitas === 1 ? "falta 1 visita" : `faltan ${c.siguiente.faltanVisitas} visitas`}` : ""}</dd>` : ""}
-            <dt>Cuenta</dt><dd>${esc(CUENTA[c.cuenta])}</dd>
+            ${tiene ? `<dt>Sellos</dt><dd><b>${Math.min(c.sellos, c.sellosMeta)} de ${c.sellosMeta}</b>${c.sellos >= c.sellosMeta ? " · ¡regalo listo!" : ""}${c.regalos ? ` · ${c.regalos} regalo(s) entregado(s)` : ""}</dd>` : ""}
+            ${tiene && c.siguiente ? `<dt>Siguiente</dt><dd>${esc(c.siguiente.nombre)}${c.siguiente.faltanVisitas ? ` · ${c.siguiente.faltanVisitas === 1 ? "falta 1 visita" : `faltan ${c.siguiente.faltanVisitas} visitas`}` : ""}</dd>` : ""}
+            <dt>Cuenta</dt><dd>${esc(CUENTA[c.cuenta])}${c.ultimoAcceso ? ` · último acceso ${new Date(c.ultimoAcceso).toLocaleDateString("es-CO", { day: "numeric", month: "short" })}` : ""}</dd>
           </dl>
+          ${hist ? `<ul class="muted" style="margin:0;padding-left:1.1rem;font-size:.82rem">${hist}</ul>` : ""}
           <div class="card__actions">
-            <button class="btn btn--sm" type="button" data-acceso="${esc(c.correo)}">Enviar acceso</button>
-            ${c.sellos >= c.sellosMeta && c.cuenta !== "no" ? `<button class="btn btn--gold btn--sm" type="button" data-canje="${esc(c.correo)}">Entregar regalo</button>` : ""}
+            ${!tiene ? `<button class="btn btn--gold btn--sm" type="button" data-c="crear">Crear cuenta</button>` : `
+              ${c.cuenta !== "desactivada" ? `<button class="btn btn--sm" type="button" data-c="clave">Cambiar contraseña</button>` : ""}
+              <button class="btn btn--sm" type="button" data-c="mas" title="Sumar un sello">+1 sello</button>
+              <button class="btn btn--sm" type="button" data-c="menos" title="Quitar un sello">−1 sello</button>
+              ${c.sellos >= c.sellosMeta && c.cuenta !== "desactivada" ? `<button class="btn btn--gold btn--sm" type="button" data-c="canjear">Entregar regalo</button>` : ""}
+              ${c.cuenta === "desactivada"
+                ? `<button class="btn btn--sm" type="button" data-c="activar">Activar cuenta</button>`
+                : `<button class="btn btn--sm btn--danger" type="button" data-c="desactivar">Desactivar</button>`}`}
           </div>
-        </article>`).join("");
+        </article>`;
+      }).join("");
     }
     $("#c-list").addEventListener("click", async (e) => {
-      const a = e.target.closest("[data-acceso]"), k = e.target.closest("[data-canje]");
+      const b = e.target.closest("[data-c]"); if (!b) return;
+      const correo = b.closest("[data-correo]").dataset.correo;
+      const c = clientas.find((x) => x.correo === correo);
+      const post = (body) => api("/api/admin/clientas", "POST", { correo, ...body });
       try {
-        if (a) {
-          const r = await api("/api/admin/clientas", "POST", { accion: "enlace", correo: a.dataset.acceso });
-          toast(r.correoEnviado ? "Enlace enviado también por correo." : "Enlace listo.");
-          ofrecerAcceso({ ...r, correo: a.dataset.acceso }, false);
-          loadClientas();
+        switch (b.dataset.c) {
+          case "crear": {
+            $("#c-crear-box").open = true;
+            $("#cc-nombre").value = c.nombre || ""; $("#cc-correo").value = c.correo; $("#cc-wa").value = c.whatsapp || ""; $("#cc-clave").value = genClave();
+            $("#c-crear-box").scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+          }
+          case "clave": {
+            const nueva = prompt(`Nueva contraseña para ${c.nombre} (mínimo 8 caracteres).\nDéjala como está para usar una generada al azar:`, genClave());
+            if (nueva === null) return;
+            if (nueva.length < 8) return toast("La contraseña debe tener al menos 8 caracteres.");
+            const r = await post({ accion: "clave", clave: nueva });
+            toast("Contraseña cambiada."); enviarCredenciales({ ...r.clienta, nombre: c.nombre, whatsapp: c.whatsapp }, nueva);
+            break;
+          }
+          case "mas": case "menos": {
+            const n = b.dataset.c === "mas" ? 1 : -1;
+            const nota = prompt(`${n > 0 ? "Sumar" : "Quitar"} 1 sello a ${c.nombre}. Motivo (opcional):`, n > 0 ? "Sello de cortesía" : "Corrección");
+            if (nota === null) return;
+            await post({ accion: "sellos", sellos: n, nota });
+            toast(n > 0 ? "Sello sumado." : "Sello quitado."); break;
+          }
+          case "canjear":
+            if (!confirm(`¿Entregar el regalo a ${c.nombre} (${fid.premio})? Se descontarán ${fid.sellos} sellos.`)) return;
+            await post({ accion: "canjear" }); toast("Regalo registrado. ¡Tarjeta nueva!"); break;
+          case "desactivar":
+            if (!confirm(`¿Desactivar la cuenta de ${c.nombre}? No podrá iniciar sesión hasta que la actives de nuevo.`)) return;
+            await post({ accion: "desactivar" }); toast("Cuenta desactivada."); break;
+          case "activar":
+            await post({ accion: "activar" }); toast("Cuenta activada."); break;
         }
-        if (k && confirm(`¿Entregar el regalo (${fid.premio})? Se descontarán ${fid.sellos} sellos.`)) {
-          await api("/api/admin/clientas", "POST", { accion: "canjear", correo: k.dataset.canje });
-          toast("Regalo registrado. ¡Tarjeta nueva!"); loadClientas();
-        }
+        loadClientas();
       } catch (err) { if (err.auth) logout(); else toast(err.message || "No se pudo completar."); }
     });
+    $("#cc-gen").addEventListener("click", () => { $("#cc-clave").value = genClave(); });
+    $("#c-crear").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const datos = { accion: "crear", nombre: $("#cc-nombre").value.trim(), correo: $("#cc-correo").value.trim().toLowerCase(), whatsapp: $("#cc-wa").value.trim(), clave: $("#cc-clave").value };
+      if (datos.clave.length < 8) return toast("La contraseña debe tener al menos 8 caracteres.");
+      try {
+        const r = await api("/api/admin/clientas", "POST", datos);
+        toast("Cuenta creada.");
+        $("#c-crear").reset(); $("#c-crear-box").open = false;
+        cfiltro = "con"; $$("[data-cf]").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.cf === "con")));
+        await loadClientas();
+        enviarCredenciales({ ...r.clienta }, datos.clave);
+      } catch (err) { if (err.auth) logout(); else toast(err.message || "No se pudo crear la cuenta."); }
+    });
+    $$("[data-cf]").forEach((b) => b.addEventListener("click", () => {
+      cfiltro = b.dataset.cf; $$("[data-cf]").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); renderClientas();
+    }));
     $("#cq").addEventListener("input", renderClientas);
     $("#c-refresh").addEventListener("click", () => loadClientas().catch(() => toast("No se pudo actualizar.")));
-    $('[data-tab="clientas"]').addEventListener("click", () => { if (!clientasCargadas) loadClientas().catch(() => toast("No se pudieron cargar las clientas.")); });
+    ["clientas", "fidelidad"].forEach((t) => $(`[data-tab="${t}"]`).addEventListener("click", () => {
+      if (!clientasCargadas) loadClientas().catch(() => toast("No se pudieron cargar las clientas."));
+    }));
 
     function renderFid() {
-      if (!fid) return;
+      if (!fid || !resumen) return;
+      $("#f-stats").innerHTML = `
+        <div class="stat"><b>${resumen.conCuenta}</b><span>Clientas con cuenta</span></div>
+        <div class="stat"><b>${resumen.sinCuenta}</b><span>Con visitas, sin cuenta</span></div>
+        <div class="stat"><b>${resumen.regalosListos}</b><span>Regalos por entregar</span></div>
+        <div class="stat"><b>${resumen.regalosEntregados}</b><span>Regalos entregados</span></div>`;
+      $("#f-niveles").innerHTML = fid.niveles.map((n) => `<div class="stat"><b>${resumen.porNivel[n.nombre] || 0}</b><span>${esc(n.nombre)}</span></div>`).join("");
       $("#fid-form").innerHTML = fid.niveles.map((n, i) => `
         <div class="field" data-i="${i}">
           <div class="field__head"><span>Nivel ${i + 1}</span></div>
@@ -739,7 +861,7 @@
       catch (err) { if (err.auth) logout(); else toast("No se pudo restaurar."); }
     });
 
-    if (pw) enter(); else $("#pw").focus();
+    if (pw) enter(); else $("#user").focus();
   })();
   </script>
 </body>

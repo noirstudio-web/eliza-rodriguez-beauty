@@ -12,7 +12,7 @@ const TIPOS = { "image/webp": "webp", "image/jpeg": "jpg", "image/png": "png" };
 const MAX_BYTES = 3 * 1024 * 1024; // 3 MB
 
 export default async (req) => {
-  if (!isAdmin(req)) return denied();
+  if (!(await isAdmin(req))) return denied();
   if (req.method !== "POST") return json(405, { ok: false, error: "Método no permitido" }, { Allow: "POST" });
 
   const tipo = (req.headers.get("content-type") || "").split(";")[0].trim();

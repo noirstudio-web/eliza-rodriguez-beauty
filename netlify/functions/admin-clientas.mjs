@@ -1,17 +1,23 @@
 /* ==========================================================================
-   /api/admin/clientas — fidelidad desde el panel de Eliza
-   GET                                   → clientas con visitas, consumo, nivel y sellos
-   POST { accion: "enlace",  correo }    → crea la cuenta si falta y genera un enlace
-                                           de acceso (para enviarlo por WhatsApp)
-   POST { accion: "canjear", correo }    → entrega el regalo (descuenta los sellos)
+   /api/admin/clientas — gestión de clientas y fidelidad desde el panel
+   GET                                                 → clientas, sellos, historial y resumen
+   POST { accion: "crear", nombre, correo, whatsapp, clave } → crea la cuenta a mano
+   POST { accion: "clave",     correo, clave }         → cambia su contraseña
+   POST { accion: "enlace",    correo }                → enlace para que ella cree su contraseña
+   POST { accion: "canjear",   correo }                → entrega el regalo (descuenta sellos)
+   POST { accion: "sellos",    correo, sellos, nota }  → suma o quita sellos a mano (±)
+   POST { accion: "activar" | "desactivar", correo }   → habilita o bloquea su cuenta
    ========================================================================== */
 import { db, json, readJson, isAdmin, denied } from "../lib/shared.mjs";
-import { cargarConfig, nivelDe, nuevoEnlace, correoAcceso, VISITAS_PARA_CUENTA } from "../lib/fidelidad.mjs";
+import { cargarConfig, nivelDe, nuevoEnlace, correoAcceso, hashClave } from "../lib/fidelidad.mjs";
 
 export const config = { path: "/api/admin/clientas" };
 
+const correoOk = (c) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(c);
+const claveOk = (c) => typeof c === "string" && c.length >= 8 && c.length <= 200;
+
 export default async (req) => {
-  if (!isAdmin(req)) return denied();
+  if (!(await isAdmin(req))) return denied();
   const sql = db();
 
   try {
@@ -29,51 +35,130 @@ export default async (req) => {
                  to_char(max(fecha) FILTER (WHERE estado = 'atendida'), 'YYYY-MM-DD') AS ultima
           FROM reservas GROUP BY correo
         )
-        SELECT b.*, c.id AS clienta_id, c.clave_hash IS NOT NULL AS activa, c.ultimo_acceso,
-               coalesce((SELECT sum(sellos_usados) FROM canjes k WHERE k.clienta_id = c.id), 0)::int AS usados
-        FROM base b LEFT JOIN clientas c ON c.correo = b.correo
-        WHERE b.visitas > 0 OR c.id IS NOT NULL
-        ORDER BY b.visitas DESC, b.consumo DESC`;
+        SELECT coalesce(c.correo, b.correo) AS correo,
+               coalesce(c.nombre, b.nombre) AS nombre,
+               coalesce(c.whatsapp, b.whatsapp) AS whatsapp,
+               coalesce(b.visitas, 0) AS visitas, coalesce(b.faltas, 0) AS faltas,
+               coalesce(b.consumo, 0) AS consumo, b.ultima,
+               c.id AS clienta_id, c.clave_hash IS NOT NULL AS con_clave, c.activa, c.ultimo_acceso,
+               coalesce((SELECT sum(sellos_usados) FROM canjes k WHERE k.clienta_id = c.id), 0)::int AS usados,
+               coalesce((SELECT sum(sellos) FROM ajustes_sellos a WHERE a.clienta_id = c.id), 0)::int AS ajuste,
+               (SELECT count(*) FROM canjes k WHERE k.clienta_id = c.id)::int AS regalos,
+               (SELECT coalesce(json_agg(h), '[]') FROM (
+                  SELECT * FROM (
+                    SELECT 'regalo' AS tipo, creado_en AS fecha, -sellos_usados AS sellos, premio AS nota FROM canjes WHERE clienta_id = c.id
+                    UNION ALL
+                    SELECT 'ajuste', creado_en, sellos, nota FROM ajustes_sellos WHERE clienta_id = c.id
+                  ) u ORDER BY fecha DESC LIMIT 10) h) AS historial
+        FROM base b FULL OUTER JOIN clientas c ON c.correo = b.correo
+        ORDER BY (c.id IS NOT NULL) DESC, coalesce(b.visitas, 0) DESC, coalesce(b.consumo, 0) DESC`;
+
+      const porNivel = Object.fromEntries(cfg.niveles.map((n) => [n.nombre, 0]));
       const clientas = filas.map((f) => {
         const consumo = Number(f.consumo);
         const n = nivelDe(f.visitas, consumo, cfg);
+        if (f.clienta_id) porNivel[n.actual.nombre] = (porNivel[n.actual.nombre] || 0) + 1;
         return {
           correo: f.correo, nombre: f.nombre, whatsapp: f.whatsapp,
           visitas: f.visitas, faltas: f.faltas, consumo, ultima: f.ultima,
           nivel: n.actual.nombre, siguiente: n.siguiente,
-          sellos: Math.max(0, f.visitas - f.usados), sellosMeta: cfg.sellos,
-          cuenta: f.clienta_id ? (f.activa ? "activa" : "sin_clave") : f.visitas >= VISITAS_PARA_CUENTA ? "pendiente" : "no",
+          sellos: Math.max(0, f.visitas + f.ajuste - f.usados), sellosMeta: cfg.sellos, ajuste: f.ajuste,
+          regalos: f.regalos, historial: f.historial || [],
+          cuenta: !f.clienta_id ? "no" : !f.activa ? "desactivada" : f.con_clave ? "activa" : "sin_clave",
           ultimoAcceso: f.ultimo_acceso,
         };
       });
-      return json(200, { ok: true, clientas, config: cfg, visitasParaCuenta: VISITAS_PARA_CUENTA });
+      const conCuenta = clientas.filter((c) => c.cuenta !== "no");
+      const resumen = {
+        conCuenta: conCuenta.length,
+        sinCuenta: clientas.length - conCuenta.length,
+        regalosListos: conCuenta.filter((c) => c.sellos >= c.sellosMeta).length,
+        regalosEntregados: conCuenta.reduce((s, c) => s + c.regalos, 0),
+        porNivel,
+      };
+      return json(200, { ok: true, clientas, resumen, config: cfg });
     }
 
     if (req.method === "POST") {
       const b = await readJson(req);
-      const correo = String(b.correo || "").trim().toLowerCase();
-      const [r] = await sql`SELECT nombre, whatsapp FROM reservas WHERE correo = ${correo} ORDER BY creada_en DESC LIMIT 1`;
-      if (!r) return json(404, { ok: false, error: "Clienta no encontrada" });
+      const correo = String(b.correo || "").trim().toLowerCase().slice(0, 160);
+      if (!correoOk(correo)) return json(400, { ok: false, error: "Correo inválido" });
 
-      if (b.accion === "enlace") {
+      /* ----- Crear cuenta a mano ----- */
+      if (b.accion === "crear") {
+        const nombre = String(b.nombre || "").trim().slice(0, 120);
+        const whatsapp = String(b.whatsapp || "").trim().slice(0, 25) || null;
+        if (!nombre) return json(400, { ok: false, error: "Escribe el nombre de la clienta" });
+        if (!claveOk(b.clave)) return json(400, { ok: false, error: "La contraseña debe tener al menos 8 caracteres" });
+        const [existe] = await sql`SELECT id, clave_hash FROM clientas WHERE correo = ${correo}`;
+        if (existe?.clave_hash) return json(409, { ok: false, error: "Ya existe una cuenta con ese correo. Usa “Cambiar contraseña”." });
+        const hash = await hashClave(b.clave);
         const [c] = await sql`
+          INSERT INTO clientas (correo, nombre, whatsapp, clave_hash, clave_creada_en)
+          VALUES (${correo}, ${nombre}, ${whatsapp}, ${hash}, now())
+          ON CONFLICT (correo) DO UPDATE SET nombre = EXCLUDED.nombre, whatsapp = coalesce(EXCLUDED.whatsapp, clientas.whatsapp),
+            clave_hash = EXCLUDED.clave_hash, clave_creada_en = now(), activa = true, fallos = 0, bloqueada_hasta = NULL
+          RETURNING id, nombre, whatsapp, correo`;
+        return json(201, { ok: true, clienta: c });
+      }
+
+      // Para el resto de acciones: la clienta debe existir (con cuenta o con reservas)
+      const [r] = await sql`
+        SELECT nombre, whatsapp FROM clientas WHERE correo = ${correo}
+        UNION ALL
+        (SELECT nombre, whatsapp FROM reservas WHERE correo = ${correo} ORDER BY creada_en DESC LIMIT 1)
+        LIMIT 1`;
+      if (!r) return json(404, { ok: false, error: "Clienta no encontrada" });
+      const cuenta = async () => (await sql`
           INSERT INTO clientas (correo, nombre, whatsapp) VALUES (${correo}, ${r.nombre}, ${r.whatsapp})
           ON CONFLICT (correo) DO UPDATE SET whatsapp = coalesce(clientas.whatsapp, EXCLUDED.whatsapp)
-          RETURNING *`;
+          RETURNING *`)[0];
+
+      if (b.accion === "clave") {
+        if (!claveOk(b.clave)) return json(400, { ok: false, error: "La contraseña debe tener al menos 8 caracteres" });
+        const c = await cuenta();
+        await sql`UPDATE clientas SET clave_hash = ${await hashClave(b.clave)}, clave_creada_en = now(),
+                  fallos = 0, bloqueada_hasta = NULL, token_acceso = NULL, token_expira = NULL WHERE id = ${c.id}`;
+        await sql`DELETE FROM sesiones WHERE clienta_id = ${c.id}`; // cierra sus sesiones anteriores
+        return json(200, { ok: true, clienta: { nombre: c.nombre, whatsapp: c.whatsapp, correo } });
+      }
+
+      if (b.accion === "enlace") {
+        const c = await cuenta();
+        if (!c.activa) return json(400, { ok: false, error: "La cuenta está desactivada. Actívala primero." });
         const url = await nuevoEnlace(sql, c.id);
         const enviado = await correoAcceso(c, url, c.clave_hash ? "recuperar" : "bienvenida");
         return json(200, { ok: true, url, correoEnviado: enviado, nombre: c.nombre, whatsapp: c.whatsapp });
       }
 
+      if (b.accion === "sellos") {
+        const n = Math.trunc(Number(b.sellos));
+        if (!Number.isFinite(n) || n === 0 || Math.abs(n) > 50) return json(400, { ok: false, error: "Cantidad de sellos inválida" });
+        const c = await cuenta();
+        await sql`INSERT INTO ajustes_sellos (clienta_id, sellos, nota) VALUES (${c.id}, ${n}, ${String(b.nota || "").trim().slice(0, 160) || null})`;
+        return json(200, { ok: true });
+      }
+
       if (b.accion === "canjear") {
-        const [c] = await sql`SELECT id FROM clientas WHERE correo = ${correo}`;
-        if (!c) return json(400, { ok: false, error: "La clienta aún no tiene cuenta" });
-        const [{ visitas }] = await sql`SELECT count(*)::int AS visitas FROM reservas WHERE correo = ${correo} AND estado = 'atendida'`;
-        const [{ usados }] = await sql`SELECT coalesce(sum(sellos_usados), 0)::int AS usados FROM canjes WHERE clienta_id = ${c.id}`;
-        if (visitas - usados < cfg.sellos) return json(400, { ok: false, error: "Aún no completa la tarjeta de sellos" });
+        const c = await cuenta();
+        const [{ disponibles }] = await sql`
+          SELECT ((SELECT count(*) FROM reservas WHERE correo = ${correo} AND estado = 'atendida')
+                 + coalesce((SELECT sum(sellos) FROM ajustes_sellos WHERE clienta_id = ${c.id}), 0)
+                 - coalesce((SELECT sum(sellos_usados) FROM canjes WHERE clienta_id = ${c.id}), 0))::int AS disponibles`;
+        if (disponibles < cfg.sellos) return json(400, { ok: false, error: "Aún no completa la tarjeta de sellos" });
         await sql`INSERT INTO canjes (clienta_id, sellos_usados, premio) VALUES (${c.id}, ${cfg.sellos}, ${cfg.premio})`;
         return json(200, { ok: true });
       }
+
+      if (b.accion === "activar" || b.accion === "desactivar") {
+        const c = await cuenta();
+        const activa = b.accion === "activar";
+        await sql`UPDATE clientas SET activa = ${activa} WHERE id = ${c.id}`;
+        if (!activa) await sql`DELETE FROM sesiones WHERE clienta_id = ${c.id}`; // la saca de su sesión
+        return json(200, { ok: true, activa });
+      }
+
+      return json(400, { ok: false, error: "Acción no válida" });
     }
 
     return json(405, { ok: false, error: "Método no permitido" });

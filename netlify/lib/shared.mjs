@@ -39,21 +39,38 @@ export async function readJson(req) {
   }
 }
 
-/** Compara la contraseña del panel en tiempo constante. */
-export function isAdmin(req) {
-  const expected = env("ADMIN_PASSWORD");
-  const header = req.headers.get("authorization") || "";
-  const given = header.startsWith("Bearer ") ? header.slice(7) : "";
-  if (!expected || !given) return false;
-  const a = createHash("sha256").update(given).digest();
-  const b = createHash("sha256").update(expected).digest();
-  return timingSafeEqual(a, b);
+/* ---------------- Acceso al panel de admin ----------------
+   Usuario y contraseña: variables ADMIN_USER y ADMIN_PASSWORD en Netlify.
+   Al entrar se crea una sesión (token aleatorio; en la base de datos solo se
+   guarda su huella SHA-256) que vence a las 12 horas. */
+export const HORAS_SESION_ADMIN = 12;
+const igual = (a, b) => timingSafeEqual(createHash("sha256").update(String(a)).digest(), createHash("sha256").update(String(b)).digest());
+export const huellaToken = (t) => createHash("sha256").update(t).digest("hex");
+
+/** ¿Usuario y contraseña correctos? (comparación en tiempo constante) */
+export function credencialesAdmin(usuario, clave) {
+  const u = env("ADMIN_USER") || "admin";
+  const p = env("ADMIN_PASSWORD");
+  if (!p) return false;
+  // Se evalúan las dos comparaciones siempre, para no revelar cuál falló
+  const okU = igual(String(usuario || "").trim().toLowerCase(), u.trim().toLowerCase());
+  const okP = igual(String(clave || ""), p);
+  return okU && okP;
 }
 
-/** Respuesta estándar cuando la contraseña no es válida (con pausa anti-fuerza bruta). */
+/** ¿La petición trae una sesión de admin válida? (cabecera Authorization: Bearer <token>) */
+export async function isAdmin(req) {
+  const h = req.headers.get("authorization") || "";
+  const token = h.startsWith("Bearer ") ? h.slice(7) : "";
+  if (token.length < 30) return false;
+  const [s] = await db()`SELECT 1 FROM admin_sesiones WHERE token_hash = ${huellaToken(token)} AND expira_en > now()`;
+  return Boolean(s);
+}
+
+/** Respuesta estándar cuando no hay sesión válida (con pausa anti-fuerza bruta). */
 export async function denied() {
-  await new Promise((r) => setTimeout(r, 600));
-  return json(401, { ok: false, error: "Contraseña incorrecta" });
+  await new Promise((r) => setTimeout(r, 400));
+  return json(401, { ok: false, error: "Sesión vencida. Vuelve a iniciar sesión." });
 }
 
 /** Fecha y hora actuales en Colombia. */

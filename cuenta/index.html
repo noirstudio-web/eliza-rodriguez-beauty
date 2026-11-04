@@ -158,8 +158,8 @@
           <label>Contraseña<input type="password" id="clave" autocomplete="current-password" required></label>
           <button class="btn btn--gold" type="submit">Entrar</button>
           <p class="msg ${aviso ? "is-ok" : ""}" id="msg" role="alert">${esc(aviso || "")}</p>
-          <p class="alt"><button class="link" type="button" id="olvide">¿Olvidaste tu contraseña o aún no la creas?</button></p>
-          <p class="alt muted" style="font-size:.82rem">La cuenta se crea automáticamente a partir de tu segunda visita.</p>
+          <p class="alt"><button class="link" type="button" id="olvide">¿Olvidaste tu contraseña?</button></p>
+          <p class="alt muted" style="font-size:.82rem">Tu cuenta la crea Eliza. ¿Aún no la tienes? <a href="${wa}" target="_blank" rel="noopener">Pídesela por WhatsApp</a>.</p>
         </form>`;
       const f = document.getElementById("f-login");
       f.addEventListener("submit", async (e) => {
@@ -299,8 +299,34 @@
               </li>`).join("")}</ul>` : `<p class="muted">Aún no tienes citas registradas.</p>`}
           </section>
         </div>
+        <details class="card" style="margin-top:1rem" id="cambiar-box">
+          <summary style="cursor:pointer;font-weight:500">Cambiar mi contraseña</summary>
+          <form id="f-cambiar" style="max-width:420px" novalidate>
+            <input type="email" value="${esc(d.clienta.correo)}" autocomplete="username" hidden readonly>
+            <label>Contraseña actual<input type="password" id="ca" autocomplete="current-password" required></label>
+            <label>Nueva contraseña (mínimo 8 caracteres)<input type="password" id="cn1" autocomplete="new-password" minlength="8" required></label>
+            <label>Repite la nueva contraseña<input type="password" id="cn2" autocomplete="new-password" minlength="8" required></label>
+            <button class="btn btn--gold" type="submit" style="margin-top:1rem">Guardar contraseña</button>
+            <p class="msg" id="msg-cambiar" role="alert" style="text-align:left"></p>
+          </form>
+        </details>
         <p class="muted" style="font-size:.8rem;margin-top:1.5rem">Usuario: ${esc(d.clienta.correo)} · <a href="../legal/terminos.html">Términos del programa</a> · <a href="../legal/privacidad.html">Datos personales</a></p>`;
     }
+
+    // Cambiar contraseña (se engancha cada vez que se pinta el panel)
+    document.addEventListener("submit", async (e) => {
+      if (e.target.id !== "f-cambiar") return;
+      e.preventDefault();
+      const f = e.target, m = document.getElementById("msg-cambiar");
+      m.className = "msg is-error";
+      if (f.cn1.value.length < 8) return (m.textContent = "La nueva contraseña debe tener al menos 8 caracteres.");
+      if (f.cn1.value !== f.cn2.value) return (m.textContent = "Las contraseñas nuevas no coinciden.");
+      const btn = f.querySelector("button[type=submit]"); btn.disabled = true;
+      const r = await api("cambiar", "POST", { actual: f.ca.value, nueva: f.cn1.value });
+      btn.disabled = false;
+      if (r.ok) { setTok(r.token); f.reset(); m.className = "msg is-ok"; m.textContent = "¡Listo! Tu contraseña fue cambiada."; }
+      else m.textContent = r.error || "No se pudo cambiar.";
+    });
 
     document.getElementById("salir").addEventListener("click", async () => {
       await api("salir", "POST").catch(() => {});
