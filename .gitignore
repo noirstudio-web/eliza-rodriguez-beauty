@@ -1,0 +1,11 @@
+# Archivos internos de herramientas (no son parte del sitio)
+.impeccable/
+_*.html
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Netlify CLI local
+.netlify/

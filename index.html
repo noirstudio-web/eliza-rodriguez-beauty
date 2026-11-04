@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Marca que JS está activo (para animaciones de aparición) -->
+  <script>document.documentElement.classList.add('js');</script>
+
+  <!-- ========== SEO ========== -->
+  <title>Eliza Rodriguez Beauty | Estética Avanzada en Bahía Solano</title>
+  <meta name="description" content="Centro de estética avanzada en Bahía Solano, Chocó. Perfilamiento de labios y nariz, botox, limpieza facial, peeling químico y dermapen. Agenda tu cita por WhatsApp.">
+  <meta name="theme-color" content="#F8F1E7">
+  <!-- Dirección pública actual (GitHub Pages). Cámbiala si usas Netlify o un dominio propio. -->
+  <link rel="canonical" href="https://noirstudio-web.github.io/eliza-rodriguez-beauty/">
+
+  <!-- Open Graph (vista previa al compartir en WhatsApp, Instagram, Facebook) -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:site_name" content="Eliza Rodriguez Beauty">
+  <meta property="og:title" content="Eliza Rodriguez Beauty | Estética Avanzada en Bahía Solano">
+  <meta property="og:description" content="Realza tu belleza natural. Tratamientos faciales y armonización con atención personalizada. Agenda por WhatsApp.">
+  <meta property="og:url" content="https://noirstudio-web.github.io/eliza-rodriguez-beauty/">
+  <meta property="og:image" content="https://noirstudio-web.github.io/eliza-rodriguez-beauty/assets/img/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Logo de Eliza Rodriguez Beauty – Estética avanzada en Bahía Solano">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/img/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+
+  <!-- ========== Rendimiento ========== -->
+  <link rel="preload" as="image" href="assets/img/eliza.webp?v=20261104131256" type="image/webp" fetchpriority="high">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Fuentes cargadas sin bloquear el render -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500&display=swap"></noscript>
+
+  <link rel="stylesheet" href="css/styles.css?v=20261104132003">
+
+  <!-- ========== Datos estructurados (Schema.org) ========== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BeautySalon",
+    "name": "Eliza Rodriguez Beauty – Estética Avanzada",
+    "url": "https://noirstudio-web.github.io/eliza-rodriguez-beauty/",
+    "image": "https://noirstudio-web.github.io/eliza-rodriguez-beauty/assets/img/og-image.jpg",
+    "logo": "https://noirstudio-web.github.io/eliza-rodriguez-beauty/assets/img/logo.png",
+    "description": "Centro de estética avanzada en Bahía Solano, Chocó: armonización facial, botox, limpieza facial, peeling químico y dermapen.",
+    "telephone": "+57 312 8802463",
+    "priceRange": "$$",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Bahía Solano",
+      "addressRegion": "Chocó",
+      "addressCountry": "CO"
+    },
+    "areaServed": "Bahía Solano, Chocó, Colombia",
+    "sameAs": [
+      "https://www.instagram.com/eliza_rodriguez_beauty/",
+      "https://www.facebook.com/"
+    ]
+  }
+  </script>
+
+  <!-- Configuración y datos editables (se cargan antes que main.js) -->
+  <script src="js/config.js?v=202611041312" defer></script>
+  <script src="js/services.js?v=202611041312" defer></script>
+  <script src="js/content.js?v=202611041312" defer></script>
+  <script src="js/main.js?v=20261104131601" defer></script>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Saltar al contenido</a>
+
+  <!-- =====================================================================
+       1. HEADER
+       ===================================================================== -->
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a href="#inicio" class="header__logo" aria-label="Eliza Rodriguez Beauty – Ir al inicio">
+        <img src="assets/img/logo.svg?v=202611041312" alt="Eliza Rodríguez Beauty – Estética avanzada" width="149" height="50">
+      </a>
+
+      <nav class="nav" id="nav" aria-label="Navegación principal">
+        <ul class="nav__list">
+          <li><a class="nav__link" href="#servicios">Servicios</a></li>
+          <li><a class="nav__link" href="#resultados">Resultados</a></li>
+          <li><a class="nav__link" href="#sobre-mi">Sobre mí</a></li>
+          <li><a class="nav__link" href="#preguntas">Preguntas</a></li>
+          <li><a class="nav__link" href="#contacto">Contacto</a></li>
+        </ul>
+      </nav>
+
+      <div class="header__actions">
+        <a class="btn btn--gold btn--sm" href="#reserva" data-wa>Agendar cita</a>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-controls="nav" aria-expanded="false" aria-label="Abrir menú">
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ===================================================================
+         2. HERO
+         =================================================================== -->
+    <section class="hero" id="inicio" aria-labelledby="hero-title">
+      <div class="container hero__inner">
+        <div class="hero__content">
+          <h1 class="hero__title hero__anim" id="hero-title">Realza tu belleza <em>natural</em></h1>
+          <span class="gold-line hero__anim" aria-hidden="true"></span>
+          <p class="hero__subtitle hero__anim">Estética avanzada en Bahía Solano</p>
+          <div class="hero__actions hero__anim">
+            <a class="btn btn--gold" href="#reserva" data-wa>
+              <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-whatsapp"/></svg>
+              Agendar por WhatsApp
+            </a>
+            <a class="btn btn--outline" href="#servicios">Ver servicios</a>
+          </div>
+        </div>
+
+        <div class="hero__media">
+          <picture>
+            <source srcset="assets/img/eliza.webp?v=20261104131256" type="image/webp">
+            <img src="assets/img/eliza.jpg?v=20261104131256" alt="Eliza Rodriguez, especialista en estética avanzada" width="900" height="1125" fetchpriority="high" decoding="async">
+          </picture>
+          <span class="hero__ring" aria-hidden="true"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         3. SERVICIOS (las tarjetas se generan desde js/services.js)
+         =================================================================== -->
+    <section class="section" id="servicios" aria-labelledby="servicios-title">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="eyebrow">Tratamientos</p>
+          <h2 class="section__title" id="servicios-title">Servicios</h2>
+          <span class="gold-line" aria-hidden="true"></span>
+          <p class="section__lead">Protocolos personalizados para resaltar tus rasgos con resultados naturales y seguros.</p>
+        </header>
+
+        <div class="services-grid" id="services-grid">
+          <!-- Generado por JS. Fallback sin JavaScript: -->
+          <noscript><p class="center">Escríbenos por WhatsApp para conocer nuestros servicios y precios.</p></noscript>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         4. RESULTADOS (antes / después)
+         =================================================================== -->
+    <section class="section section--beige" id="resultados" aria-labelledby="resultados-title">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="eyebrow">Antes y después</p>
+          <h2 class="section__title" id="resultados-title">Resultados</h2>
+          <span class="gold-line" aria-hidden="true"></span>
+          <p class="section__lead">Desliza sobre la imagen para comparar. Resultados reales de nuestras pacientes.</p>
+        </header>
+
+        <div class="results reveal">
+          <div class="tabs" role="tablist" aria-label="Filtrar resultados por tratamiento" id="results-tabs"></div>
+
+          <div class="ba" id="ba" role="tabpanel">
+            <img class="ba__img ba__img--after" id="ba-after" src="assets/img/resultados/labios-despues.webp?v=202611041312" alt="Después del tratamiento" width="900" height="900" loading="lazy" decoding="async">
+            <img class="ba__img ba__img--before" id="ba-before" src="assets/img/resultados/labios-antes.webp?v=202611041312" alt="Antes del tratamiento" width="900" height="900" loading="lazy" decoding="async">
+            <span class="ba__label ba__label--before" aria-hidden="true">Antes</span>
+            <span class="ba__label ba__label--after" aria-hidden="true">Después</span>
+            <div class="ba__handle" id="ba-handle" role="slider" tabindex="0"
+                 aria-label="Deslizar para comparar antes y después" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="50 % antes">
+              <span class="ba__knob" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9 6l-6 6 6 6M15 6l6 6-6 6"/></svg>
+              </span>
+            </div>
+          </div>
+          <p class="results__note" id="results-note" aria-live="polite"></p>
+          <p class="results__disclaimer">Los resultados pueden variar según cada persona. Imágenes publicadas con autorización.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         5. SOBRE ELIZA
+         =================================================================== -->
+    <section class="section" id="sobre-mi" aria-labelledby="sobre-title">
+      <div class="container about">
+        <div class="about__media reveal">
+          <img src="assets/img/eliza-sobre.webp?v=202611041312" alt="Eliza Rodriguez con su uniforme de Eliza Rodríguez Beauty" width="800" height="1000" loading="lazy" decoding="async">
+        </div>
+
+        <div class="about__content reveal">
+          <p class="eyebrow">Sobre mí</p>
+          <h2 class="section__title section__title--left" id="sobre-title">Hola, soy Eliza</h2>
+          <span class="gold-line gold-line--left" aria-hidden="true"></span>
+          <p>Soy especialista en estética avanzada y mi propósito es ayudarte a sentirte segura y radiante, realzando lo que ya te hace única. Creo en una belleza natural: resultados armoniosos que se ven como tú, en tu mejor versión.</p>
+          <p>Cada tratamiento empieza con una valoración honesta, en la que escucho lo que deseas y te recomiendo solo lo que realmente necesitas.</p>
+
+          <h3 class="about__subtitle">Formación y certificaciones</h3>
+          <ul class="cert-list" id="cert-list"></ul>
+
+          <blockquote class="about__quote">
+            “Atención personalizada, productos de calidad y protocolos seguros”
+          </blockquote>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         6. POR QUÉ ELEGIRNOS
+         =================================================================== -->
+    <section class="section section--beige" aria-labelledby="why-title">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="eyebrow">Tu tranquilidad primero</p>
+          <h2 class="section__title" id="why-title">Por qué elegirnos</h2>
+          <span class="gold-line" aria-hidden="true"></span>
+        </header>
+
+        <ul class="why-grid">
+          <li class="why reveal">
+            <span class="why__icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><path d="M24 40s-14-8.5-14-19a8 8 0 0 1 14-5.3A8 8 0 0 1 38 21c0 10.5-14 19-14 19z"/><path d="M19 22l3.5 3.5L29 19"/></svg>
+            </span>
+            <h3 class="why__title">Atención personalizada</h3>
+            <p>Cada plan se diseña según tu rostro, tu piel y tus objetivos.</p>
+          </li>
+          <li class="why reveal">
+            <span class="why__icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><path d="M24 6l14 5v11c0 9-6 16-14 20-8-4-14-11-14-20V11z"/><path d="M18 24l4 4 8-8"/></svg>
+            </span>
+            <h3 class="why__title">Productos certificados</h3>
+            <p>Trabajamos solo con marcas originales y registro sanitario.</p>
+          </li>
+          <li class="why reveal">
+            <span class="why__icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><path d="M12 36c0-15 10-24 26-26-1 16-10 26-24 26z"/><path d="M12 36l14-14"/></svg>
+            </span>
+            <h3 class="why__title">Resultados naturales</h3>
+            <p>Realzamos tu belleza sin exagerar, en armonía con tus rasgos.</p>
+          </li>
+          <li class="why reveal">
+            <span class="why__icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><path d="M8 22L24 9l16 13"/><path d="M12 19v20h24V19"/><path d="M24 33s-5-3-5-6.5a2.6 2.6 0 0 1 5-1 2.6 2.6 0 0 1 5 1C29 30 24 33 24 33z"/></svg>
+            </span>
+            <h3 class="why__title">Ambiente cómodo y seguro</h3>
+            <p>Un espacio tranquilo, limpio y con estrictos protocolos de bioseguridad.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         7. TESTIMONIOS (generados desde js/content.js)
+         =================================================================== -->
+    <section class="section" id="testimonios" aria-labelledby="testi-title">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="eyebrow">Lo que dicen</p>
+          <h2 class="section__title" id="testi-title">Testimonios</h2>
+          <span class="gold-line" aria-hidden="true"></span>
+        </header>
+
+        <div class="carousel reveal" aria-roledescription="carrusel" aria-label="Testimonios de pacientes">
+          <div class="carousel__track" id="testi-track" tabindex="0"></div>
+          <div class="carousel__controls">
+            <button class="carousel__btn" id="testi-prev" type="button" aria-label="Testimonio anterior">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+            </button>
+            <div class="carousel__dots" id="testi-dots"></div>
+            <button class="carousel__btn" id="testi-next" type="button" aria-label="Testimonio siguiente">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         8. PREGUNTAS FRECUENTES (acordeón nativo con <details>)
+         =================================================================== -->
+    <section class="section section--beige" id="preguntas" aria-labelledby="faq-title">
+      <div class="container container--narrow">
+        <header class="section__head reveal">
+          <p class="eyebrow">Resolvemos tus dudas</p>
+          <h2 class="section__title" id="faq-title">Preguntas frecuentes</h2>
+          <span class="gold-line" aria-hidden="true"></span>
+        </header>
+
+        <div class="faq reveal">
+          <details class="faq__item" name="faq">
+            <summary>¿Duele el procedimiento?</summary>
+            <div class="faq__body">
+              <p>La mayoría de tratamientos son muy tolerables. Usamos anestesia tópica y técnicas suaves para que la molestia sea mínima. Durante la valoración te explicamos qué sentirás en cada paso.</p>
+            </div>
+          </details>
+          <details class="faq__item" name="faq">
+            <summary>¿Cuánto dura el resultado?</summary>
+            <div class="faq__body">
+              <p>Depende del tratamiento y de tu piel: el ácido hialurónico en labios y nariz suele durar entre 9 y 12 meses, el botox de 4 a 6 meses, y los tratamientos de piel como peeling y dermapen mejoran con sesiones de mantenimiento.</p>
+            </div>
+          </details>
+          <details class="faq__item" name="faq">
+            <summary>¿Qué cuidados debo tener después?</summary>
+            <div class="faq__body">
+              <p>Te entregamos indicaciones por escrito para cada caso. En general: evitar el sol directo, el maquillaje y el ejercicio intenso las primeras 24–48 horas, usar protector solar y no manipular la zona tratada.</p>
+            </div>
+          </details>
+          <details class="faq__item" name="faq">
+            <summary>¿Necesito valoración previa?</summary>
+            <div class="faq__body">
+              <p>Sí. La valoración nos permite conocer tu historia, tus expectativas y confirmar que el tratamiento es adecuado y seguro para ti. Puedes agendarla por WhatsApp.</p>
+            </div>
+          </details>
+          <details class="faq__item" name="faq">
+            <summary>¿Qué medios de pago aceptan?</summary>
+            <div class="faq__body">
+              <p>Aceptamos efectivo, transferencia bancaria y Nequi / Daviplata. Para reservar algunos tratamientos se puede solicitar un abono previo.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         9. FORMULARIO DE RESERVA RÁPIDA (abre WhatsApp, no envía a servidor)
+         =================================================================== -->
+    <section class="section" id="reserva" aria-labelledby="reserva-title">
+      <div class="container container--narrow">
+        <div class="booking reveal">
+          <header class="section__head">
+            <p class="eyebrow">Reserva rápida</p>
+            <h2 class="section__title" id="reserva-title">Agenda tu cita</h2>
+            <span class="gold-line" aria-hidden="true"></span>
+            <p class="section__lead">Completa tus datos y te llevamos a WhatsApp con el mensaje listo para enviar.</p>
+          </header>
+
+          <!-- Netlify Forms: al publicar en Netlify, cada reserva queda guardada en
+               el panel del sitio (Forms → "reserva"). Ver README. -->
+          <form class="form" id="booking-form" name="reserva" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+            <input type="hidden" name="form-name" value="reserva">
+            <!-- Campo trampa anti-spam: invisible para personas -->
+            <p class="visually-hidden" aria-hidden="true">
+              <label>No llenar: <input name="bot-field" tabindex="-1" autocomplete="off"></label>
+            </p>
+
+            <div class="form__field">
+              <label for="f-nombre">Nombre</label>
+              <input id="f-nombre" name="nombre" type="text" autocomplete="name" required placeholder="Tu nombre">
+              <p class="form__error" id="err-nombre" hidden>Por favor escribe tu nombre.</p>
+            </div>
+
+            <div class="form__row">
+              <div class="form__field">
+                <label for="f-whatsapp">Número de WhatsApp</label>
+                <input id="f-whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" required placeholder="300 123 4567">
+                <p class="form__error" id="err-whatsapp" hidden>Escribe un número de WhatsApp válido.</p>
+              </div>
+              <div class="form__field">
+                <label for="f-correo">Correo</label>
+                <input id="f-correo" name="correo" type="email" inputmode="email" autocomplete="email" required placeholder="tu@correo.com">
+                <p class="form__error" id="err-correo" hidden>Escribe un correo válido (ej. nombre@correo.com).</p>
+              </div>
+            </div>
+
+            <div class="form__field">
+              <label for="f-servicio">Servicio</label>
+              <select id="f-servicio" name="servicio" required>
+                <option value="">Selecciona un servicio</option>
+              </select>
+              <p class="form__error" id="err-servicio" hidden>Selecciona un servicio.</p>
+            </div>
+
+            <div class="form__row">
+              <div class="form__field">
+                <label for="f-fecha">Fecha de la cita</label>
+                <input id="f-fecha" name="fecha" type="date" required>
+                <p class="form__error" id="err-fecha" hidden>Elige la fecha de tu cita.</p>
+              </div>
+              <div class="form__field">
+                <label for="f-hora">Hora de la cita</label>
+                <input id="f-hora" name="hora" type="time" step="1800" required>
+                <p class="form__error" id="err-hora" hidden>Elige la hora de tu cita.</p>
+              </div>
+            </div>
+            <p class="form__hint form__hint--left">Atendemos sobre reserva: Eliza te confirmará por WhatsApp si la fecha y hora están disponibles.</p>
+
+            <div class="form__field">
+              <label for="f-comentario">Comentario <span class="optional">(opcional)</span></label>
+              <textarea id="f-comentario" name="comentario" rows="3" placeholder="Cuéntanos qué te gustaría mejorar"></textarea>
+            </div>
+
+            <div class="form__field">
+              <label class="form__check" for="f-autorizo">
+                <input id="f-autorizo" name="autorizo-datos" type="checkbox" value="sí" required>
+                <span>Autorizo a Eliza Rodriguez Beauty a guardar y usar mis datos únicamente para gestionar mi cita (Ley 1581 de 2012).</span>
+              </label>
+              <p class="form__error" id="err-autorizo" hidden>Necesitamos tu autorización para registrar la reserva.</p>
+            </div>
+
+            <button class="btn btn--gold btn--block" type="submit" id="booking-submit">
+              <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-whatsapp"/></svg>
+              Reservar y enviar por WhatsApp
+            </button>
+            <p class="form__hint">Tu reserva queda registrada en nuestro sistema y se abre WhatsApp para confirmarla con Eliza.</p>
+            <p class="form__status" id="booking-status" role="status" aria-live="polite" hidden></p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         10. UBICACIÓN Y CONTACTO
+         =================================================================== -->
+    <section class="section section--beige" id="contacto" aria-labelledby="contacto-title">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="eyebrow">Visítanos</p>
+          <h2 class="section__title" id="contacto-title">Ubicación y contacto</h2>
+          <span class="gold-line" aria-hidden="true"></span>
+        </header>
+
+        <div class="contact">
+          <div class="contact__map reveal">
+            <!-- TODO: reemplaza el src por el "Insertar mapa" de Google Maps con la dirección exacta -->
+            <iframe
+              title="Mapa de ubicación de Eliza Rodriguez Beauty en Bahía Solano"
+              src="https://www.google.com/maps?q=Bah%C3%ADa%20Solano%2C%20Choc%C3%B3%2C%20Colombia&z=14&output=embed"
+              width="600" height="450" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+          </div>
+
+          <div class="contact__info reveal">
+            <h3 class="contact__title">Dirección</h3>
+            <p id="contact-address">Bahía Solano, Chocó, Colombia</p>
+
+            <h3 class="contact__title">Horarios</h3>
+            <dl class="hours" id="hours"></dl>
+
+            <h3 class="contact__title">Escríbenos</h3>
+            <div class="social-buttons">
+              <a class="btn btn--gold btn--block" href="#reserva" data-wa>
+                <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-whatsapp"/></svg>
+                WhatsApp
+              </a>
+              <a class="btn btn--outline btn--block" href="https://www.instagram.com/eliza_rodriguez_beauty/" data-social="instagram" target="_blank" rel="noopener">
+                <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-instagram"/></svg>
+                <span data-social-label>@eliza_rodriguez_beauty</span>
+              </a>
+              <a class="btn btn--outline btn--block" href="https://www.facebook.com/" data-social="facebook" target="_blank" rel="noopener">
+                <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-facebook"/></svg>
+                Facebook
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =====================================================================
+       11. FOOTER
+       ===================================================================== -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <img src="assets/img/logo.svg?v=202611041312" alt="Eliza Rodríguez Beauty – Estética avanzada" width="240" height="80" loading="lazy">
+        <p>Estética avanzada en Bahía Solano, Chocó.</p>
+      </div>
+
+      <nav class="footer__nav" aria-label="Enlaces rápidos">
+        <h2 class="footer__title">Enlaces</h2>
+        <ul>
+          <li><a href="#servicios">Servicios</a></li>
+          <li><a href="#resultados">Resultados</a></li>
+          <li><a href="#sobre-mi">Sobre mí</a></li>
+          <li><a href="#preguntas">Preguntas</a></li>
+          <li><a href="#reserva">Reservar</a></li>
+        </ul>
+      </nav>
+
+      <div class="footer__social">
+        <h2 class="footer__title">Síguenos</h2>
+        <div class="footer__icons">
+          <a href="https://www.instagram.com/eliza_rodriguez_beauty/" data-social="instagram" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><use href="#i-instagram"/></svg>
+          </a>
+          <a href="https://www.facebook.com/" data-social="facebook" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><use href="#i-facebook"/></svg>
+          </a>
+          <a href="#reserva" data-wa aria-label="WhatsApp">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><use href="#i-whatsapp"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container footer__bottom">
+      <p>© 2026 Eliza Rodriguez Beauty</p>
+      <p class="footer__credit">Desarrollado por Noir Studio</p>
+    </div>
+  </footer>
+
+  <!-- Botón flotante de WhatsApp -->
+  <a class="wa-float" href="#reserva" data-wa aria-label="Escríbenos por WhatsApp">
+    <svg aria-hidden="true" viewBox="0 0 24 24"><use href="#i-whatsapp"/></svg>
+  </a>
+
+  <!-- Sprite de íconos SVG (reutilizados con <use>) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-whatsapp" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M12.04 2a9.9 9.9 0 0 0-8.5 14.98L2 22l5.17-1.5A9.93 9.93 0 1 0 12.04 2zm0 18.1a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3.07.9.92-2.99-.2-.31a8.18 8.18 0 1 1 6.85 3.73zm4.5-6.13c-.25-.12-1.46-.72-1.69-.8-.23-.08-.39-.12-.55.12-.17.25-.64.8-.78.97-.14.16-.29.18-.53.06a6.7 6.7 0 0 1-3.32-2.9c-.25-.43.25-.4.71-1.33.08-.16.04-.3-.02-.43-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.41-.55-.42h-.47a.9.9 0 0 0-.65.3 2.74 2.74 0 0 0-.86 2.04 4.76 4.76 0 0 0 1 2.53 10.9 10.9 0 0 0 4.17 3.68c1.55.67 2.16.73 2.93.61.48-.07 1.46-.6 1.66-1.17.2-.58.2-1.07.15-1.17-.06-.11-.22-.17-.47-.29z"/>
+    </symbol>
+    <symbol id="i-instagram" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.6" d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4z"/>
+      <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/>
+      <circle cx="17.3" cy="6.7" r="1.1" fill="currentColor"/>
+    </symbol>
+    <symbol id="i-facebook" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M13.5 21v-7.5h2.5l.4-3h-2.9V8.6c0-.86.25-1.45 1.48-1.45h1.57V4.47A21 21 0 0 0 14.27 4.3c-2.27 0-3.82 1.38-3.82 3.93v2.27H7.9v3h2.55V21z"/>
+    </symbol>
+  </svg>
+</body>
+</html>

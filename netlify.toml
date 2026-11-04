@@ -1,0 +1,14 @@
+# Sitio estático: no requiere build. Publica la carpeta raíz.
+[build]
+  publish = "."
+
+# Caché larga para imágenes y fuentes; corta para HTML/CSS/JS (para ver cambios rápido)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
