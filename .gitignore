@@ -9,3 +9,8 @@ desktop.ini
 
 # Netlify CLI local
 .netlify/
+
+# Dependencias y Vercel
+node_modules/
+.vercel/
+.env*

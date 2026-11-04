@@ -10,8 +10,8 @@
   <title>Eliza Rodriguez Beauty | Estética Avanzada en Bahía Solano</title>
   <meta name="description" content="Centro de estética avanzada en Bahía Solano, Chocó. Perfilamiento de labios y nariz, botox, limpieza facial, peeling químico y dermapen. Agenda tu cita por WhatsApp.">
   <meta name="theme-color" content="#F8F1E7">
-  <!-- Dirección pública actual (GitHub Pages). Cámbiala si usas Netlify o un dominio propio. -->
-  <link rel="canonical" href="https://noirstudio-web.github.io/eliza-rodriguez-beauty/">
+  <!-- Dirección pública oficial del sitio (Netlify). Cámbiala si conectas un dominio propio. -->
+  <link rel="canonical" href="https://eliza-rodriguez-beauty.netlify.app/">
 
   <!-- Open Graph (vista previa al compartir en WhatsApp, Instagram, Facebook) -->
   <meta property="og:type" content="website">
@@ -19,8 +19,8 @@
   <meta property="og:site_name" content="Eliza Rodriguez Beauty">
   <meta property="og:title" content="Eliza Rodriguez Beauty | Estética Avanzada en Bahía Solano">
   <meta property="og:description" content="Realza tu belleza natural. Tratamientos faciales y armonización con atención personalizada. Agenda por WhatsApp.">
-  <meta property="og:url" content="https://noirstudio-web.github.io/eliza-rodriguez-beauty/">
-  <meta property="og:image" content="https://noirstudio-web.github.io/eliza-rodriguez-beauty/assets/img/og-image.jpg">
+  <meta property="og:url" content="https://eliza-rodriguez-beauty.netlify.app/">
+  <meta property="og:image" content="https://eliza-rodriguez-beauty.netlify.app/assets/img/og-image.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Logo de Eliza Rodriguez Beauty – Estética avanzada en Bahía Solano">
@@ -47,9 +47,9 @@
     "@context": "https://schema.org",
     "@type": "BeautySalon",
     "name": "Eliza Rodriguez Beauty – Estética Avanzada",
-    "url": "https://noirstudio-web.github.io/eliza-rodriguez-beauty/",
-    "image": "https://noirstudio-web.github.io/eliza-rodriguez-beauty/assets/img/og-image.jpg",
-    "logo": "https://noirstudio-web.github.io/eliza-rodriguez-beauty/assets/img/logo.png",
+    "url": "https://eliza-rodriguez-beauty.netlify.app/",
+    "image": "https://eliza-rodriguez-beauty.netlify.app/assets/img/og-image.jpg",
+    "logo": "https://eliza-rodriguez-beauty.netlify.app/assets/img/logo.png",
     "description": "Centro de estética avanzada en Bahía Solano, Chocó: armonización facial, botox, limpieza facial, peeling químico y dermapen.",
     "telephone": "+57 312 8802463",
     "priceRange": "$$",
@@ -71,7 +71,7 @@
   <script src="js/config.js?v=202611041312" defer></script>
   <script src="js/services.js?v=202611041312" defer></script>
   <script src="js/content.js?v=202611041312" defer></script>
-  <script src="js/main.js?v=20261104131601" defer></script>
+  <script src="js/main.js?v=20261104134339" defer></script>
 </head>
 
 <body>
@@ -343,10 +343,9 @@
             <p class="section__lead">Completa tus datos y te llevamos a WhatsApp con el mensaje listo para enviar.</p>
           </header>
 
-          <!-- Netlify Forms: al publicar en Netlify, cada reserva queda guardada en
-               el panel del sitio (Forms → "reserva"). Ver README. -->
-          <form class="form" id="booking-form" name="reserva" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
-            <input type="hidden" name="form-name" value="reserva">
+          <!-- Al enviar, js/main.js guarda la reserva en la base de datos (/api/reserva)
+               y abre WhatsApp. Las reservas se ven en el panel privado /admin. -->
+          <form class="form" id="booking-form" name="reserva" novalidate>
             <!-- Campo trampa anti-spam: invisible para personas -->
             <p class="visually-hidden" aria-hidden="true">
               <label>No llenar: <input name="bot-field" tabindex="-1" autocomplete="off"></label>

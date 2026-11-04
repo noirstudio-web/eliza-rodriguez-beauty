@@ -1,0 +1,12 @@
+{
+  "name": "eliza-rodriguez-beauty",
+  "private": true,
+  "description": "Landing page de Eliza Rodriguez Beauty con reservas guardadas en Neon (Postgres) vía funciones de Netlify.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "1.0.2"
+  }
+}

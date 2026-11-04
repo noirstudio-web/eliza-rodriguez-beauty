@@ -1,14 +1,35 @@
-# Sitio estático: no requiere build. Publica la carpeta raíz.
+# Sitio estático + funciones de Netlify (guardado de reservas y panel /admin).
+# No hay comando de build: se publica la carpeta raíz tal cual.
 [build]
   publish = "."
+  functions = "netlify/functions"
 
-# Caché larga para imágenes y fuentes; corta para HTML/CSS/JS (para ver cambios rápido)
+[functions]
+  node_bundler = "esbuild"
+
+# Seguridad básica para todo el sitio
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+
+# Imágenes: caché larga
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=2592000"
 
+# HTML siempre fresco
 [[headers]]
   for = "/*.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+
+# Panel privado: fuera de Google y sin caché
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-store"

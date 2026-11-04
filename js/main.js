@@ -411,7 +411,7 @@
       if (comentario) lines.push(`• Comentario: ${comentario}`);
       lines.push("", "¿Me confirmas si hay disponibilidad? Gracias.");
 
-      // 1) Guardar la reserva en Netlify Forms (en segundo plano).
+      // 1) Guardar la reserva en la base de datos (en segundo plano).
       //    keepalive permite que el envío termine aunque la página cambie a WhatsApp.
       const saved = saveBooking(data);
 
@@ -437,20 +437,20 @@
   }
 
   /**
-   * Envía los datos del formulario a Netlify Forms.
-   * Devuelve true si se guardó. En local (sin Netlify) devuelve false sin romper nada.
+   * Guarda la reserva en la base de datos (función /api/reserva en Vercel).
+   * Devuelve true si se guardó. Sin servidor (p. ej. en local) devuelve false sin romper nada.
    */
   function saveBooking(data) {
-    const body = new URLSearchParams();
-    data.forEach((value, key) => body.append(key, value));
-    return fetch("/", {
+    const body = {};
+    data.forEach((value, key) => (body[key] = value));
+    return fetch("api/reserva", {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: body.toString(),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
       keepalive: true,
     })
       .then((res) => {
-        if (!res.ok) console.warn("[Reserva] No se guardó (¿sitio fuera de Netlify?). Código:", res.status);
+        if (!res.ok) console.warn("[Reserva] No se guardó. Código:", res.status);
         return res.ok;
       })
       .catch((err) => {

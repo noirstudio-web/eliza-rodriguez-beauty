@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Reservas | Eliza Rodriguez Beauty</title>
+  <link rel="icon" href="../assets/img/favicon.ico" sizes="any">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Montserrat:wght@300;400;500&display=swap">
+  <style>
+    /* Panel privado de reservas — mismos colores de la marca */
+    :root {
+      --cream: #F8F1E7; --beige: #EFE4D6; --gold: #B8945A; --gold-ink: #7E5F30;
+      --ink: #2B2420; --ink-soft: #5A4E46; --white: #FFFFFF; --line: rgba(184,148,90,.35);
+      --ok: #2F6B4F; --bad: #A3412F;
+      --serif: "Cormorant Garamond", Georgia, serif; --sans: "Montserrat", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--cream); color: var(--ink); font: 400 15px/1.55 var(--sans); }
+    button, input, select { font: inherit; color: inherit; }
+    :focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
+    header.top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .75rem 0 1.25rem; border-bottom: 1px solid var(--line); margin-bottom: 1.25rem; }
+    header.top img { height: 44px; width: auto; }
+    h1 { font: 600 1.7rem/1.1 var(--serif); margin: 0; letter-spacing: .04em; }
+    .muted { color: var(--ink-soft); font-size: .85rem; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; min-height: 42px; padding: .5rem 1rem; border-radius: 999px; border: 1px solid var(--gold); background: transparent; cursor: pointer; font-size: .82rem; font-weight: 500; letter-spacing: .06em; text-decoration: none; }
+    .btn--gold { background: var(--gold); border-color: var(--gold); }
+    .btn:hover { background: var(--white); }
+    .btn--gold:hover { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+
+    /* Login */
+    .login { max-width: 380px; margin: 12vh auto 0; background: var(--white); border: 1px solid var(--line); border-radius: 20px; padding: 2rem 1.5rem; text-align: center; }
+    .login img { height: 64px; margin: 0 auto 1rem; display: block; }
+    .login input { width: 100%; min-height: 48px; padding: .7rem 1rem; border: 1px solid rgba(43,36,32,.2); border-radius: 10px; background: var(--cream); margin: 1rem 0 .75rem; font-size: 1rem; }
+    .login .btn { width: 100%; }
+    .error { color: var(--bad); font-size: .85rem; min-height: 1.3em; margin: .5rem 0 0; }
+
+    /* Resumen */
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: .6rem; margin-bottom: 1rem; }
+    .stat { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: .8rem 1rem; }
+    .stat b { display: block; font: 600 1.6rem/1 var(--serif); }
+    .stat span { font-size: .78rem; color: var(--ink-soft); }
+
+    /* Filtros */
+    .tools { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-bottom: 1rem; }
+    .chips { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .chip { min-height: 38px; padding: .35rem .9rem; border-radius: 999px; border: 1px solid var(--gold); background: transparent; cursor: pointer; font-size: .8rem; }
+    .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--cream); }
+    .search { flex: 1 1 220px; min-height: 42px; padding: .5rem .9rem; border: 1px solid rgba(43,36,32,.2); border-radius: 999px; background: var(--white); font-size: 1rem; }
+
+    /* Lista de reservas */
+    .list { display: grid; gap: .75rem; }
+    .card { background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 1rem 1.1rem; display: grid; gap: .6rem; }
+    .card__head { display: flex; justify-content: space-between; align-items: flex-start; gap: .75rem; }
+    .card__when { font: 600 1.25rem/1.15 var(--serif); }
+    .card__name { font-weight: 500; }
+    .card dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: .2rem .8rem; font-size: .88rem; }
+    .card dt { color: var(--ink-soft); }
+    .card dd { margin: 0; overflow-wrap: anywhere; }
+    .card__actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; padding-top: .6rem; border-top: 1px solid var(--line); }
+    .estado { min-height: 38px; padding: .3rem .7rem; border-radius: 999px; border: 1px solid var(--gold); background: var(--cream); font-size: .82rem; cursor: pointer; }
+    .badge { display: inline-block; padding: .2rem .65rem; border-radius: 999px; font-size: .72rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+    .badge--pendiente { background: var(--beige); color: var(--gold-ink); }
+    .badge--confirmada { background: #E3EFE7; color: var(--ok); }
+    .badge--cancelada { background: #F4E2DE; color: var(--bad); }
+    .badge--atendida { background: #E9E6E3; color: var(--ink-soft); }
+    .card.is-past { opacity: .72; }
+    .empty { text-align: center; padding: 3rem 1rem; color: var(--ink-soft); background: var(--white); border: 1px dashed var(--line); border-radius: 16px; }
+    .toast { position: fixed; left: 50%; bottom: 1.25rem; transform: translateX(-50%); background: var(--ink); color: var(--cream); padding: .65rem 1.1rem; border-radius: 999px; font-size: .85rem; opacity: 0; transition: opacity .3s; pointer-events: none; }
+    .toast.is-on { opacity: 1; }
+    [hidden] { display: none !important; }
+
+    @media (min-width: 720px) {
+      .stats { grid-template-columns: repeat(4, 1fr); }
+      .list { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1040px) { .list { grid-template-columns: repeat(3, 1fr); } }
+  </style>
+</head>
+<body>
+  <!-- ===== Inicio de sesión ===== -->
+  <main class="wrap" id="view-login">
+    <form class="login" id="login-form">
+      <img src="../assets/img/logo.svg" alt="Eliza Rodríguez Beauty">
+      <h1>Panel de reservas</h1>
+      <p class="muted">Acceso privado para Eliza.</p>
+      <label for="pw" class="muted" style="display:block;text-align:left;margin-top:1rem">Contraseña</label>
+      <input id="pw" type="password" autocomplete="current-password" required style="margin-top:.35rem">
+      <button class="btn btn--gold" type="submit">Entrar</button>
+      <p class="error" id="login-error" role="alert"></p>
+    </form>
+  </main>
+
+  <!-- ===== Panel ===== -->
+  <div class="wrap" id="view-panel" hidden>
+    <header class="top">
+      <div>
+        <h1>Reservas</h1>
+        <span class="muted" id="updated"></span>
+      </div>
+      <img src="../assets/img/logo.svg" alt="Eliza Rodríguez Beauty">
+    </header>
+
+    <section class="stats" aria-label="Resumen">
+      <div class="stat"><b id="s-hoy">0</b><span>Citas hoy</span></div>
+      <div class="stat"><b id="s-prox">0</b><span>Próximas</span></div>
+      <div class="stat"><b id="s-pend">0</b><span>Por confirmar</span></div>
+      <div class="stat"><b id="s-total">0</b><span>Total recibidas</span></div>
+    </section>
+
+    <div class="tools">
+      <div class="chips" role="group" aria-label="Filtrar">
+        <button class="chip" type="button" data-f="proximas" aria-pressed="true">Próximas</button>
+        <button class="chip" type="button" data-f="pendiente" aria-pressed="false">Por confirmar</button>
+        <button class="chip" type="button" data-f="pasadas" aria-pressed="false">Pasadas</button>
+        <button class="chip" type="button" data-f="todas" aria-pressed="false">Todas</button>
+      </div>
+      <input class="search" id="q" type="search" placeholder="Buscar nombre, teléfono, servicio…" aria-label="Buscar">
+      <button class="btn" type="button" id="refresh">Actualizar</button>
+      <button class="btn" type="button" id="csv">Descargar Excel (CSV)</button>
+      <button class="btn" type="button" id="logout">Salir</button>
+    </div>
+
+    <div class="list" id="list" aria-live="polite"></div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+  (function () {
+    "use strict";
+    const API = "/api/admin/reservas";
+    const ESTADOS = { pendiente: "Pendiente", confirmada: "Confirmada", cancelada: "Cancelada", atendida: "Atendida" };
+    const $ = (s) => document.querySelector(s);
+    const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+    let pw = "";
+    try { pw = sessionStorage.getItem("erb-admin") || ""; } catch (_) {}
+    let data = [];
+    let filtro = "proximas";
+
+    const hoy = new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
+    const fFecha = (f) => { const [y, m, d] = f.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" }); };
+    const fHora = (h) => { const [a, b] = h.split(":").map(Number); return new Date(2000, 0, 1, a, b).toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit" }); };
+
+    function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("is-on"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("is-on"), 2200); }
+
+    async function api(method, body) {
+      const res = await fetch(API, {
+        method,
+        headers: { Authorization: "Bearer " + pw, ...(body ? { "Content-Type": "application/json" } : {}) },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.status === 401) throw Object.assign(new Error("auth"), { auth: true });
+      if (!res.ok) throw new Error(json.error || "Error");
+      return json;
+    }
+
+    async function load() {
+      try {
+        const r = await api("GET");
+        data = r.reservas;
+        $("#view-login").hidden = true; $("#view-panel").hidden = false;
+        $("#updated").textContent = "Actualizado: " + new Date().toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit" });
+        render();
+      } catch (e) {
+        if (e.auth) { logout(); $("#login-error").textContent = pw ? "Contraseña incorrecta." : ""; }
+        else toast("No se pudieron cargar las reservas.");
+      }
+    }
+
+    function filtradas() {
+      const q = $("#q").value.trim().toLowerCase();
+      let list = data.filter((r) => {
+        if (filtro === "proximas") return r.fecha >= hoy && r.estado !== "cancelada";
+        if (filtro === "pendiente") return r.estado === "pendiente" && r.fecha >= hoy;
+        if (filtro === "pasadas") return r.fecha < hoy;
+        return true;
+      });
+      if (q) list = list.filter((r) => [r.nombre, r.whatsapp, r.correo, r.servicio, r.comentario].join(" ").toLowerCase().includes(q));
+      // Próximas: de la más cercana a la más lejana
+      if (filtro === "proximas" || filtro === "pendiente") list = list.slice().sort((a, b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
+      return list;
+    }
+
+    function waCliente(r) {
+      let n = r.whatsapp.replace(/\D/g, "");
+      if (n.length === 10 && n.startsWith("3")) n = "57" + n; // celular colombiano sin indicativo
+      const msg = `Hola ${r.nombre}, te escribe Eliza Rodriguez Beauty. Te confirmo tu cita de ${r.servicio} el ${fFecha(r.fecha)} a las ${fHora(r.hora)}. ¡Te esperamos!`;
+      return `https://wa.me/${n}?text=${encodeURIComponent(msg)}`;
+    }
+
+    function render() {
+      $("#s-hoy").textContent = data.filter((r) => r.fecha === hoy && r.estado !== "cancelada").length;
+      $("#s-prox").textContent = data.filter((r) => r.fecha >= hoy && r.estado !== "cancelada").length;
+      $("#s-pend").textContent = data.filter((r) => r.fecha >= hoy && r.estado === "pendiente").length;
+      $("#s-total").textContent = data.length;
+
+      const list = filtradas();
+      if (!list.length) { $("#list").innerHTML = '<p class="empty">No hay reservas en esta vista.</p>'; return; }
+      $("#list").innerHTML = list.map((r) => `
+        <article class="card ${r.fecha < hoy ? "is-past" : ""}">
+          <div class="card__head">
+            <div>
+              <div class="card__when">${esc(fFecha(r.fecha))} · ${esc(fHora(r.hora))}</div>
+              <div class="card__name">${esc(r.nombre)}</div>
+            </div>
+            <span class="badge badge--${esc(r.estado)}">${esc(ESTADOS[r.estado] || r.estado)}</span>
+          </div>
+          <dl>
+            <dt>Servicio</dt><dd>${esc(r.servicio)}</dd>
+            <dt>WhatsApp</dt><dd>${esc(r.whatsapp)}</dd>
+            <dt>Correo</dt><dd><a href="mailto:${esc(r.correo)}">${esc(r.correo)}</a></dd>
+            ${r.comentario ? `<dt>Nota</dt><dd>${esc(r.comentario)}</dd>` : ""}
+            <dt>Recibida</dt><dd>${esc(new Date(r.creada_en).toLocaleString("es-CO", { dateStyle: "medium", timeStyle: "short" }))}</dd>
+          </dl>
+          <div class="card__actions">
+            <a class="btn btn--gold" href="${waCliente(r)}" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+            <label class="muted" style="display:flex;align-items:center;gap:.4rem">Estado
+              <select class="estado" data-id="${r.id}" aria-label="Estado de la reserva de ${esc(r.nombre)}">
+                ${Object.entries(ESTADOS).map(([k, v]) => `<option value="${k}" ${k === r.estado ? "selected" : ""}>${v}</option>`).join("")}
+              </select>
+            </label>
+          </div>
+        </article>`).join("");
+    }
+
+    function csv() {
+      const cols = ["id", "fecha", "hora", "nombre", "whatsapp", "correo", "servicio", "comentario", "estado", "creada_en"];
+      const head = ["ID", "Fecha", "Hora", "Nombre", "WhatsApp", "Correo", "Servicio", "Comentario", "Estado", "Recibida"];
+      const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+      const rows = [head.map(cell).join(";")].concat(filtradas().map((r) => cols.map((c) => cell(r[c])).join(";")));
+      // BOM + ";" para que Excel en español abra bien tildes y columnas
+      const blob = new Blob(["﻿" + rows.join("\r\n")], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `reservas-${hoy}.csv`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+
+    function logout() {
+      pw = ""; try { sessionStorage.removeItem("erb-admin"); } catch (_) {}
+      $("#view-panel").hidden = true; $("#view-login").hidden = false; $("#pw").value = ""; $("#pw").focus();
+    }
+
+    // Eventos
+    $("#login-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      pw = $("#pw").value; $("#login-error").textContent = "";
+      try { sessionStorage.setItem("erb-admin", pw); } catch (_) {}
+      load();
+    });
+    document.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
+      filtro = c.dataset.f;
+      document.querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", String(x === c)));
+      render();
+    }));
+    $("#q").addEventListener("input", render);
+    $("#refresh").addEventListener("click", load);
+    $("#csv").addEventListener("click", csv);
+    $("#logout").addEventListener("click", logout);
+    $("#list").addEventListener("change", async (e) => {
+      const sel = e.target.closest(".estado"); if (!sel) return;
+      const id = Number(sel.dataset.id), estado = sel.value;
+      try {
+        await api("PATCH", { id, estado });
+        const r = data.find((x) => x.id == id); if (r) r.estado = estado;
+        render(); toast("Estado actualizado: " + ESTADOS[estado]);
+      } catch (err) { if (err.auth) logout(); else { toast("No se pudo actualizar."); render(); } }
+    });
+
+    if (pw) load(); else $("#pw").focus();
+  })();
+  </script>
+</body>
+</html>

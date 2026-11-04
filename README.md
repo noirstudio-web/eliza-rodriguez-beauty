@@ -3,7 +3,7 @@
 Sitio de una sola página para **Eliza Rodriguez Beauty – Estética Avanzada** (Bahía Solano, Chocó).
 Su objetivo principal es que las visitantes agenden su cita por **WhatsApp**.
 
-Es un sitio estático: HTML, CSS y JavaScript sin frameworks, sin backend y sin proceso de *build*.
+Sitio estático (HTML, CSS y JavaScript sin frameworks) publicado en **Netlify**, con dos pequeñas funciones de servidor que guardan las reservas en una base de datos **Neon (Postgres)** y alimentan el panel privado `/admin`.
 
 ---
 
@@ -28,10 +28,17 @@ Es un sitio estático: HTML, CSS y JavaScript sin frameworks, sin backend y sin 
 │   ├── resultados/       ← Fotos de antes y después
 │   ├── og-image.jpg      ← Imagen de vista previa al compartir el enlace
 │   └── favicon.ico, favicon-32.png, apple-touch-icon.png
-└── netlify.toml          ← Configuración opcional para Netlify
+├── admin/index.html      ← Panel privado de reservas (con contraseña)
+├── netlify/
+│   ├── functions/reserva.mjs         ← POST /api/reserva: guarda cada reserva
+│   ├── functions/admin-reservas.mjs  ← GET/PATCH /api/admin/reservas: panel
+│   └── lib/shared.mjs                ← Conexión a la base de datos y utilidades
+├── netlify.toml          ← Configuración de Netlify (publicación, funciones, cabeceras)
+├── package.json          ← Dependencia del conector de base de datos
+└── robots.txt            ← Oculta /admin y /api de Google
 ```
 
-> Todas las imágenes incluidas son **placeholders** con la paleta de la marca. Reemplázalas por las fotos reales manteniendo el mismo nombre de archivo.
+> Las fotos de portada, "Sobre mí" y labios ya son reales; el resto son **placeholders** con la paleta de la marca. Reemplázalas manteniendo el mismo nombre de archivo.
 
 ---
 
@@ -135,78 +142,72 @@ Al inicio de `css/styles.css`, en `:root`:
 
 ---
 
-## Antes de publicar (checklist)
+## Antes de compartir (checklist)
 
-- [ ] Número real en `WHATSAPP_NUMBER` (`js/config.js`) y en el JSON-LD.
-- [ ] URL real de Facebook en `js/config.js` y en el JSON-LD.
+- [x] Número de WhatsApp (`js/config.js` y JSON-LD).
+- [ ] URL real de Facebook en `js/config.js` y en el JSON-LD de `index.html`.
 - [ ] Precios reales en `js/services.js`.
-- [ ] Fotos reales en `assets/img/`.
-- [ ] Reemplazar `https://elizarodriguezbeauty.com/` por tu dominio real en `index.html`
-      (etiquetas `canonical`, `og:url`, `og:image` y JSON-LD). La imagen de Open Graph **necesita la URL completa** para verse al compartir por WhatsApp.
+- [ ] Fotos reales de los demás servicios y resultados en `assets/img/`.
 - [ ] Mapa con la dirección exacta.
-- [ ] Revisar horarios y medios de pago en la sección de preguntas.
+- [ ] Revisar medios de pago en la sección de preguntas.
+- [ ] Publicar una política de tratamiento de datos (Ley 1581 de 2012).
 
 ---
 
-## Publicar
+## Publicación
 
-- **Repositorio:** https://github.com/noirstudio-web/eliza-rodriguez-beauty
-- **Sitio en GitHub Pages:** https://noirstudio-web.github.io/eliza-rodriguez-beauty/
-  (se actualiza solo con cada `git push` a `main`; tarda 1–2 minutos).
-  En GitHub Pages el sitio y WhatsApp funcionan, pero **las reservas no se guardan**.
+| | |
+|---|---|
+| **Sitio oficial** | https://eliza-rodriguez-beauty.netlify.app/ |
+| **Panel de reservas** | https://eliza-rodriguez-beauty.netlify.app/admin/ |
+| **Repositorio** | https://github.com/noirstudio-web/eliza-rodriguez-beauty |
+| **Base de datos** | Neon, proyecto `eliza-rodriguez-beauty` (tabla `reservas`) |
 
-### Netlify desde GitHub (recomendado: guarda las reservas)
-1. Entra a [app.netlify.com](https://app.netlify.com) → **Add new site → Import an existing project → GitHub**.
-2. Autoriza a Netlify y elige el repositorio **eliza-rodriguez-beauty**.
-3. *Branch*: `main` · *Build command*: (vacío) · *Publish directory*: `.` → **Deploy**.
-4. Activa los formularios (ver *Reservas guardadas*).
-5. Cuando tengas la dirección final (p. ej. `https://eliza-rodriguez-beauty.netlify.app/` o tu dominio),
-   reemplaza `https://noirstudio-web.github.io/eliza-rodriguez-beauty/` en `index.html`
-   (canonical, `og:url`, `og:image` y JSON-LD) y haz push. Comparte siempre esa dirección.
+**Cada `git push` a `main` se publica solo en Netlify** (1–2 minutos). Netlify instala la dependencia de `package.json` y empaqueta las funciones automáticamente; no hay comando de build.
 
-Cada `git push` publica automáticamente en Netlify y en GitHub Pages.
+También existe una copia en GitHub Pages (https://noirstudio-web.github.io/eliza-rodriguez-beauty/), pero ahí **no se guardan las reservas** (no tiene servidor). Comparte siempre la dirección de Netlify.
 
-### Netlify sin GitHub
-1. Entra a [app.netlify.com/drop](https://app.netlify.com/drop).
-2. Arrastra la carpeta completa del proyecto. ¡Listo!
+**Variables de entorno** (Netlify → *Project configuration → Environment variables*):
 
-### Vercel
-1. Sube el proyecto a GitHub.
-2. En [vercel.com/new](https://vercel.com/new) importa el repositorio.
-3. *Framework Preset*: **Other**. Sin comando de build. Deploy.
+| Variable | Para qué |
+|---|---|
+| `DATABASE_URL` | Conexión a la base de datos Neon |
+| `ADMIN_PASSWORD` | Contraseña del panel `/admin` |
 
-Después de publicar, prueba la vista previa del enlace en
-[opengraph.xyz](https://www.opengraph.xyz) y el rendimiento en
-[PageSpeed Insights](https://pagespeed.web.dev).
+Si cambias una variable, vuelve a publicar (*Deploys → Trigger deploy*) para que se aplique.
+
+Si conectas un dominio propio, reemplaza `https://eliza-rodriguez-beauty.netlify.app/` en `index.html` (canonical, `og:url`, `og:image` y JSON-LD).
 
 ---
 
-## Reservas guardadas (Netlify Forms)
+## Reservas
 
 Cada vez que alguien usa el formulario **Agenda tu cita**:
-1. La reserva se guarda en Netlify (nombre, WhatsApp, correo, servicio, fecha, hora, comentario y autorización de datos).
+1. La reserva se guarda en la base de datos (nombre, WhatsApp, correo, servicio, fecha, hora y comentario), con la autorización de datos.
 2. Se abre WhatsApp con el mensaje listo para confirmar con Eliza.
 
-**Dónde ver las reservas:** en [app.netlify.com](https://app.netlify.com) → tu sitio → **Forms** → formulario **reserva**.
-Desde ahí se pueden exportar a CSV (Excel).
+El servidor vuelve a validar todo (no se fía del navegador), rechaza fechas pasadas y descarta los envíos de bots (campo trampa oculto).
 
-**Activar el formulario (una sola vez, después del primer deploy):**
-1. En el panel del sitio, ve a **Forms** y pulsa **Enable form detection** si aparece.
-2. Vuelve a publicar el sitio (arrastra la carpeta otra vez o haz *Trigger deploy*).
+### Panel privado `/admin`
+- Entra a **https://eliza-rodriguez-beauty.netlify.app/admin/** con la contraseña (`ADMIN_PASSWORD`).
+- Resumen: citas de hoy, próximas, por confirmar y total.
+- Filtros (*Próximas, Por confirmar, Pasadas, Todas*) y buscador.
+- Cambiar el estado de cada cita: **Pendiente → Confirmada / Cancelada / Atendida**.
+- Botón **Escribir por WhatsApp** a la clienta, con un mensaje de confirmación listo.
+- **Descargar Excel (CSV)** con lo que se ve en pantalla.
+- La sesión dura hasta cerrar la pestaña. El panel no aparece en Google.
 
-**Recibir cada reserva por correo:** *Site configuration → Notifications → Emails and webhooks → Form submission notifications →* **Add notification → Email notification**, formulario `reserva`.
+**Cambiar la contraseña:** Netlify → *Environment variables* → `ADMIN_PASSWORD` → editar → *Trigger deploy*.
 
-**Límites del plan gratuito:** 100 envíos al mes. Incluye filtro anti-spam (campo trampa oculto).
+> En tu computador (`localhost` con `python -m http.server`) no se guarda nada porque no hay servidor de funciones; WhatsApp sí abre. Para probar las funciones en local: `npx netlify-cli dev`.
 
-> En tu computador (`localhost`) no se guarda nada: el guardado solo funciona en el sitio publicado en Netlify. WhatsApp sí abre en ambos casos.
-
-**Protección de datos:** el formulario pide autorización expresa (Ley 1581 de 2012). Se recomienda publicar también una política de tratamiento de datos y no usar estos datos para otros fines sin permiso.
+**Protección de datos:** el formulario pide autorización expresa (Ley 1581 de 2012). Usa estos datos solo para gestionar las citas y publica una política de tratamiento de datos.
 
 ---
 
 ## Notas técnicas
 
-- **Formulario:** guarda la reserva en **Netlify Forms** y además abre `wa.me` con el mensaje prellenado (ver sección *Reservas guardadas*).
+- **Formulario:** guarda la reserva en la base de datos (`/api/reserva`) y además abre `wa.me` con el mensaje prellenado (ver sección *Reservas*).
 - **Rendimiento:** imágenes WebP con `loading="lazy"` (excepto la portada, que se precarga), fuentes de Google sin bloquear el render, sin librerías externas.
 - **Accesibilidad:** HTML semántico, textos `alt`, contraste AA (el dorado de texto usa `--gold-ink`), navegación con teclado en el menú, pestañas, comparador (flechas ← →) y carrusel, y respeto por `prefers-reduced-motion`.
 - **SEO:** título y descripción, Open Graph, favicon y datos estructurados Schema.org `BeautySalon`.
