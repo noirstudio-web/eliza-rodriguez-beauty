@@ -10,5 +10,8 @@
     "@neondatabase/serverless": "1.0.2",
     "@netlify/blobs": "11.1.7",
     "nodemailer": "10.3.1"
+  },
+  "scripts": {
+    "clienta": "node scripts/clientas.mjs"
   }
 }

@@ -227,6 +227,22 @@ Entra a **https://eliza-rodriguez-beauty.netlify.app/admin/** con tu usuario y c
 - Contraseñas cifradas (scrypt): nadie puede verlas, ni desde el panel. Sesiones de 30 días y bloqueo de 15 min tras 8 intentos fallidos.
 - Para volver a crear cuentas automáticamente en la 2.ª visita: `CREAR_CUENTA_AUTOMATICA = true` en `netlify/lib/fidelidad.mjs`.
 
+### Crear cuentas desde Visual Studio Code
+Además del panel, puedes gestionar las cuentas desde VS Code (esta carpeta abierta en VS Code):
+
+- **Con ventanitas:** *Terminal → Run Task…* (o `Ctrl+Shift+P` → “Tasks: Run Task”) y elige:
+  - **Clientas: crear cuenta** — te pide nombre, correo (usuario), WhatsApp y contraseña (vacía = se genera una).
+  - **Clientas: cambiar contraseña** · **Clientas: ver todas** · **Clientas: desactivar cuenta** · **Clientas: activar cuenta**
+- **Con comandos** (en la terminal de VS Code):
+  ```bash
+  npm run clienta -- crear --nombre "Ana Pérez" --correo ana@mail.com --whatsapp 3001234567 --clave "MiClave123"
+  npm run clienta -- clave --correo ana@mail.com --clave "NuevaClave123"
+  npm run clienta -- listar
+  npm run clienta -- desactivar --correo ana@mail.com
+  ```
+- Al terminar te muestra el usuario, la contraseña y un **enlace de WhatsApp** (Ctrl + clic) con el mensaje listo para la clienta.
+- Requisitos: Node.js instalado, `npm install` hecho una vez, y sesión de Netlify en esta computadora (`npx netlify-cli login`). La conexión a la base de datos se pide a Netlify en el momento; no se guarda en ningún archivo.
+
 ### Usuario y contraseña del panel de admin
 Variables `ADMIN_USER` (usuario) y `ADMIN_PASSWORD` (contraseña) en Netlify → *Project configuration → Environment variables* → *Edit* → luego *Deploys → Trigger deploy*. Al entrar se abre una sesión de 12 horas; tras 8 intentos fallidos se bloquea 15 minutos.
 

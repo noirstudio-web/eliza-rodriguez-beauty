@@ -1,0 +1,48 @@
+{
+  // Tareas para gestionar cuentas de clientas desde VS Code:
+  // Terminal → Run Task… (o Ctrl+Shift+P → "Tasks: Run Task") → elige una "Clientas: …"
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Clientas: crear cuenta",
+      "type": "shell",
+      "command": "npm run clienta -- crear --nombre \"${input:nombre}\" --correo \"${input:correo}\" --whatsapp \"${input:whatsapp}\" --clave \"${input:clave}\"",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    },
+    {
+      "label": "Clientas: cambiar contraseña",
+      "type": "shell",
+      "command": "npm run clienta -- clave --correo \"${input:correo}\" --clave \"${input:clave}\"",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    },
+    {
+      "label": "Clientas: ver todas",
+      "type": "shell",
+      "command": "npm run clienta -- listar",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    },
+    {
+      "label": "Clientas: desactivar cuenta",
+      "type": "shell",
+      "command": "npm run clienta -- desactivar --correo \"${input:correo}\"",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    },
+    {
+      "label": "Clientas: activar cuenta",
+      "type": "shell",
+      "command": "npm run clienta -- activar --correo \"${input:correo}\"",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    }
+  ],
+  "inputs": [
+    { "id": "nombre", "type": "promptString", "description": "Nombre de la clienta" },
+    { "id": "correo", "type": "promptString", "description": "Correo de la clienta (será su usuario)" },
+    { "id": "whatsapp", "type": "promptString", "description": "WhatsApp de la clienta (opcional, ej. 3001234567)" },
+    { "id": "clave", "type": "promptString", "description": "Contraseña (mínimo 8 caracteres). Déjala vacía para generar una al azar", "password": true }
+  ]
+}

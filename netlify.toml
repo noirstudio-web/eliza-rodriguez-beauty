@@ -33,3 +33,45 @@
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
     Cache-Control = "no-store"
+
+# Archivos internos del proyecto: no se publican (responden 404)
+[[redirects]]
+  from = "/netlify/*"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/scripts/*"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/.vscode/*"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/node_modules/*"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/README.md"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/package.json"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/package-lock.json"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/netlify.toml"
+  to = "/404"
+  status = 404
+  force = true
