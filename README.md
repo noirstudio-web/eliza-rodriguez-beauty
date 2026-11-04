@@ -30,14 +30,17 @@ Sitio estático (HTML, CSS y JavaScript sin frameworks) publicado en **Netlify**
 │   └── favicon.ico, favicon-32.png, apple-touch-icon.png
 ├── admin/index.html      ← Panel privado (reservas, servicios, resultados, textos, fotos)
 ├── cancelar/index.html   ← Página donde la clienta cancela su cita (enlace del correo)
+├── cuenta/index.html     ← Club de clientas: iniciar sesión, nivel, sellos y citas
 ├── legal/                ← Términos y condiciones · Política de datos
 ├── netlify/
 │   ├── functions/reserva.mjs          ← POST /api/reserva: guarda la reserva y envía correos
 │   ├── functions/cancelar.mjs         ← /api/cancelar: cancelación hasta 3 h antes
 │   ├── functions/recordatorios.mjs    ← Programada cada 10 min: recordatorio 2 h antes
 │   ├── functions/contenido.mjs        ← GET /api/contenido: textos/fotos/precios editados
-│   ├── functions/admin-*.mjs          ← Panel: reservas, contenido y subida de fotos
+│   ├── functions/cuenta.mjs           ← Cuentas de clientas: login, contraseña, mi cuenta
+│   ├── functions/admin-*.mjs          ← Panel: reservas, clientas, contenido y fotos
 │   ├── functions/fotos.mjs            ← Sirve las fotos subidas (/fotos/…)
+│   ├── lib/fidelidad.mjs              ← Niveles, sellos, cuentas y contraseñas
 │   └── lib/shared.mjs                 ← Base de datos, correo, validación
 ├── netlify.toml          ← Configuración de Netlify (publicación, funciones, cabeceras)
 ├── package.json          ← Dependencia del conector de base de datos
@@ -212,7 +215,18 @@ Entra a **https://eliza-rodriguez-beauty.netlify.app/admin/** con la contraseña
 - Los cambios se ven en la página en menos de 1 minuto. Si la base de datos no responde, la página muestra los textos y fotos originales.
 - Los valores originales siguen estando en `index.html`, `js/services.js` y `js/content.js`.
 
-**Cambiar la contraseña:** Netlify → *Environment variables* → `ADMIN_PASSWORD` → editar → *Trigger deploy*.
+
+### Club de clientas (cuentas y fidelidad)
+- **Cuándo se crea la cuenta:** sola, cuando marcas **“Asistió” por 2.ª vez** a una clienta (se identifica por su correo). Le llega un correo con un enlace para **crear su propia contraseña**, y el panel te ofrece enviárselo también por WhatsApp. El usuario es su correo. Nadie más conoce su contraseña (se guarda cifrada).
+- **Dónde entra la clienta:** “Iniciar sesión” en el menú y en el pie de página → `/cuenta/`. Ahí ve su **nivel** (Essential, Glow, Gold, VIP, Luxury) con el progreso al siguiente, su **tarjeta de sellos**, sus visitas y sus citas (y puede cancelar las próximas hasta 3 h antes).
+- **Si olvida la contraseña:** “¿Olvidaste tu contraseña?” en `/cuenta/`, o desde el panel → **Clientas → Enviar acceso**.
+- **Valor pagado:** al marcar “Asistió”, escribe cuánto pagó (opcional); suma al consumo para los niveles VIP y Luxury.
+- **Entregar el regalo:** cuando completa los sellos, en **Clientas** aparece **“Entregar regalo”** (descuenta los sellos y empieza una tarjeta nueva).
+- **Cambiar niveles, sellos o regalo:** panel → **Clientas → Niveles y tarjeta de sellos**.
+- Seguridad: sesiones de 30 días, bloqueo de 15 min tras 8 intentos fallidos, enlaces de acceso de un solo uso que vencen a los 7 días.
+
+### Contraseña del panel de admin
+Es la variable `ADMIN_PASSWORD` en Netlify → *Project configuration → Environment variables* → `ADMIN_PASSWORD` → *Edit* → luego *Deploys → Trigger deploy*.
 
 ### Correos automáticos
 | Cuándo | A quién |

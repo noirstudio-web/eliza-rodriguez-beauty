@@ -676,7 +676,7 @@
             <dt>Visitas</dt><dd>${c.visitas}${c.faltas ? ` · ${c.faltas} sin asistir` : ""}</dd>
             <dt>Consumo</dt><dd>${esc(peso(c.consumo))}</dd>
             <dt>Sellos</dt><dd>${Math.min(c.sellos, c.sellosMeta)} de ${c.sellosMeta}${c.sellos >= c.sellosMeta ? " · <b>¡regalo listo!</b>" : ""}</dd>
-            ${c.siguiente ? `<dt>Siguiente</dt><dd>${esc(c.siguiente.nombre)}${c.siguiente.faltanVisitas ? ` · faltan ${c.siguiente.faltanVisitas} visitas` : ""}</dd>` : ""}
+            ${c.siguiente ? `<dt>Siguiente</dt><dd>${esc(c.siguiente.nombre)}${c.siguiente.faltanVisitas ? ` · ${c.siguiente.faltanVisitas === 1 ? "falta 1 visita" : `faltan ${c.siguiente.faltanVisitas} visitas`}` : ""}</dd>` : ""}
             <dt>Cuenta</dt><dd>${esc(CUENTA[c.cuenta])}</dd>
           </dl>
           <div class="card__actions">
