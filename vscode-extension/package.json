@@ -2,7 +2,7 @@
   "name": "eliza-clientas",
   "displayName": "Eliza Beauty – Clientas",
   "description": "Sección exclusiva en VS Code para gestionar las cuentas de clientas y la fidelidad de Eliza Rodriguez Beauty.",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "publisher": "noirstudio",
   "license": "UNLICENSED",
   "private": true,

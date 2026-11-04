@@ -107,17 +107,25 @@ class VistaClientas {
             crear: "Cuenta creada.", clave: "Contraseña cambiada.", sellos: "Sellos actualizados.",
             canjear: "Regalo registrado. ¡Tarjeta nueva!", activar: "Cuenta activada.", desactivar: "Cuenta desactivada.",
           };
-          if (m.accion === "crear" || m.accion === "clave") {
-            const c = { nombre: m.nombre || m.datos.nombre, correo: m.datos.correo, whatsapp: m.whatsapp || m.datos.whatsapp };
+          if (m.accion === "crear") {
+            // La pestaña "Clientes nuevos" muestra Nombre, Usuario y Contraseña con botones
+            this.enviar({ tipo: "creada", nombre: m.datos.nombre, correo: m.datos.correo, clave: m.datos.clave, whatsapp: m.datos.whatsapp || "" });
+            vscode.window.showInformationMessage(`Cuenta creada para ${m.datos.nombre}.`);
+          } else if (m.accion === "clave") {
+            const c = { nombre: m.nombre, correo: m.datos.correo, whatsapp: m.whatsapp };
             await this.credenciales(c, m.datos.clave, mensajes[m.accion]);
           } else {
             vscode.window.showInformationMessage(mensajes[m.accion] || "Listo.");
           }
-          if (m.accion === "crear") this.enviar({ tipo: "creada", nombre: m.datos.nombre, correo: m.datos.correo });
           return app.recargar();
         }
         case "web": return vscode.env.openExternal(vscode.Uri.parse(SITIO + "/admin/"));
         case "aviso": return vscode.window.showWarningMessage(m.texto);
+        case "copiar": {
+          await vscode.env.clipboard.writeText(textoCredenciales(m.c, m.c.clave));
+          return vscode.window.showInformationMessage("Datos copiados. Pégalos en WhatsApp o donde quieras.");
+        }
+        case "whatsapp": return abrirWhatsApp(m.c, m.c.clave);
       }
     } catch (e) {
       vscode.window.showErrorMessage("Eliza Beauty: " + (e?.message || e));
@@ -136,7 +144,7 @@ class VistaClientas {
 
   /** Muestra usuario y contraseña, con botones para copiar o enviar por WhatsApp. */
   async credenciales(c, clave, titulo) {
-    const texto = `Hola ${String(c.nombre).split(" ")[0]}, ¡bienvenida al club de clientas de Eliza Rodriguez Beauty! 💛\n\nEntra a ${SITIO}/cuenta/ con:\nUsuario: ${c.correo}\nContraseña: ${clave}\n\nPuedes cambiar la contraseña desde tu cuenta.`;
+    const texto = textoCredenciales(c, clave);
     const opciones = c.whatsapp ? ["Enviar por WhatsApp", "Copiar mensaje"] : ["Copiar mensaje"];
     const eleccion = await vscode.window.showInformationMessage(
       `${titulo}\n\nUsuario: ${c.correo}\nContraseña: ${clave}`, { modal: true }, ...opciones);
@@ -144,11 +152,7 @@ class VistaClientas {
       await vscode.env.clipboard.writeText(texto);
       vscode.window.showInformationMessage("Mensaje copiado. Pégalo en WhatsApp.");
     }
-    if (eleccion === "Enviar por WhatsApp") {
-      let n = String(c.whatsapp).replace(/\D/g, "");
-      if (n.length === 10 && n.startsWith("3")) n = "57" + n;
-      vscode.env.openExternal(vscode.Uri.parse(`https://wa.me/${n}?text=${encodeURIComponent(texto)}`));
-    }
+    if (eleccion === "Enviar por WhatsApp") abrirWhatsApp(c, clave);
   }
 
   html(webview) {
@@ -327,7 +331,12 @@ class VistaNuevas extends VistaClientas {
   button.sec { color: var(--vscode-button-secondaryForeground); background: var(--vscode-button-secondaryBackground); }
   button.sec:hover { background: var(--vscode-button-secondaryHoverBackground); }
   button[disabled] { opacity: .6; cursor: wait; }
-  .ok { border: 1px solid var(--vscode-panel-border, #8884); border-radius: 6px; padding: 8px 10px; margin: 12px 0; }
+  .ok { border: 1px solid var(--vscode-panel-border, #8884); border-radius: 6px; padding: 10px; margin: 14px 0; }
+  .ok h3 { margin: 0 0 8px; font-size: 1em; }
+  .ok dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; margin: 0 0 10px; }
+  .ok dt { opacity: .75; }
+  .ok dd { margin: 0; font-weight: 600; word-break: break-all; font-family: var(--vscode-editor-font-family, monospace); }
+  .ok .fila { flex-wrap: wrap; }
   .error { color: var(--vscode-errorForeground); }
 </style></head>
 <body>
@@ -336,7 +345,13 @@ class VistaNuevas extends VistaClientas {
   const vscode = acquireVsCodeApi();
   const app = document.getElementById("app");
   const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  let ultima = null;
+  let ultima = null, verClave = true;
+  /** Conserva lo escrito en el formulario al volver a pintarlo. */
+  const datosForm = () => ({
+    nombre: document.getElementById("c-nombre")?.value || "",
+    correo: document.getElementById("c-correo")?.value || "",
+    whatsapp: document.getElementById("c-wa")?.value || "",
+  });
 
   function login(error) {
     app.innerHTML = \`
@@ -370,7 +385,26 @@ class VistaNuevas extends VistaClientas {
         <p class="muted">Usa el mismo correo con el que la clienta reserva para que se sumen sus visitas.</p>
         <p><button type="submit" id="crear">Crear cuenta</button></p>
       </form>
-      \${ultima ? \`<div class="ok">✓ Última cuenta creada: <b>\${esc(ultima.nombre)}</b><br><span class="muted">\${esc(ultima.correo)}</span></div>\` : ""}\`;
+      \${ultima ? \`
+        <div class="ok" aria-live="polite">
+          <h3>✓ Cuenta creada</h3>
+          <dl>
+            <dt>Nombre</dt><dd>\${esc(ultima.nombre)}</dd>
+            <dt>Usuario</dt><dd>\${esc(ultima.correo)}</dd>
+            <dt>Contraseña</dt><dd id="ult-clave">\${verClave ? esc(ultima.clave) : "••••••••••"}</dd>
+          </dl>
+          <div class="fila">
+            <button class="sec" type="button" id="ult-ver">\${verClave ? "Ocultar contraseña" : "Ver contraseña"}</button>
+            <button type="button" id="ult-copiar">Copiar datos</button>
+            \${ultima.whatsapp ? \`<button type="button" id="ult-wa">Enviar por WhatsApp</button>\` : ""}
+          </div>
+          <p class="muted" style="margin:8px 0 0">Entra en: eliza-rodriguez-beauty.netlify.app/cuenta/<br>La contraseña solo se ve aquí hasta que cierres VS Code.</p>
+        </div>\` : ""}\`;
+    if (ultima) {
+      document.getElementById("ult-ver").addEventListener("click", () => { verClave = !verClave; formulario(datosForm()); });
+      document.getElementById("ult-copiar").addEventListener("click", () => vscode.postMessage({ tipo: "copiar", c: ultima }));
+      document.getElementById("ult-wa")?.addEventListener("click", () => vscode.postMessage({ tipo: "whatsapp", c: ultima }));
+    }
     const clave = document.getElementById("c-clave");
     document.getElementById("ver").addEventListener("click", (e) => {
       clave.type = clave.type === "password" ? "text" : "password";
@@ -392,12 +426,23 @@ class VistaNuevas extends VistaClientas {
     if (m.tipo === "login") login(m.error);
     if (m.tipo === "listo") formulario();
     if (m.tipo === "prellenar") formulario(m.datos || {});
-    if (m.tipo === "creada") { ultima = { nombre: m.nombre, correo: m.correo }; formulario(); }
+    if (m.tipo === "creada") { ultima = { nombre: m.nombre, correo: m.correo, clave: m.clave, whatsapp: m.whatsapp }; verClave = true; formulario(); }
   });
   vscode.postMessage({ tipo: "inicio" });
 </script>
 </body></html>`;
   }
+}
+
+/** Mensaje para la clienta con su usuario y contraseña. */
+function textoCredenciales(c, clave) {
+  return `Hola ${String(c.nombre).split(" ")[0]}, ¡bienvenida al club de clientas de Eliza Rodriguez Beauty! 💛\n\nEntra a ${SITIO}/cuenta/ con:\nUsuario: ${c.correo}\nContraseña: ${clave}\n\nPuedes cambiar la contraseña desde tu cuenta.`;
+}
+function abrirWhatsApp(c, clave) {
+  let n = String(c.whatsapp || "").replace(/\D/g, "");
+  if (!n) return vscode.window.showWarningMessage("Esta clienta no tiene WhatsApp registrado. Usa “Copiar datos”.");
+  if (n.length === 10 && n.startsWith("3")) n = "57" + n;
+  return vscode.env.openExternal(vscode.Uri.parse(`https://wa.me/${n}?text=${encodeURIComponent(textoCredenciales(c, clave))}`));
 }
 
 function generarClave() {
