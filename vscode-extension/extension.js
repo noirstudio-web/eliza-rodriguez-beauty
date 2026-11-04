@@ -203,11 +203,11 @@ class VistaClientas {
 
   function login(error) {
     app.innerHTML = \`
-      <h2>Eliza Beauty · Clientas</h2>
-      <p class="muted">Entra con el usuario y la contraseña del panel de admin.</p>
+      <h2>Entrar al panel</h2>
+      <p class="muted">Escribe <b>tus</b> datos de administradora (los del panel de admin). No son los de una clienta.</p>
       <form id="f-login">
-        <label>Usuario<input id="u" autocomplete="username" required></label>
-        <label>Contraseña<input id="p" type="password" autocomplete="current-password" required></label>
+        <label>Tu usuario de admin<input id="u" autocomplete="username" required></label>
+        <label>Tu contraseña de admin<input id="p" type="password" autocomplete="current-password" required></label>
         <button type="submit">Entrar</button>
         <p class="error">\${esc(error || "")}</p>
       </form>\`;
@@ -355,12 +355,13 @@ class VistaNuevas extends VistaClientas {
 
   function login(error) {
     app.innerHTML = \`
-      <h2>Clientes nuevos</h2>
-      <p class="muted">Entra con el usuario y la contraseña del panel de admin.</p>
+      <h2>Entrar al panel</h2>
+      <p class="muted">Paso 1 de 2 · Escribe <b>tus</b> datos de administradora (los del panel de admin). No son los de la clienta.</p>
       <form id="f-login">
-        <label>Usuario<input id="u" autocomplete="username" required></label>
-        <label>Contraseña<input id="p" type="password" autocomplete="current-password" required></label>
+        <label>Tu usuario de admin<input id="u" autocomplete="username" required></label>
+        <label>Tu contraseña de admin<input id="p" type="password" autocomplete="current-password" required></label>
         <p><button type="submit">Entrar</button></p>
+        <p class="muted">Después verás el formulario para crear la clienta con su <b>Nombre</b>, <b>Usuario</b> y <b>Contraseña</b>.</p>
         <p class="error">\${esc(error || "")}</p>
       </form>\`;
     document.getElementById("f-login").addEventListener("submit", (e) => {
@@ -374,14 +375,15 @@ class VistaNuevas extends VistaClientas {
   function formulario(d = {}) {
     app.innerHTML = \`
       <h2>Crear cuenta de clienta</h2>
-      <p class="muted">La clienta entrará en la página con su correo y esta contraseña.</p>
+      <p class="muted">Paso 2 de 2 · Datos de la <b>clienta</b>.</p>
       <form id="f-crear" autocomplete="off">
-        <label>Nombre<input id="c-nombre" value="\${esc(d.nombre)}" required></label>
-        <label>Correo (será su usuario)<input id="c-correo" value="\${esc(d.correo)}" required></label>
-        <label>WhatsApp<input id="c-wa" value="\${esc(d.whatsapp)}" placeholder="300 123 4567"></label>
+        <label>Nombre<input id="c-nombre" value="\${esc(d.nombre)}" placeholder="Ana Pérez" required></label>
+        <p class="muted" id="saludo" style="margin:2px 0 0">\${d.nombre ? "En su cuenta verá: <b>Hola, " + esc(String(d.nombre).trim().split(" ")[0]) + "</b>" : "Es el nombre que verá la clienta en su cuenta: «Hola, Ana»."}</p>
+        <label>Usuario (su correo)<input id="c-correo" value="\${esc(d.correo)}" placeholder="ana@correo.com" required></label>
         <label>Contraseña
           <div class="fila"><input id="c-clave" type="password" autocomplete="new-password" placeholder="Vacía = se genera una al azar"><button class="sec" type="button" id="ver">Ver</button></div>
         </label>
+        <label>WhatsApp (opcional, para enviarle sus datos)<input id="c-wa" value="\${esc(d.whatsapp)}" placeholder="300 123 4567"></label>
         <p class="muted">Usa el mismo correo con el que la clienta reserva para que se sumen sus visitas.</p>
         <p><button type="submit" id="crear">Crear cuenta</button></p>
       </form>
@@ -418,6 +420,11 @@ class VistaNuevas extends VistaClientas {
       document.getElementById("crear").disabled = true;
       vscode.postMessage({ tipo: "accion", accion: "crear", datos: { nombre: v("c-nombre"), correo: v("c-correo").toLowerCase(), whatsapp: v("c-wa"), clave: clave.value } });
       setTimeout(() => { const b = document.getElementById("crear"); if (b) b.disabled = false; }, 4000);
+    });
+    // Vista previa del saludo que verá la clienta
+    document.getElementById("c-nombre").addEventListener("input", (e) => {
+      const n = e.target.value.trim().split(" ")[0];
+      document.getElementById("saludo").innerHTML = n ? "En su cuenta verá: <b>Hola, " + esc(n) + "</b>" : "Es el nombre que verá la clienta en su cuenta: «Hola, Ana».";
     });
     document.getElementById(d.correo ? "c-clave" : "c-nombre").focus();
   }
