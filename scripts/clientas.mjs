@@ -55,19 +55,22 @@ const correoOk = (c) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(c);
 /* ---------- Conexión a la base de datos ---------- */
 function databaseUrl() {
   if (env.DATABASE_URL) return env.DATABASE_URL;
-  try {
-    console.log("Conectando con Netlify para obtener la base de datos…");
-    const out = execSync("npx --yes netlify-cli@latest env:get DATABASE_URL", {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-      env: { ...env, NO_COLOR: "1", FORCE_COLOR: "0" },
-    });
-    // Se quitan los códigos de color de la terminal antes de buscar la dirección
-    const limpio = out.replace(/\u001b\[[0-9;?]*[A-Za-z]/g, "");
-    const url = (limpio.match(/postgres(?:ql)?:\/\/\S+/) || [])[0];
-    if (url) return url;
-  } catch { /* sigue abajo */ }
-  salir("No se pudo obtener DATABASE_URL. Inicia sesión con `npx netlify-cli login` o define la variable DATABASE_URL.");
+  console.log("Conectando con Netlify para obtener la base de datos…");
+  for (let intento = 1; intento <= 3; intento++) {
+    try {
+      const out = execSync("npx --yes netlify-cli@latest env:get DATABASE_URL", {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+        env: { ...env, NO_COLOR: "1", FORCE_COLOR: "0" },
+      });
+      // Se quitan los códigos de color de la terminal antes de buscar la dirección
+      const limpio = out.replace(/\u001b\[[0-9;?]*[A-Za-z]/g, "");
+      const url = (limpio.match(/postgres(?:ql)?:\/\/\S+/) || [])[0];
+      if (url) return url;
+    } catch { /* reintenta: a veces la red falla un momento */ }
+    if (intento < 3) console.log(`  Reintentando (${intento + 1}/3)…`);
+  }
+  salir("No se pudo obtener DATABASE_URL. Revisa tu internet, o inicia sesión con `npx netlify-cli login`.");
 }
 
 const AYUDA = `
@@ -84,7 +87,17 @@ Opciones: --nombre  --correo  --whatsapp  --clave
 
 async function main() {
   if (!["crear", "clave", "listar", "desactivar", "activar"].includes(accion)) { console.log(AYUDA); rl.close(); return; }
-  const sql = neon(databaseUrl());
+  // Cliente SQL con reintentos: si la red se corta un instante, vuelve a intentar
+  const crudo = neon(databaseUrl());
+  const sql = async (strings, ...vals) => {
+    for (let i = 1; ; i++) {
+      try { return await crudo(strings, ...vals); }
+      catch (e) {
+        if (i >= 4 || !/fetch failed|ENOTFOUND|ECONNRESET|ETIMEDOUT/i.test(String(e?.message) + String(e?.sourceError?.cause?.code))) throw e;
+        await new Promise((r) => setTimeout(r, 800 * i));
+      }
+    }
+  };
 
   if (accion === "listar") {
     const filas = await sql`
