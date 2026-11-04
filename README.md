@@ -227,21 +227,26 @@ Entra a **https://eliza-rodriguez-beauty.netlify.app/admin/** con tu usuario y c
 - Contraseñas cifradas (scrypt): nadie puede verlas, ni desde el panel. Sesiones de 30 días y bloqueo de 15 min tras 8 intentos fallidos.
 - Para volver a crear cuentas automáticamente en la 2.ª visita: `CREAR_CUENTA_AUTOMATICA = true` en `netlify/lib/fidelidad.mjs`.
 
-### Crear cuentas desde Visual Studio Code
-Además del panel, puedes gestionar las cuentas desde VS Code (esta carpeta abierta en VS Code):
+### Sección “Eliza Beauty” en Visual Studio Code
+Extensión propia (carpeta `vscode-extension/`) que agrega un **ícono en la barra lateral izquierda de VS Code**. Al abrirlo:
 
-- **Con ventanitas:** *Terminal → Run Task…* (o `Ctrl+Shift+P` → “Tasks: Run Task”) y elige:
-  - **Clientas: crear cuenta** — te pide nombre, correo (usuario), WhatsApp y contraseña (vacía = se genera una).
-  - **Clientas: cambiar contraseña** · **Clientas: ver todas** · **Clientas: desactivar cuenta** · **Clientas: activar cuenta**
-- **Con comandos** (en la terminal de VS Code):
-  ```bash
-  npm run clienta -- crear --nombre "Ana Pérez" --correo ana@mail.com --whatsapp 3001234567 --clave "MiClave123"
-  npm run clienta -- clave --correo ana@mail.com --clave "NuevaClave123"
-  npm run clienta -- listar
-  npm run clienta -- desactivar --correo ana@mail.com
-  ```
-- Al terminar te muestra el usuario, la contraseña y un **enlace de WhatsApp** (Ctrl + clic) con el mensaje listo para la clienta.
-- Requisitos: Node.js instalado, `npm install` hecho una vez, y sesión de Netlify en esta computadora (`npx netlify-cli login`). La conexión a la base de datos se pide a Netlify en el momento; no se guarda en ningún archivo.
+1. Entras con el **usuario y contraseña del panel** (la sesión queda guardada de forma cifrada en VS Code).
+2. Ves el resumen (clientas con cuenta, regalos por entregar…), los niveles y la lista de clientas con filtros y buscador.
+3. **“+ Crear cuenta de clienta”**: nombre, correo (usuario), WhatsApp y contraseña (vacía = se genera una).
+4. En cada clienta: **Contraseña** (cambiarla), **+1 / −1 sello**, **Entregar regalo**, **Activar / Desactivar**.
+5. Al crear o cambiar una contraseña, VS Code muestra el usuario y la contraseña con botones **“Enviar por WhatsApp”** y **“Copiar mensaje”**.
+
+Botones arriba de la sección: Actualizar · Abrir panel web · Cerrar sesión.
+
+**Instalar o actualizar la extensión** (una vez por computadora):
+```bash
+cd vscode-extension
+npx @vscode/vsce package --no-dependencies --skip-license --allow-missing-repository --out eliza-clientas.vsix
+code --install-extension eliza-clientas.vsix --force
+```
+Luego en VS Code: `Ctrl+Shift+P` → **Developer: Reload Window**.
+
+> Alternativa por terminal (opcional): `npm run clienta -- crear|clave|listar|desactivar|activar` (ver `scripts/clientas.mjs`).
 
 ### Usuario y contraseña del panel de admin
 Variables `ADMIN_USER` (usuario) y `ADMIN_PASSWORD` (contraseña) en Netlify → *Project configuration → Environment variables* → *Edit* → luego *Deploys → Trigger deploy*. Al entrar se abre una sesión de 12 horas; tras 8 intentos fallidos se bloquea 15 minutos.

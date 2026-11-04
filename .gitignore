@@ -14,3 +14,6 @@ desktop.ini
 node_modules/
 .vercel/
 .env*
+
+# Paquete de la extensión de VS Code (se genera con vsce)
+*.vsix
