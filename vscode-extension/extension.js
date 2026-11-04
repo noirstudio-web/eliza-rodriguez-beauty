@@ -157,8 +157,8 @@ class VistaClientas {
   .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 10px 0; }
   .stat { border: 1px solid var(--vscode-panel-border, #8884); border-radius: 6px; padding: 6px 8px; }
   .stat b { font-size: 1.3em; display: block; }
-  .card { border: 1px solid var(--vscode-panel-border, #8884); border-left: 3px solid var(--gold); border-radius: 6px; padding: 8px 10px; margin: 8px 0; }
-  .card.off { border-left-color: var(--vscode-errorForeground); opacity: .8; }
+  .card { border: 1px solid var(--vscode-panel-border, #8884); border-radius: 6px; padding: 8px 10px; margin: 8px 0; }
+  .card.off { border-style: dashed; opacity: .7; }
   .card .top { display: flex; justify-content: space-between; gap: 6px; align-items: baseline; }
   .nivel { font-size: .8em; padding: 1px 7px; border-radius: 10px; background: var(--gold); color: #2B2420; font-weight: 600; white-space: nowrap; }
   .datos { margin: 6px 0; font-size: .92em; line-height: 1.5; }
