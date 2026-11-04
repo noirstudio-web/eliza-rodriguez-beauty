@@ -150,11 +150,25 @@ Al inicio de `css/styles.css`, en `:root`:
 
 ## Publicar
 
-### Netlify
+- **Repositorio:** https://github.com/noirstudio-web/eliza-rodriguez-beauty
+- **Sitio en GitHub Pages:** https://noirstudio-web.github.io/eliza-rodriguez-beauty/
+  (se actualiza solo con cada `git push` a `main`; tarda 1–2 minutos).
+  En GitHub Pages el sitio y WhatsApp funcionan, pero **las reservas no se guardan**.
+
+### Netlify desde GitHub (recomendado: guarda las reservas)
+1. Entra a [app.netlify.com](https://app.netlify.com) → **Add new site → Import an existing project → GitHub**.
+2. Autoriza a Netlify y elige el repositorio **eliza-rodriguez-beauty**.
+3. *Branch*: `main` · *Build command*: (vacío) · *Publish directory*: `.` → **Deploy**.
+4. Activa los formularios (ver *Reservas guardadas*).
+5. Cuando tengas la dirección final (p. ej. `https://eliza-rodriguez-beauty.netlify.app/` o tu dominio),
+   reemplaza `https://noirstudio-web.github.io/eliza-rodriguez-beauty/` en `index.html`
+   (canonical, `og:url`, `og:image` y JSON-LD) y haz push. Comparte siempre esa dirección.
+
+Cada `git push` publica automáticamente en Netlify y en GitHub Pages.
+
+### Netlify sin GitHub
 1. Entra a [app.netlify.com/drop](https://app.netlify.com/drop).
 2. Arrastra la carpeta completa del proyecto. ¡Listo!
-
-(O conecta el repositorio de GitHub: no requiere comando de build; la carpeta a publicar es la raíz.)
 
 ### Vercel
 1. Sube el proyecto a GitHub.
