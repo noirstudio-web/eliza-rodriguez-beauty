@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Cancelar cita | Eliza Rodriguez Beauty</title>
+  <link rel="icon" href="../assets/img/favicon.ico" sizes="any">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Montserrat:wght@300;400;500&display=swap">
+  <style>
+    :root { --cream:#F8F1E7; --beige:#EFE4D6; --gold:#B8945A; --gold-ink:#7E5F30; --ink:#2B2420; --ink-soft:#5A4E46; --line:rgba(184,148,90,.35); }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--cream); color: var(--ink); font: 400 16px/1.6 "Montserrat", system-ui, sans-serif; display: grid; place-items: center; padding: 1.25rem; }
+    .box { width: 100%; max-width: 460px; background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 2rem 1.5rem; text-align: center; }
+    .box img { height: 60px; width: auto; margin: 0 auto 1.25rem; display: block; }
+    h1 { font: 600 1.8rem/1.15 "Cormorant Garamond", Georgia, serif; margin: 0 0 .75rem; }
+    p { margin: 0 0 1rem; color: var(--ink-soft); }
+    dl { margin: 1.25rem 0; padding: 1rem; background: var(--cream); border-radius: 12px; display: grid; grid-template-columns: auto 1fr; gap: .35rem 1rem; text-align: left; font-size: .92rem; }
+    dt { color: var(--ink-soft); } dd { margin: 0; font-weight: 500; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; min-height: 48px; padding: .7rem 1.2rem; border-radius: 999px; border: 1px solid var(--gold); background: transparent; font: 500 .92rem/1.3 inherit; color: var(--ink); text-decoration: none; cursor: pointer; margin-top: .6rem; }
+    .btn--gold { background: var(--gold); }
+    .btn:hover { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+    .btn[disabled] { opacity: .6; cursor: wait; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main class="box">
+    <img src="../assets/img/logo.svg" alt="Eliza Rodríguez Beauty">
+    <div id="estado" aria-live="polite"><p>Cargando tu cita…</p></div>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    const el = document.getElementById("estado");
+    const token = new URLSearchParams(location.search).get("t") || "";
+    const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const wa = "https://wa.me/" + String(WHATSAPP_NUMBER).replace(/\D/g, "") + "?text=" + encodeURIComponent("Hola Eliza, necesito cambiar o cancelar mi cita.");
+    const detalle = (c) => `<dl><dt>Servicio</dt><dd>${esc(c.servicio)}</dd><dt>Fecha</dt><dd>${esc(c.fecha)}</dd><dt>Hora</dt><dd>${esc(c.hora)}</dd></dl>`;
+    const botonWa = `<a class="btn" href="${wa}" target="_blank" rel="noopener">Escribir a Eliza por WhatsApp</a>`;
+    const volver = `<a class="btn" href="../">Volver al sitio</a>`;
+
+    function pintar(c, extra) {
+      if (c.estado === "cancelada") {
+        el.innerHTML = `<h1>Cita cancelada</h1><p>${extra || "Tu cita quedó cancelada y Eliza ya fue notificada."}</p>${detalle(c)}<a class="btn btn--gold" href="../#reserva">Agendar otra cita</a>${volver}`;
+      } else if (c.puedeCancelar) {
+        el.innerHTML = `<h1>Hola, ${esc(c.nombre)}</h1><p>¿Quieres cancelar esta cita?</p>${detalle(c)}
+          <button class="btn btn--gold" id="cancelar" type="button">Sí, cancelar mi cita</button>${volver}`;
+        document.getElementById("cancelar").addEventListener("click", cancelar);
+      } else if (["atendida", "no_asistio"].includes(c.estado)) {
+        el.innerHTML = `<h1>Esta cita ya pasó</h1>${detalle(c)}${volver}`;
+      } else {
+        el.innerHTML = `<h1>Ya no es posible cancelar en línea</h1>
+          <p>Las cancelaciones en línea se permiten hasta ${esc(c.horasLimite)} horas antes de la cita. Escríbele a Eliza por WhatsApp para avisarle.</p>${detalle(c)}${botonWa}${volver}`;
+      }
+    }
+
+    async function cancelar(e) {
+      e.target.disabled = true; e.target.textContent = "Cancelando…";
+      try {
+        const res = await fetch("../api/cancelar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ t: token }) });
+        const data = await res.json();
+        if (data.cita) pintar(data.cita);
+        else throw new Error();
+      } catch (_) {
+        el.innerHTML = `<h1>No pudimos cancelar</h1><p>Ocurrió un error. Escríbele a Eliza por WhatsApp.</p>${botonWa}`;
+      }
+    }
+
+    fetch("../api/cancelar?t=" + encodeURIComponent(token))
+      .then((r) => r.json())
+      .then((d) => { if (d.ok) pintar(d.cita); else throw new Error(); })
+      .catch(() => { el.innerHTML = `<h1>Enlace no válido</h1><p>Revisa que el enlace del correo esté completo, o escríbele a Eliza.</p>${botonWa}${volver}`; });
+  })();
+  </script>
+</body>
+</html>

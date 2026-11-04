@@ -28,11 +28,17 @@ Sitio estático (HTML, CSS y JavaScript sin frameworks) publicado en **Netlify**
 │   ├── resultados/       ← Fotos de antes y después
 │   ├── og-image.jpg      ← Imagen de vista previa al compartir el enlace
 │   └── favicon.ico, favicon-32.png, apple-touch-icon.png
-├── admin/index.html      ← Panel privado de reservas (con contraseña)
+├── admin/index.html      ← Panel privado (reservas, servicios, resultados, textos, fotos)
+├── cancelar/index.html   ← Página donde la clienta cancela su cita (enlace del correo)
+├── legal/                ← Términos y condiciones · Política de datos
 ├── netlify/
-│   ├── functions/reserva.mjs         ← POST /api/reserva: guarda cada reserva
-│   ├── functions/admin-reservas.mjs  ← GET/PATCH /api/admin/reservas: panel
-│   └── lib/shared.mjs                ← Conexión a la base de datos y utilidades
+│   ├── functions/reserva.mjs          ← POST /api/reserva: guarda la reserva y envía correos
+│   ├── functions/cancelar.mjs         ← /api/cancelar: cancelación hasta 3 h antes
+│   ├── functions/recordatorios.mjs    ← Programada cada 10 min: recordatorio 2 h antes
+│   ├── functions/contenido.mjs        ← GET /api/contenido: textos/fotos/precios editados
+│   ├── functions/admin-*.mjs          ← Panel: reservas, contenido y subida de fotos
+│   ├── functions/fotos.mjs            ← Sirve las fotos subidas (/fotos/…)
+│   └── lib/shared.mjs                 ← Base de datos, correo, validación
 ├── netlify.toml          ← Configuración de Netlify (publicación, funciones, cabeceras)
 ├── package.json          ← Dependencia del conector de base de datos
 └── robots.txt            ← Oculta /admin y /api de Google
@@ -54,6 +60,8 @@ python -m http.server 8000
 ---
 
 ## Cómo cambiar…
+
+> **Lo más fácil es el panel `/admin`** (servicios, precios, fotos, resultados y textos, sin tocar código). Lo de abajo explica cómo cambiar los **valores originales** en los archivos.
 
 ### 1. El número de WhatsApp
 Abre `js/config.js` y cambia **una sola línea**:
@@ -150,7 +158,8 @@ Al inicio de `css/styles.css`, en `:root`:
 - [ ] Fotos reales de los demás servicios y resultados en `assets/img/`.
 - [ ] Mapa con la dirección exacta.
 - [ ] Revisar medios de pago en la sección de preguntas.
-- [ ] Publicar una política de tratamiento de datos (Ley 1581 de 2012).
+- [ ] Completar los `[COMPLETAR]` de `legal/terminos.html` y `legal/privacidad.html` y hacerlos revisar por un abogado.
+- [ ] Configurar el correo (`SMTP_USER` y `SMTP_PASS`) para los avisos automáticos.
 
 ---
 
@@ -189,17 +198,48 @@ Cada vez que alguien usa el formulario **Agenda tu cita**:
 El servidor vuelve a validar todo (no se fía del navegador), rechaza fechas pasadas y descarta los envíos de bots (campo trampa oculto).
 
 ### Panel privado `/admin`
-- Entra a **https://eliza-rodriguez-beauty.netlify.app/admin/** con la contraseña (`ADMIN_PASSWORD`).
-- Resumen: citas de hoy, próximas, por confirmar y total.
-- Filtros (*Próximas, Por confirmar, Pasadas, Todas*) y buscador.
-- Cambiar el estado de cada cita: **Pendiente → Confirmada / Cancelada / Atendida**.
-- Botón **Escribir por WhatsApp** a la clienta, con un mensaje de confirmación listo.
-- **Descargar Excel (CSV)** con lo que se ve en pantalla.
-- La sesión dura hasta cerrar la pestaña. El panel no aparece en Google.
+Entra a **https://eliza-rodriguez-beauty.netlify.app/admin/** con la contraseña (`ADMIN_PASSWORD`). Tiene 5 pestañas:
+
+| Pestaña | Qué se puede hacer |
+|---|---|
+| **Reservas** | Ver citas de hoy, próximas y por confirmar · cambiar estado (Pendiente, Confirmada, **Asistió**, **No asistió**, Cancelada) · filtro **Marcar asistencia** con botones ✓ / ✗ · % de asistencia · WhatsApp a la clienta · descargar Excel |
+| **Servicios y precios** | Cambiar foto, nombre, descripción, duración y **precio** · agregar, ordenar o eliminar servicios |
+| **Resultados** | Subir fotos de **antes y después**, nombre de la pestaña y nota · agregar, ordenar o eliminar |
+| **Textos** | Editar cualquier texto de la página (p. ej. “Servicios · texto de abajo del título”), las preguntas frecuentes y las certificaciones · “Restaurar” vuelve al original |
+| **Fotos** | Cambiar la foto de portada y la de “Sobre mí” |
+
+- Las fotos se reducen y se convierten a WebP en el navegador antes de subirse (la página sigue rápida). Se guardan en **Netlify Blobs** y se sirven en `/fotos/…`.
+- Los cambios se ven en la página en menos de 1 minuto. Si la base de datos no responde, la página muestra los textos y fotos originales.
+- Los valores originales siguen estando en `index.html`, `js/services.js` y `js/content.js`.
 
 **Cambiar la contraseña:** Netlify → *Environment variables* → `ADMIN_PASSWORD` → editar → *Trigger deploy*.
 
-> En tu computador (`localhost` con `python -m http.server`) no se guarda nada porque no hay servidor de funciones; WhatsApp sí abre. Para probar las funciones en local: `npx netlify-cli dev`.
+### Correos automáticos
+| Cuándo | A quién |
+|---|---|
+| Al recibir una reserva | Eliza (aviso) y la clienta (constancia + **enlace para cancelar**) |
+| **2 horas antes** de la cita | La clienta y Eliza (recordatorio) |
+| Cuando la clienta cancela | Eliza, al instante |
+
+- La clienta puede cancelar en línea **hasta 3 horas antes** (`/cancelar/?t=…`). Después, la página le pide escribir por WhatsApp.
+- El recordatorio lo envía la función programada `recordatorios` cada 10 minutos (no aplica a citas canceladas ni a reservas hechas con menos de 2 h de anticipación).
+- Las horas de cancelación y recordatorio se cambian en `netlify/lib/shared.mjs` (`HORAS_CANCELACION`, `HORAS_RECORDATORIO`).
+
+**Activar los correos (Gmail de Eliza):**
+1. En la cuenta de Google de Eliza, activa la **verificación en 2 pasos** (myaccount.google.com → Seguridad).
+2. Entra a **myaccount.google.com/apppasswords**, crea una contraseña de aplicación llamada “Sitio web” y copia los 16 caracteres.
+3. En Netlify → *Environment variables*, crea `SMTP_USER` = el Gmail de Eliza y `SMTP_PASS` = la contraseña de aplicación. Opcional: `AVISOS_EMAIL` si los avisos deben llegar a otro correo.
+4. *Deploys → Trigger deploy*.
+
+Mientras no estén configuradas, las reservas se guardan igual, pero no se envían correos.
+
+> En tu computador (`localhost` con `python -m http.server`) no hay servidor de funciones: no se guardan reservas ni se carga el contenido editado. Para probar todo en local: `npx netlify-cli dev`.
+
+### Páginas legales
+- `legal/terminos.html` — Términos y condiciones (servicios de salud, Ley 1799 de 2016 sobre menores, reservas, cancelaciones, precios, fotos, Estatuto del Consumidor y PQR).
+- `legal/privacidad.html` — Política de tratamiento de datos personales (Ley 1581 de 2012, Decreto 1377 de 2013).
+- Están enlazadas en el pie de página y en la casilla de autorización del formulario.
+- **Completa los campos marcados `[COMPLETAR]`** (titular, NIT, dirección, correo, ReTHUS, habilitación, política de abonos, tiempo de conservación) y **haz revisar ambos textos por un abogado**: son una base sólida, no asesoría legal.
 
 **Protección de datos:** el formulario pide autorización expresa (Ley 1581 de 2012). Usa estos datos solo para gestionar las citas y publica una política de tratamiento de datos.
 

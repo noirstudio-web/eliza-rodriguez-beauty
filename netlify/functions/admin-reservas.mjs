@@ -4,16 +4,12 @@
    PATCH → cambia el estado de una reserva { id, estado }
    La contraseña es la variable ADMIN_PASSWORD configurada en Netlify.
    ========================================================================== */
-import { db, json, readJson, isAdmin, ESTADOS } from "../lib/shared.mjs";
+import { db, json, readJson, isAdmin, denied, ESTADOS } from "../lib/shared.mjs";
 
 export const config = { path: "/api/admin/reservas" };
 
 export default async (req) => {
-  if (!isAdmin(req)) {
-    // Pequeña pausa para frenar intentos de adivinar la contraseña
-    await new Promise((r) => setTimeout(r, 600));
-    return json(401, { ok: false, error: "Contraseña incorrecta" });
-  }
+  if (!isAdmin(req)) return denied();
 
   try {
     const sql = db();
@@ -22,7 +18,7 @@ export default async (req) => {
       const reservas = await sql`
         SELECT id, creada_en, nombre, whatsapp, correo, servicio,
                to_char(fecha, 'YYYY-MM-DD') AS fecha, to_char(hora, 'HH24:MI') AS hora,
-               comentario, estado
+               comentario, estado, cancelada_por, recordatorio_enviado_en IS NOT NULL AS recordatorio
         FROM reservas
         ORDER BY fecha DESC, hora DESC, id DESC
         LIMIT 2000`;
@@ -35,7 +31,12 @@ export default async (req) => {
       if (!Number.isInteger(id) || id < 1 || !ESTADOS.includes(b.estado)) {
         return json(400, { ok: false, error: "Datos inválidos" });
       }
-      const filas = await sql`UPDATE reservas SET estado = ${b.estado} WHERE id = ${id} RETURNING id, estado`;
+      const cancela = b.estado === "cancelada";
+      const filas = await sql`
+        UPDATE reservas SET estado = ${b.estado},
+          cancelada_en = CASE WHEN ${cancela} THEN COALESCE(cancelada_en, now()) ELSE NULL END,
+          cancelada_por = CASE WHEN ${cancela} THEN COALESCE(cancelada_por, 'eliza') ELSE NULL END
+        WHERE id = ${id} RETURNING id, estado, cancelada_por`;
       if (!filas.length) return json(404, { ok: false, error: "Reserva no encontrada" });
       return json(200, { ok: true, reserva: filas[0] });
     }

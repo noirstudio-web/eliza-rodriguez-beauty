@@ -837,3 +837,32 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .btn--gold:hover { background: var(--gold); color: var(--ink); box-shadow: none; }
   .wa-float:hover { transform: none; background: var(--gold); color: var(--ink); }
 }
+
+/* ==========================================================================
+   Páginas legales (/legal)
+   ========================================================================== */
+.legal-page { background: var(--cream); }
+.legal-top { border-bottom: 1px solid var(--line); background: var(--cream); }
+.legal-top__inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 72px; }
+.legal-top img { height: 44px; width: auto; }
+.legal { max-width: 780px; padding-block: 2.5rem 4rem; }
+.legal h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(2rem, 6vw, 2.8rem); line-height: 1.1; margin-bottom: .5rem; }
+.legal__updated { color: var(--ink-soft); font-size: .85rem; }
+.legal h2 { font-family: var(--serif); font-weight: 600; font-size: 1.5rem; margin: 2.25rem 0 .75rem; }
+.legal p, .legal li { color: var(--ink-soft); font-weight: 400; }
+.legal strong { color: var(--ink); font-weight: 500; }
+.legal ul { list-style: disc; padding-left: 1.25rem; }
+.legal li { margin-bottom: .45rem; }
+.legal a { color: var(--gold-ink); }
+.legal section { scroll-margin-top: 1rem; }
+.legal__toc { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem 1.4rem; margin: 1.5rem 0 1rem; }
+.legal__toc ol { margin: 0; padding-left: 1.2rem; columns: 2 220px; column-gap: 2rem; }
+.legal__toc li { margin-bottom: .3rem; font-size: .9rem; }
+.legal-foot { background: var(--ink); color: rgba(248, 241, 231, .8); padding: 1.75rem 0; font-size: .85rem; text-align: center; }
+.legal-foot p { margin: .25rem 0; }
+.legal-foot a { color: var(--gold); }
+
+/* Enlaces legales en el pie de página y en el formulario */
+.footer__legal { display: flex; flex-wrap: wrap; justify-content: center; gap: .25rem 1rem; }
+.footer__legal a { text-decoration: underline; text-underline-offset: 3px; }
+.form .form__check a { color: var(--gold-ink); text-decoration: underline; }

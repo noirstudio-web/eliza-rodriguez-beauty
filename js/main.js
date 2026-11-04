@@ -497,14 +497,69 @@
   /* ------------------------------------------------------------------------
      Inicio
      ------------------------------------------------------------------------ */
-  renderServices();
-  renderCertifications();
-  renderContact();
-  initWhatsAppLinks();
-  initSocialLinks();
+  // 1) Lo que no depende del contenido editable: de inmediato
   initHeader();
-  initResults();
-  initTestimonials();
+  initSocialLinks();
+  renderContact();
   initForm();
-  initReveal(); // al final, para incluir los elementos generados
+
+  // 2) Contenido editable desde el panel /admin (textos, fotos, servicios, precios,
+  //    resultados…). Si no responde a tiempo, se usan los valores por defecto.
+  loadContent().finally(() => {
+    renderServices();
+    renderCertifications();
+    initWhatsAppLinks();
+    initResults();
+    initTestimonials();
+    initReveal(); // al final, para incluir los elementos generados
+  });
+
+  /* ------------------------------------------------------------------------
+     Contenido editable (panel /admin → /api/contenido)
+     ------------------------------------------------------------------------ */
+  function loadContent() {
+    if (!/^https?:$/.test(location.protocol)) return Promise.resolve();
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 2500);
+    return fetch("api/contenido", { signal: ctrl.signal })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d && d.ok) applyContent(d.contenido || {}); })
+      .catch(() => {}) // sin servidor (local / GitHub Pages): valores por defecto
+      .finally(() => clearTimeout(timer));
+  }
+
+  /** Reemplaza el contenido de un arreglo global (SERVICES, RESULTADOS…) sin cambiar su referencia. */
+  const replaceArray = (arr, nuevo) => {
+    if (Array.isArray(arr) && Array.isArray(nuevo) && nuevo.length) arr.splice(0, arr.length, ...nuevo);
+  };
+
+  function applyContent(c) {
+    // Textos: cualquier elemento con data-edit="clave"
+    if (c.textos) {
+      $$("[data-edit]").forEach((el) => {
+        const v = c.textos[el.dataset.edit];
+        if (typeof v === "string" && v.trim()) el.textContent = v;
+      });
+    }
+    // Fotos fijas (portada y Sobre mí)
+    if (c.fotos) {
+      $$("[data-edit-img]").forEach((el) => {
+        const url = c.fotos[el.dataset.editImg];
+        if (!url) return;
+        if (el.tagName === "PICTURE") {
+          el.querySelectorAll("source").forEach((s) => s.remove());
+          const img = el.querySelector("img");
+          if (img) img.src = url;
+        } else {
+          el.src = url;
+        }
+      });
+      // la foto de portada se precarga en el <head>: se quita para no descargar la anterior
+      if (c.fotos.portada) $$('link[rel="preload"][as="image"]').forEach((l) => l.remove());
+    }
+    replaceArray(SERVICES, c.servicios);
+    replaceArray(RESULTADOS, c.resultados);
+    replaceArray(CERTIFICACIONES, c.certificaciones);
+    replaceArray(TESTIMONIOS, c.testimonios);
+  }
 })();

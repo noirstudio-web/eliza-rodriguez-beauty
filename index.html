@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500&display=swap"></noscript>
 
-  <link rel="stylesheet" href="css/styles.css?v=20261104132003">
+  <link rel="stylesheet" href="css/styles.css?v=20261104142151">
 
   <!-- ========== Datos estructurados (Schema.org) ========== -->
   <script type="application/ld+json">
@@ -71,7 +71,7 @@
   <script src="js/config.js?v=202611041312" defer></script>
   <script src="js/services.js?v=202611041312" defer></script>
   <script src="js/content.js?v=202611041312" defer></script>
-  <script src="js/main.js?v=20261104135456" defer></script>
+  <script src="js/main.js?v=20261104142151" defer></script>
 </head>
 
 <body>
@@ -114,9 +114,9 @@
     <section class="hero" id="inicio" aria-labelledby="hero-title">
       <div class="container hero__inner">
         <div class="hero__content">
-          <h1 class="hero__title hero__anim" id="hero-title">Realza tu belleza <em>natural</em></h1>
+          <h1 class="hero__title hero__anim" id="hero-title"><span data-edit="portada.titulo" data-label="Portada · título">Realza tu belleza</span> <em data-edit="portada.destacado" data-label="Portada · palabra destacada (dorada)">natural</em></h1>
           <span class="gold-line hero__anim" aria-hidden="true"></span>
-          <p class="hero__subtitle hero__anim">Estética avanzada en Bahía Solano</p>
+          <p class="hero__subtitle hero__anim" data-edit="portada.subtitulo" data-label="Portada · subtítulo">Estética avanzada en Bahía Solano</p>
           <div class="hero__actions hero__anim">
             <a class="btn btn--gold" href="#reserva" data-wa>
               <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-whatsapp"/></svg>
@@ -127,7 +127,7 @@
         </div>
 
         <div class="hero__media">
-          <picture>
+          <picture data-edit-img="portada" data-label="Foto de portada">
             <source srcset="assets/img/eliza.webp?v=20261104131256" type="image/webp">
             <img src="assets/img/eliza.jpg?v=20261104131256" alt="Eliza Rodriguez, especialista en estética avanzada" width="900" height="1125" fetchpriority="high" decoding="async">
           </picture>
@@ -142,10 +142,10 @@
     <section class="section" id="servicios" aria-labelledby="servicios-title">
       <div class="container">
         <header class="section__head reveal">
-          <p class="eyebrow">Tratamientos</p>
-          <h2 class="section__title" id="servicios-title">Servicios</h2>
+          <p class="eyebrow" data-edit="servicios.etiqueta" data-label="Servicios · etiqueta pequeña">Tratamientos</p>
+          <h2 class="section__title" id="servicios-title" data-edit="servicios.titulo" data-label="Servicios · título">Servicios</h2>
           <span class="gold-line" aria-hidden="true"></span>
-          <p class="section__lead">Protocolos personalizados para resaltar tus rasgos con resultados naturales y seguros.</p>
+          <p class="section__lead" data-edit="servicios.intro" data-label="Servicios · texto de abajo del título">Protocolos personalizados para resaltar tus rasgos con resultados naturales y seguros.</p>
         </header>
 
         <div class="services-grid" id="services-grid">
@@ -161,10 +161,10 @@
     <section class="section section--beige" id="resultados" aria-labelledby="resultados-title">
       <div class="container">
         <header class="section__head reveal">
-          <p class="eyebrow">Antes y después</p>
-          <h2 class="section__title" id="resultados-title">Resultados</h2>
+          <p class="eyebrow" data-edit="resultados.etiqueta" data-label="Resultados · etiqueta pequeña">Antes y después</p>
+          <h2 class="section__title" id="resultados-title" data-edit="resultados.titulo" data-label="Resultados · título">Resultados</h2>
           <span class="gold-line" aria-hidden="true"></span>
-          <p class="section__lead">Desliza sobre la imagen para comparar. Resultados reales de nuestras pacientes.</p>
+          <p class="section__lead" data-edit="resultados.intro" data-label="Resultados · texto de abajo del título">Desliza sobre la imagen para comparar. Resultados reales de nuestras pacientes.</p>
         </header>
 
         <div class="results reveal">
@@ -183,7 +183,7 @@
             </div>
           </div>
           <p class="results__note" id="results-note" aria-live="polite"></p>
-          <p class="results__disclaimer">Los resultados pueden variar según cada persona. Imágenes publicadas con autorización.</p>
+          <p class="results__disclaimer" data-edit="resultados.aviso" data-label="Resultados · aviso pequeño">Los resultados pueden variar según cada persona. Imágenes publicadas con autorización.</p>
         </div>
       </div>
     </section>
@@ -194,20 +194,20 @@
     <section class="section" id="sobre-mi" aria-labelledby="sobre-title">
       <div class="container about">
         <div class="about__media reveal">
-          <img src="assets/img/eliza-sobre.webp?v=202611041312" alt="Eliza Rodriguez con su uniforme de Eliza Rodríguez Beauty" width="800" height="1000" loading="lazy" decoding="async">
+          <img data-edit-img="sobre" data-label="Foto de Sobre mí" src="assets/img/eliza-sobre.webp?v=202611041312" alt="Eliza Rodriguez con su uniforme de Eliza Rodríguez Beauty" width="800" height="1000" loading="lazy" decoding="async">
         </div>
 
         <div class="about__content reveal">
-          <p class="eyebrow">Sobre mí</p>
-          <h2 class="section__title section__title--left" id="sobre-title">Hola, soy Eliza</h2>
+          <p class="eyebrow" data-edit="sobre.etiqueta" data-label="Sobre mí · etiqueta pequeña">Sobre mí</p>
+          <h2 class="section__title section__title--left" id="sobre-title" data-edit="sobre.titulo" data-label="Sobre mí · título">Hola, soy Eliza</h2>
           <span class="gold-line gold-line--left" aria-hidden="true"></span>
-          <p>Soy especialista en estética avanzada y mi propósito es ayudarte a sentirte segura y radiante, realzando lo que ya te hace única. Creo en una belleza natural: resultados armoniosos que se ven como tú, en tu mejor versión.</p>
-          <p>Cada tratamiento empieza con una valoración honesta, en la que escucho lo que deseas y te recomiendo solo lo que realmente necesitas.</p>
+          <p data-edit="sobre.parrafo1" data-label="Sobre mí · párrafo 1">Soy especialista en estética avanzada y mi propósito es ayudarte a sentirte segura y radiante, realzando lo que ya te hace única. Creo en una belleza natural: resultados armoniosos que se ven como tú, en tu mejor versión.</p>
+          <p data-edit="sobre.parrafo2" data-label="Sobre mí · párrafo 2">Cada tratamiento empieza con una valoración honesta, en la que escucho lo que deseas y te recomiendo solo lo que realmente necesitas.</p>
 
-          <h3 class="about__subtitle">Formación y certificaciones</h3>
+          <h3 class="about__subtitle" data-edit="sobre.subtitulo" data-label="Sobre mí · subtítulo de certificaciones">Formación y certificaciones</h3>
           <ul class="cert-list" id="cert-list"></ul>
 
-          <blockquote class="about__quote">
+          <blockquote class="about__quote" data-edit="sobre.frase" data-label="Sobre mí · frase destacada">
             “Atención personalizada, productos de calidad y protocolos seguros”
           </blockquote>
         </div>
@@ -220,8 +220,8 @@
     <section class="section section--beige" aria-labelledby="why-title">
       <div class="container">
         <header class="section__head reveal">
-          <p class="eyebrow">Tu tranquilidad primero</p>
-          <h2 class="section__title" id="why-title">Por qué elegirnos</h2>
+          <p class="eyebrow" data-edit="porque.etiqueta" data-label="Por qué elegirnos · etiqueta pequeña">Tu tranquilidad primero</p>
+          <h2 class="section__title" id="why-title" data-edit="porque.titulo" data-label="Por qué elegirnos · título">Por qué elegirnos</h2>
           <span class="gold-line" aria-hidden="true"></span>
         </header>
 
@@ -230,29 +230,29 @@
             <span class="why__icon" aria-hidden="true">
               <svg viewBox="0 0 48 48"><path d="M24 40s-14-8.5-14-19a8 8 0 0 1 14-5.3A8 8 0 0 1 38 21c0 10.5-14 19-14 19z"/><path d="M19 22l3.5 3.5L29 19"/></svg>
             </span>
-            <h3 class="why__title">Atención personalizada</h3>
-            <p>Cada plan se diseña según tu rostro, tu piel y tus objetivos.</p>
+            <h3 class="why__title" data-edit="porque.1.titulo" data-label="Por qué elegirnos · motivo 1 (título)">Atención personalizada</h3>
+            <p data-edit="porque.1.texto" data-label="Por qué elegirnos · motivo 1 (texto)">Cada plan se diseña según tu rostro, tu piel y tus objetivos.</p>
           </li>
           <li class="why reveal">
             <span class="why__icon" aria-hidden="true">
               <svg viewBox="0 0 48 48"><path d="M24 6l14 5v11c0 9-6 16-14 20-8-4-14-11-14-20V11z"/><path d="M18 24l4 4 8-8"/></svg>
             </span>
-            <h3 class="why__title">Productos certificados</h3>
-            <p>Trabajamos solo con marcas originales y registro sanitario.</p>
+            <h3 class="why__title" data-edit="porque.2.titulo" data-label="Por qué elegirnos · motivo 2 (título)">Productos certificados</h3>
+            <p data-edit="porque.2.texto" data-label="Por qué elegirnos · motivo 2 (texto)">Trabajamos solo con marcas originales y registro sanitario.</p>
           </li>
           <li class="why reveal">
             <span class="why__icon" aria-hidden="true">
               <svg viewBox="0 0 48 48"><path d="M12 36c0-15 10-24 26-26-1 16-10 26-24 26z"/><path d="M12 36l14-14"/></svg>
             </span>
-            <h3 class="why__title">Resultados naturales</h3>
-            <p>Realzamos tu belleza sin exagerar, en armonía con tus rasgos.</p>
+            <h3 class="why__title" data-edit="porque.3.titulo" data-label="Por qué elegirnos · motivo 3 (título)">Resultados naturales</h3>
+            <p data-edit="porque.3.texto" data-label="Por qué elegirnos · motivo 3 (texto)">Realzamos tu belleza sin exagerar, en armonía con tus rasgos.</p>
           </li>
           <li class="why reveal">
             <span class="why__icon" aria-hidden="true">
               <svg viewBox="0 0 48 48"><path d="M8 22L24 9l16 13"/><path d="M12 19v20h24V19"/><path d="M24 33s-5-3-5-6.5a2.6 2.6 0 0 1 5-1 2.6 2.6 0 0 1 5 1C29 30 24 33 24 33z"/></svg>
             </span>
-            <h3 class="why__title">Ambiente cómodo y seguro</h3>
-            <p>Un espacio tranquilo, limpio y con estrictos protocolos de bioseguridad.</p>
+            <h3 class="why__title" data-edit="porque.4.titulo" data-label="Por qué elegirnos · motivo 4 (título)">Ambiente cómodo y seguro</h3>
+            <p data-edit="porque.4.texto" data-label="Por qué elegirnos · motivo 4 (texto)">Un espacio tranquilo, limpio y con estrictos protocolos de bioseguridad.</p>
           </li>
         </ul>
       </div>
@@ -264,8 +264,8 @@
     <section class="section" id="testimonios" aria-labelledby="testi-title">
       <div class="container">
         <header class="section__head reveal">
-          <p class="eyebrow">Lo que dicen</p>
-          <h2 class="section__title" id="testi-title">Testimonios</h2>
+          <p class="eyebrow" data-edit="testimonios.etiqueta" data-label="Testimonios · etiqueta pequeña">Lo que dicen</p>
+          <h2 class="section__title" id="testi-title" data-edit="testimonios.titulo" data-label="Testimonios · título">Testimonios</h2>
           <span class="gold-line" aria-hidden="true"></span>
         </header>
 
@@ -290,40 +290,40 @@
     <section class="section section--beige" id="preguntas" aria-labelledby="faq-title">
       <div class="container container--narrow">
         <header class="section__head reveal">
-          <p class="eyebrow">Resolvemos tus dudas</p>
-          <h2 class="section__title" id="faq-title">Preguntas frecuentes</h2>
+          <p class="eyebrow" data-edit="faq.etiqueta" data-label="Preguntas · etiqueta pequeña">Resolvemos tus dudas</p>
+          <h2 class="section__title" id="faq-title" data-edit="faq.titulo" data-label="Preguntas · título">Preguntas frecuentes</h2>
           <span class="gold-line" aria-hidden="true"></span>
         </header>
 
         <div class="faq reveal">
           <details class="faq__item" name="faq">
-            <summary>¿Duele el procedimiento?</summary>
+            <summary data-edit="faq.1.pregunta" data-label="Preguntas · pregunta 1">¿Duele el procedimiento?</summary>
             <div class="faq__body">
-              <p>La mayoría de tratamientos son muy tolerables. Usamos anestesia tópica y técnicas suaves para que la molestia sea mínima. Durante la valoración te explicamos qué sentirás en cada paso.</p>
+              <p data-edit="faq.1.respuesta" data-label="Preguntas · respuesta 1">La mayoría de tratamientos son muy tolerables. Usamos anestesia tópica y técnicas suaves para que la molestia sea mínima. Durante la valoración te explicamos qué sentirás en cada paso.</p>
             </div>
           </details>
           <details class="faq__item" name="faq">
-            <summary>¿Cuánto dura el resultado?</summary>
+            <summary data-edit="faq.2.pregunta" data-label="Preguntas · pregunta 2">¿Cuánto dura el resultado?</summary>
             <div class="faq__body">
-              <p>Depende del tratamiento y de tu piel: el ácido hialurónico en labios y nariz suele durar entre 9 y 12 meses, el botox de 4 a 6 meses, y los tratamientos de piel como peeling y dermapen mejoran con sesiones de mantenimiento.</p>
+              <p data-edit="faq.2.respuesta" data-label="Preguntas · respuesta 2">Depende del tratamiento y de tu piel: el ácido hialurónico en labios y nariz suele durar entre 9 y 12 meses, el botox de 4 a 6 meses, y los tratamientos de piel como peeling y dermapen mejoran con sesiones de mantenimiento.</p>
             </div>
           </details>
           <details class="faq__item" name="faq">
-            <summary>¿Qué cuidados debo tener después?</summary>
+            <summary data-edit="faq.3.pregunta" data-label="Preguntas · pregunta 3">¿Qué cuidados debo tener después?</summary>
             <div class="faq__body">
-              <p>Te entregamos indicaciones por escrito para cada caso. En general: evitar el sol directo, el maquillaje y el ejercicio intenso las primeras 24–48 horas, usar protector solar y no manipular la zona tratada.</p>
+              <p data-edit="faq.3.respuesta" data-label="Preguntas · respuesta 3">Te entregamos indicaciones por escrito para cada caso. En general: evitar el sol directo, el maquillaje y el ejercicio intenso las primeras 24–48 horas, usar protector solar y no manipular la zona tratada.</p>
             </div>
           </details>
           <details class="faq__item" name="faq">
-            <summary>¿Necesito valoración previa?</summary>
+            <summary data-edit="faq.4.pregunta" data-label="Preguntas · pregunta 4">¿Necesito valoración previa?</summary>
             <div class="faq__body">
-              <p>Sí. La valoración nos permite conocer tu historia, tus expectativas y confirmar que el tratamiento es adecuado y seguro para ti. Puedes agendarla por WhatsApp.</p>
+              <p data-edit="faq.4.respuesta" data-label="Preguntas · respuesta 4">Sí. La valoración nos permite conocer tu historia, tus expectativas y confirmar que el tratamiento es adecuado y seguro para ti. Puedes agendarla por WhatsApp.</p>
             </div>
           </details>
           <details class="faq__item" name="faq">
-            <summary>¿Qué medios de pago aceptan?</summary>
+            <summary data-edit="faq.5.pregunta" data-label="Preguntas · pregunta 5">¿Qué medios de pago aceptan?</summary>
             <div class="faq__body">
-              <p>Aceptamos efectivo, transferencia bancaria y Nequi / Daviplata. Para reservar algunos tratamientos se puede solicitar un abono previo.</p>
+              <p data-edit="faq.5.respuesta" data-label="Preguntas · respuesta 5">Aceptamos efectivo, transferencia bancaria y Nequi / Daviplata. Para reservar algunos tratamientos se puede solicitar un abono previo.</p>
             </div>
           </details>
         </div>
@@ -331,16 +331,16 @@
     </section>
 
     <!-- ===================================================================
-         9. FORMULARIO DE RESERVA RÁPIDA (abre WhatsApp, no envía a servidor)
+         9. FORMULARIO DE RESERVA RÁPIDA (guarda la reserva y abre WhatsApp)
          =================================================================== -->
     <section class="section" id="reserva" aria-labelledby="reserva-title">
       <div class="container container--narrow">
         <div class="booking reveal">
           <header class="section__head">
-            <p class="eyebrow">Reserva rápida</p>
-            <h2 class="section__title" id="reserva-title">Agenda tu cita</h2>
+            <p class="eyebrow" data-edit="reserva.etiqueta" data-label="Reserva · etiqueta pequeña">Reserva rápida</p>
+            <h2 class="section__title" id="reserva-title" data-edit="reserva.titulo" data-label="Reserva · título">Agenda tu cita</h2>
             <span class="gold-line" aria-hidden="true"></span>
-            <p class="section__lead">Completa tus datos y te llevamos a WhatsApp con el mensaje listo para enviar.</p>
+            <p class="section__lead" data-edit="reserva.intro" data-label="Reserva · texto de abajo del título">Completa tus datos y te llevamos a WhatsApp con el mensaje listo para enviar.</p>
           </header>
 
           <!-- Al enviar, js/main.js guarda la reserva en la base de datos (/api/reserva)
@@ -400,9 +400,9 @@
             <div class="form__field">
               <label class="form__check" for="f-autorizo">
                 <input id="f-autorizo" name="autorizo-datos" type="checkbox" value="si" required>
-                <span>Autorizo a Eliza Rodriguez Beauty a guardar y usar mis datos únicamente para gestionar mi cita (Ley 1581 de 2012).</span>
+                <span>Soy mayor de edad, acepto los <a href="legal/terminos.html" target="_blank" rel="noopener">términos y condiciones</a> y autorizo el tratamiento de mis datos para gestionar mi cita según la <a href="legal/privacidad.html" target="_blank" rel="noopener">política de datos</a> (Ley 1581 de 2012).</span>
               </label>
-              <p class="form__error" id="err-autorizo" hidden>Necesitamos tu autorización para registrar la reserva.</p>
+              <p class="form__error" id="err-autorizo" hidden>Debes aceptar los términos y la política de datos para reservar.</p>
             </div>
 
             <button class="btn btn--gold btn--block" type="submit" id="booking-submit">
@@ -422,8 +422,8 @@
     <section class="section section--beige" id="contacto" aria-labelledby="contacto-title">
       <div class="container">
         <header class="section__head reveal">
-          <p class="eyebrow">Visítanos</p>
-          <h2 class="section__title" id="contacto-title">Ubicación y contacto</h2>
+          <p class="eyebrow" data-edit="contacto.etiqueta" data-label="Contacto · etiqueta pequeña">Visítanos</p>
+          <h2 class="section__title" id="contacto-title" data-edit="contacto.titulo" data-label="Contacto · título">Ubicación y contacto</h2>
           <span class="gold-line" aria-hidden="true"></span>
         </header>
 
@@ -471,7 +471,7 @@
     <div class="container footer__inner">
       <div class="footer__brand">
         <img src="assets/img/logo.svg?v=202611041312" alt="Eliza Rodríguez Beauty – Estética avanzada" width="240" height="80" loading="lazy">
-        <p>Estética avanzada en Bahía Solano, Chocó.</p>
+        <p data-edit="footer.texto" data-label="Pie de página · texto">Estética avanzada en Bahía Solano, Chocó.</p>
       </div>
 
       <nav class="footer__nav" aria-label="Enlaces rápidos">
@@ -503,6 +503,7 @@
 
     <div class="container footer__bottom">
       <p>© 2026 Eliza Rodriguez Beauty</p>
+      <p class="footer__legal"><a href="legal/terminos.html">Términos y condiciones</a><a href="legal/privacidad.html">Política de tratamiento de datos</a></p>
       <p class="footer__credit">Desarrollado por Noir Studio</p>
     </div>
   </footer>

@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <title>Reservas | Eliza Rodriguez Beauty</title>
+  <title>Panel | Eliza Rodriguez Beauty</title>
   <link rel="icon" href="../assets/img/favicon.ico" sizes="any">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Montserrat:wght@300;400;500&display=swap">
   <style>
-    /* Panel privado de reservas — mismos colores de la marca */
+    /* Panel privado — mismos colores de la marca */
     :root {
       --cream: #F8F1E7; --beige: #EFE4D6; --gold: #B8945A; --gold-ink: #7E5F30;
       --ink: #2B2420; --ink-soft: #5A4E46; --white: #FFFFFF; --line: rgba(184,148,90,.35);
@@ -19,39 +19,51 @@
     }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--cream); color: var(--ink); font: 400 15px/1.55 var(--sans); }
-    button, input, select { font: inherit; color: inherit; }
+    button, input, select, textarea { font: inherit; color: inherit; }
     :focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
-    header.top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .75rem 0 1.25rem; border-bottom: 1px solid var(--line); margin-bottom: 1.25rem; }
-    header.top img { height: 44px; width: auto; }
-    h1 { font: 600 1.7rem/1.1 var(--serif); margin: 0; letter-spacing: .04em; }
+    img { max-width: 100%; display: block; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 1rem 1rem 6rem; }
+    header.top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .5rem 0 1rem; }
+    header.top img { height: 42px; width: auto; }
+    h1 { font: 600 1.7rem/1.1 var(--serif); margin: 0; letter-spacing: .02em; }
+    h2 { font: 600 1.35rem/1.2 var(--serif); margin: 0 0 .25rem; }
     .muted { color: var(--ink-soft); font-size: .85rem; }
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; min-height: 42px; padding: .5rem 1rem; border-radius: 999px; border: 1px solid var(--gold); background: transparent; cursor: pointer; font-size: .82rem; font-weight: 500; letter-spacing: .02em; text-decoration: none; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; min-height: 42px; padding: .5rem 1rem; border-radius: 999px; border: 1px solid var(--gold); background: transparent; cursor: pointer; font-size: .85rem; font-weight: 500; text-decoration: none; }
     .btn--gold { background: var(--gold); border-color: var(--gold); }
+    .btn--sm { min-height: 36px; padding: .3rem .8rem; font-size: .8rem; }
+    .btn--danger { border-color: var(--bad); color: var(--bad); }
     .btn:hover { background: var(--white); }
     .btn--gold:hover { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+    .btn[disabled] { opacity: .55; cursor: wait; }
+    input[type=text], input[type=password], input[type=search], textarea, select.input {
+      width: 100%; min-height: 44px; padding: .55rem .8rem; border: 1px solid rgba(43,36,32,.2); border-radius: 10px; background: var(--white); font-size: 1rem;
+    }
+    textarea { min-height: 76px; resize: vertical; line-height: 1.45; }
+    label.f { display: grid; gap: .25rem; font-size: .8rem; color: var(--ink-soft); font-weight: 500; }
+
+    /* Pestañas */
+    .tabs { display: flex; gap: .35rem; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--line); margin: 0 -1rem 1.25rem; padding: 0 1rem; position: sticky; top: 0; background: var(--cream); z-index: 5; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { flex: none; padding: .8rem .9rem; border: 0; background: none; cursor: pointer; font-weight: 500; font-size: .9rem; border-bottom: 2px solid transparent; color: var(--ink-soft); }
+    .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--gold); }
 
     /* Login */
     .login { max-width: 380px; margin: 12vh auto 0; background: var(--white); border: 1px solid var(--line); border-radius: 20px; padding: 2rem 1.5rem; text-align: center; }
-    .login img { height: 64px; margin: 0 auto 1rem; display: block; }
-    .login input { width: 100%; min-height: 48px; padding: .7rem 1rem; border: 1px solid rgba(43,36,32,.2); border-radius: 10px; background: var(--cream); margin: 1rem 0 .75rem; font-size: 1rem; }
+    .login img { height: 60px; width: auto; margin: 0 auto 1rem; }
+    .login input { margin: .35rem 0 .75rem; }
     .login .btn { width: 100%; }
     .error { color: var(--bad); font-size: .85rem; min-height: 1.3em; margin: .5rem 0 0; }
 
-    /* Resumen */
+    /* Reservas */
     .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: .6rem; margin-bottom: 1rem; }
     .stat { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: .8rem 1rem; }
     .stat b { display: block; font: 600 1.6rem/1 var(--serif); }
     .stat span { font-size: .78rem; color: var(--ink-soft); }
-
-    /* Filtros */
     .tools { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-bottom: 1rem; }
     .chips { display: flex; gap: .4rem; flex-wrap: wrap; }
     .chip { min-height: 38px; padding: .35rem .9rem; border-radius: 999px; border: 1px solid var(--gold); background: transparent; cursor: pointer; font-size: .8rem; }
     .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--cream); }
-    .search { flex: 1 1 220px; min-height: 42px; padding: .5rem .9rem; border: 1px solid rgba(43,36,32,.2); border-radius: 999px; background: var(--white); font-size: 1rem; }
-
-    /* Lista de reservas */
+    .tools input[type=search] { flex: 1 1 220px; border-radius: 999px; }
     .list { display: grid; gap: .75rem; }
     .card { background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 1rem 1.1rem; display: grid; gap: .6rem; }
     .card__head { display: flex; justify-content: space-between; align-items: flex-start; gap: .75rem; }
@@ -62,20 +74,55 @@
     .card dd { margin: 0; overflow-wrap: anywhere; }
     .card__actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; padding-top: .6rem; border-top: 1px solid var(--line); }
     .estado { min-height: 38px; padding: .3rem .7rem; border-radius: 999px; border: 1px solid var(--gold); background: var(--cream); font-size: .82rem; cursor: pointer; }
-    .badge { display: inline-block; padding: .2rem .65rem; border-radius: 999px; font-size: .72rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+    .badge { display: inline-block; padding: .2rem .65rem; border-radius: 999px; font-size: .72rem; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
     .badge--pendiente { background: var(--beige); color: var(--gold-ink); }
     .badge--confirmada { background: #E3EFE7; color: var(--ok); }
     .badge--cancelada { background: #F4E2DE; color: var(--bad); }
-    .badge--atendida { background: #E9E6E3; color: var(--ink-soft); }
-    .card.is-past { opacity: .72; }
+    .badge--atendida { background: #E3EFE7; color: var(--ok); }
+    .badge--no_asistio { background: #F4E2DE; color: var(--bad); }
+    .card.is-past { background: #fdfbf8; }
+    .asist { display: flex; gap: .4rem; flex-wrap: wrap; }
     .empty { text-align: center; padding: 3rem 1rem; color: var(--ink-soft); background: var(--white); border: 1px dashed var(--line); border-radius: 16px; }
-    .toast { position: fixed; left: 50%; bottom: 1.25rem; transform: translateX(-50%); background: var(--ink); color: var(--cream); padding: .65rem 1.1rem; border-radius: 999px; font-size: .85rem; opacity: 0; transition: opacity .3s; pointer-events: none; }
+
+    /* Editores de contenido */
+    .intro { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: .9rem 1rem; margin-bottom: 1rem; font-size: .9rem; color: var(--ink-soft); }
+    .items { display: grid; gap: .9rem; }
+    .item { background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 1rem; display: grid; gap: .75rem; }
+    .item__top { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+    .item__num { font: 600 1.15rem/1 var(--serif); }
+    .item__move { display: flex; gap: .35rem; }
+    .grid2 { display: grid; gap: .75rem; }
+    .photo { display: grid; gap: .5rem; }
+    .photo__img { aspect-ratio: 4 / 3; width: 100%; object-fit: cover; border-radius: 12px; background: var(--beige); border: 1px solid var(--line); }
+    .photo__img--sq { aspect-ratio: 1 / 1; }
+    .photo__img--tall { aspect-ratio: 4 / 5; max-width: 320px; }
+    .photo__bar { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+    .file { position: relative; overflow: hidden; }
+    .file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .savebar { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(43,36,32,.96); color: var(--cream); padding: .75rem 1rem; display: flex; justify-content: center; align-items: center; gap: .75rem; flex-wrap: wrap; z-index: 10; transform: translateY(110%); transition: transform .25s; }
+    .savebar.is-on { transform: none; }
+    .savebar .btn { border-color: var(--gold); color: var(--cream); }
+    .savebar .btn--gold { color: var(--ink); }
+    .savebar .btn:hover { background: rgba(248,241,231,.12); color: var(--cream); }
+    .savebar .btn--gold:hover { background: var(--cream); border-color: var(--cream); color: var(--ink); }
+    .group { margin-bottom: 1.25rem; }
+    .group > h2 { margin-bottom: .6rem; }
+    .field { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: .8rem .9rem; display: grid; gap: .35rem; margin-bottom: .6rem; }
+    .field__head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; font-size: .8rem; color: var(--ink-soft); font-weight: 500; }
+    .field.is-changed { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(184,148,90,.18); }
+    .link { background: none; border: 0; color: var(--gold-ink); text-decoration: underline; cursor: pointer; font-size: .78rem; padding: 0; }
+    .toast { position: fixed; left: 50%; bottom: 5rem; transform: translateX(-50%); background: var(--ink); color: var(--cream); padding: .65rem 1.1rem; border-radius: 999px; font-size: .85rem; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 20; max-width: 90vw; text-align: center; }
     .toast.is-on { opacity: 1; }
     [hidden] { display: none !important; }
 
     @media (min-width: 720px) {
       .stats { grid-template-columns: repeat(4, 1fr); }
       .list { grid-template-columns: repeat(2, 1fr); }
+      .item { grid-template-columns: 260px 1fr; align-items: start; }
+      .item__top { grid-column: 1 / -1; }
+      .item--result { grid-template-columns: 1fr 1fr; }
+      .item--result .grid2 { grid-column: 1 / -1; }
+      .grid2 { grid-template-columns: 1fr 1fr; }
     }
     @media (min-width: 1040px) { .list { grid-template-columns: repeat(3, 1fr); } }
   </style>
@@ -85,10 +132,11 @@
   <main class="wrap" id="view-login">
     <form class="login" id="login-form">
       <img src="../assets/img/logo.svg" alt="Eliza Rodríguez Beauty">
-      <h1>Panel de reservas</h1>
-      <p class="muted">Acceso privado para Eliza.</p>
-      <label for="pw" class="muted" style="display:block;text-align:left;margin-top:1rem">Contraseña</label>
-      <input id="pw" type="password" autocomplete="current-password" required style="margin-top:.35rem">
+      <h1>Panel de Eliza</h1>
+      <p class="muted">Reservas y contenido de la página.</p>
+      <label class="f" for="pw" style="text-align:left;margin-top:1rem">Contraseña
+        <input id="pw" type="password" autocomplete="current-password" required>
+      </label>
       <button class="btn btn--gold" type="submit">Entrar</button>
       <p class="error" id="login-error" role="alert"></p>
     </form>
@@ -97,118 +145,200 @@
   <!-- ===== Panel ===== -->
   <div class="wrap" id="view-panel" hidden>
     <header class="top">
-      <div>
-        <h1>Reservas</h1>
-        <span class="muted" id="updated"></span>
+      <div><h1>Panel</h1><span class="muted" id="updated"></span></div>
+      <div style="display:flex;gap:.5rem;align-items:center">
+        <a class="btn btn--sm" href="../" target="_blank" rel="noopener">Ver página</a>
+        <button class="btn btn--sm" type="button" id="logout">Salir</button>
       </div>
-      <img src="../assets/img/logo.svg" alt="Eliza Rodríguez Beauty">
     </header>
 
-    <section class="stats" aria-label="Resumen">
-      <div class="stat"><b id="s-hoy">0</b><span>Citas hoy</span></div>
-      <div class="stat"><b id="s-prox">0</b><span>Próximas</span></div>
-      <div class="stat"><b id="s-pend">0</b><span>Por confirmar</span></div>
-      <div class="stat"><b id="s-total">0</b><span>Total recibidas</span></div>
+    <nav class="tabs" role="tablist" aria-label="Secciones del panel">
+      <button class="tab" role="tab" data-tab="reservas" aria-selected="true">Reservas</button>
+      <button class="tab" role="tab" data-tab="servicios" aria-selected="false">Servicios y precios</button>
+      <button class="tab" role="tab" data-tab="resultados" aria-selected="false">Resultados</button>
+      <button class="tab" role="tab" data-tab="textos" aria-selected="false">Textos</button>
+      <button class="tab" role="tab" data-tab="fotos" aria-selected="false">Fotos</button>
+    </nav>
+
+    <!-- Reservas -->
+    <section id="tab-reservas" role="tabpanel">
+      <div class="stats" aria-label="Resumen">
+        <div class="stat"><b id="s-hoy">0</b><span>Citas hoy</span></div>
+        <div class="stat"><b id="s-prox">0</b><span>Próximas</span></div>
+        <div class="stat"><b id="s-pend">0</b><span>Por confirmar</span></div>
+        <div class="stat"><b id="s-asist">–</b><span>Asistencia (pasadas)</span></div>
+      </div>
+      <div class="tools">
+        <div class="chips" role="group" aria-label="Filtrar">
+          <button class="chip" type="button" data-f="proximas" aria-pressed="true">Próximas</button>
+          <button class="chip" type="button" data-f="pendiente" aria-pressed="false">Por confirmar</button>
+          <button class="chip" type="button" data-f="marcar" aria-pressed="false">Marcar asistencia</button>
+          <button class="chip" type="button" data-f="pasadas" aria-pressed="false">Pasadas</button>
+          <button class="chip" type="button" data-f="todas" aria-pressed="false">Todas</button>
+        </div>
+        <input id="q" type="search" placeholder="Buscar nombre, teléfono, servicio…" aria-label="Buscar">
+        <button class="btn btn--sm" type="button" id="refresh">Actualizar</button>
+        <button class="btn btn--sm" type="button" id="csv">Descargar Excel</button>
+      </div>
+      <div class="list" id="list" aria-live="polite"></div>
     </section>
 
-    <div class="tools">
-      <div class="chips" role="group" aria-label="Filtrar">
-        <button class="chip" type="button" data-f="proximas" aria-pressed="true">Próximas</button>
-        <button class="chip" type="button" data-f="pendiente" aria-pressed="false">Por confirmar</button>
-        <button class="chip" type="button" data-f="pasadas" aria-pressed="false">Pasadas</button>
-        <button class="chip" type="button" data-f="todas" aria-pressed="false">Todas</button>
-      </div>
-      <input class="search" id="q" type="search" placeholder="Buscar nombre, teléfono, servicio…" aria-label="Buscar">
-      <button class="btn" type="button" id="refresh">Actualizar</button>
-      <button class="btn" type="button" id="csv">Descargar Excel (CSV)</button>
-      <button class="btn" type="button" id="logout">Salir</button>
-    </div>
+    <!-- Servicios -->
+    <section id="tab-servicios" role="tabpanel" hidden>
+      <p class="intro">Cambia la foto, el nombre, la descripción, la duración y el <b>precio</b> de cada servicio. Los cambios se ven en la página al guardar (puede tardar hasta 1 minuto).</p>
+      <div class="items" id="svc-list"></div>
+      <p style="margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn" type="button" id="svc-add">+ Agregar servicio</button>
+        <button class="link" type="button" data-reset="servicios">Volver a los servicios originales</button>
+      </p>
+    </section>
 
-    <div class="list" id="list" aria-live="polite"></div>
+    <!-- Resultados -->
+    <section id="tab-resultados" role="tabpanel" hidden>
+      <p class="intro">Cada resultado es una pestaña del comparador “antes y después”. Usa fotos con el <b>mismo encuadre</b> y publica solo fotos con <b>autorización escrita</b> de la paciente.</p>
+      <div class="items" id="res-list"></div>
+      <p style="margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn" type="button" id="res-add">+ Agregar resultado</button>
+        <button class="link" type="button" data-reset="resultados">Volver a los resultados originales</button>
+      </p>
+    </section>
+
+    <!-- Textos -->
+    <section id="tab-textos" role="tabpanel" hidden>
+      <p class="intro">Edita cualquier texto de la página. Los textos que cambies quedan marcados en dorado. Para volver al original, usa “Restaurar”.</p>
+      <div id="txt-list"></div>
+      <div class="group">
+        <h2>Sobre mí · formación y certificaciones</h2>
+        <div class="field" id="cert-field">
+          <div class="field__head"><span>Una por línea</span><button class="link" type="button" id="cert-reset">Restaurar</button></div>
+          <textarea id="cert-text" rows="6"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fotos -->
+    <section id="tab-fotos" role="tabpanel" hidden>
+      <p class="intro">Fotos principales de la página. Se ven mejor en <b>vertical</b> (formato 4:5).</p>
+      <div class="items" id="img-list"></div>
+    </section>
   </div>
 
+  <div class="savebar" id="savebar" role="region" aria-label="Cambios sin guardar">
+    <span id="savebar-text">Tienes cambios sin guardar</span>
+    <button class="btn btn--sm" type="button" id="discard">Descartar</button>
+    <button class="btn btn--gold btn--sm" type="button" id="save">Guardar cambios</button>
+  </div>
   <div class="toast" id="toast" role="status"></div>
 
+  <!-- Valores por defecto del sitio (si nunca se editaron) -->
+  <script src="../js/services.js"></script>
+  <script src="../js/content.js"></script>
   <script>
   (function () {
     "use strict";
-    const API = "/api/admin/reservas";
-    const ESTADOS = { pendiente: "Pendiente", confirmada: "Confirmada", cancelada: "Cancelada", atendida: "Atendida" };
-    const $ = (s) => document.querySelector(s);
+    const $ = (s, c = document) => c.querySelector(s);
+    const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
     const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const clone = (o) => JSON.parse(JSON.stringify(o));
+    const src = (u) => (!u ? "" : u.startsWith("/") || /^https?:/.test(u) ? u : "../" + u);
+    const ESTADOS = { pendiente: "Pendiente", confirmada: "Confirmada", atendida: "Asistió", no_asistio: "No asistió", cancelada: "Cancelada" };
 
     let pw = "";
     try { pw = sessionStorage.getItem("erb-admin") || ""; } catch (_) {}
-    let data = [];
-    let filtro = "proximas";
 
-    const hoy = new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
-    const fFecha = (f) => { const [y, m, d] = f.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" }); };
-    const fHora = (h) => { const [a, b] = h.split(":").map(Number); return new Date(2000, 0, 1, a, b).toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit" }); };
+    function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("is-on"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("is-on"), 2600); }
 
-    function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("is-on"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("is-on"), 2200); }
-
-    async function api(method, body) {
-      const res = await fetch(API, {
-        method,
-        headers: { Authorization: "Bearer " + pw, ...(body ? { "Content-Type": "application/json" } : {}) },
-        body: body ? JSON.stringify(body) : undefined,
-      });
+    async function api(path, method = "GET", body, raw) {
+      const headers = { Authorization: "Bearer " + pw };
+      if (body && !raw) headers["Content-Type"] = "application/json";
+      if (raw) headers["Content-Type"] = body.type;
+      const res = await fetch(path, { method, headers, body: raw ? body : body ? JSON.stringify(body) : undefined });
       const json = await res.json().catch(() => ({}));
       if (res.status === 401) throw Object.assign(new Error("auth"), { auth: true });
       if (!res.ok) throw new Error(json.error || "Error");
       return json;
     }
 
-    async function load() {
+    /* ======================= Sesión ======================= */
+    async function enter() {
       try {
-        const r = await api("GET");
-        data = r.reservas;
+        await loadReservas();
         $("#view-login").hidden = true; $("#view-panel").hidden = false;
-        $("#updated").textContent = "Actualizado: " + new Date().toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit" });
-        render();
+        loadContenido();
       } catch (e) {
         if (e.auth) { logout(); $("#login-error").textContent = pw ? "Contraseña incorrecta." : ""; }
-        else toast("No se pudieron cargar las reservas.");
+        else toast("No se pudo conectar. Revisa tu internet.");
       }
     }
+    function logout() {
+      pw = ""; try { sessionStorage.removeItem("erb-admin"); } catch (_) {}
+      $("#view-panel").hidden = true; $("#view-login").hidden = false; $("#pw").value = "";
+    }
+    $("#login-form").addEventListener("submit", (e) => {
+      e.preventDefault(); pw = $("#pw").value; $("#login-error").textContent = "";
+      try { sessionStorage.setItem("erb-admin", pw); } catch (_) {}
+      enter();
+    });
+    $("#logout").addEventListener("click", () => { if (!dirty || confirm("Tienes cambios sin guardar. ¿Salir igual?")) { setDirty(null); logout(); } });
 
+    /* ======================= Pestañas ======================= */
+    $$(".tab").forEach((t) => t.addEventListener("click", () => {
+      if (dirty && !confirm("Tienes cambios sin guardar en esta pestaña. ¿Descartarlos?")) return;
+      if (dirty) discard();
+      $$(".tab").forEach((x) => x.setAttribute("aria-selected", String(x === t)));
+      $$("[role=tabpanel]").forEach((p) => (p.hidden = p.id !== "tab-" + t.dataset.tab));
+    }));
+
+    /* ======================= Reservas ======================= */
+    const hoy = new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
+    const fFecha = (f) => { const [y, m, d] = f.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" }); };
+    const fHora = (h) => { const [a, b] = h.split(":").map(Number); return new Date(2000, 0, 1, a, b).toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit" }); };
+    let reservas = [];
+    let filtro = "proximas";
+
+    async function loadReservas() {
+      const r = await api("/api/admin/reservas");
+      reservas = r.reservas;
+      $("#updated").textContent = "Actualizado " + new Date().toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit" });
+      renderReservas();
+    }
+    const activa = (r) => r.estado === "pendiente" || r.estado === "confirmada";
     function filtradas() {
       const q = $("#q").value.trim().toLowerCase();
-      let list = data.filter((r) => {
-        if (filtro === "proximas") return r.fecha >= hoy && r.estado !== "cancelada";
-        if (filtro === "pendiente") return r.estado === "pendiente" && r.fecha >= hoy;
+      let list = reservas.filter((r) => {
+        if (filtro === "proximas") return r.fecha >= hoy && activa(r);
+        if (filtro === "pendiente") return r.fecha >= hoy && r.estado === "pendiente";
+        if (filtro === "marcar") return r.fecha <= hoy && activa(r);
         if (filtro === "pasadas") return r.fecha < hoy;
         return true;
       });
       if (q) list = list.filter((r) => [r.nombre, r.whatsapp, r.correo, r.servicio, r.comentario].join(" ").toLowerCase().includes(q));
-      // Próximas: de la más cercana a la más lejana
-      if (filtro === "proximas" || filtro === "pendiente") list = list.slice().sort((a, b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
+      if (["proximas", "pendiente"].includes(filtro)) list = list.slice().sort((a, b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
       return list;
     }
-
     function waCliente(r) {
       let n = r.whatsapp.replace(/\D/g, "");
-      if (n.length === 10 && n.startsWith("3")) n = "57" + n; // celular colombiano sin indicativo
+      if (n.length === 10 && n.startsWith("3")) n = "57" + n;
       const msg = `Hola ${r.nombre}, te escribe Eliza Rodriguez Beauty. Te confirmo tu cita de ${r.servicio} el ${fFecha(r.fecha)} a las ${fHora(r.hora)}. ¡Te esperamos!`;
       return `https://wa.me/${n}?text=${encodeURIComponent(msg)}`;
     }
-
-    function render() {
-      $("#s-hoy").textContent = data.filter((r) => r.fecha === hoy && r.estado !== "cancelada").length;
-      $("#s-prox").textContent = data.filter((r) => r.fecha >= hoy && r.estado !== "cancelada").length;
-      $("#s-pend").textContent = data.filter((r) => r.fecha >= hoy && r.estado === "pendiente").length;
-      $("#s-total").textContent = data.length;
+    function renderReservas() {
+      $("#s-hoy").textContent = reservas.filter((r) => r.fecha === hoy && activa(r)).length;
+      $("#s-prox").textContent = reservas.filter((r) => r.fecha >= hoy && activa(r)).length;
+      $("#s-pend").textContent = reservas.filter((r) => r.fecha >= hoy && r.estado === "pendiente").length;
+      const asist = reservas.filter((r) => r.estado === "atendida").length, falta = reservas.filter((r) => r.estado === "no_asistio").length;
+      $("#s-asist").textContent = asist + falta ? Math.round((asist / (asist + falta)) * 100) + "%" : "–";
+      const n = reservas.filter((r) => r.fecha <= hoy && activa(r)).length;
+      $('[data-f="marcar"]').textContent = n ? `Marcar asistencia (${n})` : "Marcar asistencia";
 
       const list = filtradas();
       if (!list.length) { $("#list").innerHTML = '<p class="empty">No hay reservas en esta vista.</p>'; return; }
-      $("#list").innerHTML = list.map((r) => `
+      $("#list").innerHTML = list.map((r) => {
+        const yaPaso = r.fecha <= hoy && activa(r);
+        return `
         <article class="card ${r.fecha < hoy ? "is-past" : ""}">
           <div class="card__head">
-            <div>
-              <div class="card__when">${esc(fFecha(r.fecha))} · ${esc(fHora(r.hora))}</div>
-              <div class="card__name">${esc(r.nombre)}</div>
-            </div>
+            <div><div class="card__when">${esc(fFecha(r.fecha))} · ${esc(fHora(r.hora))}</div><div class="card__name">${esc(r.nombre)}</div></div>
             <span class="badge badge--${esc(r.estado)}">${esc(ESTADOS[r.estado] || r.estado)}</span>
           </div>
           <dl>
@@ -216,65 +346,272 @@
             <dt>WhatsApp</dt><dd>${esc(r.whatsapp)}</dd>
             <dt>Correo</dt><dd><a href="mailto:${esc(r.correo)}">${esc(r.correo)}</a></dd>
             ${r.comentario ? `<dt>Nota</dt><dd>${esc(r.comentario)}</dd>` : ""}
-            <dt>Recibida</dt><dd>${esc(new Date(r.creada_en).toLocaleString("es-CO", { dateStyle: "medium", timeStyle: "short" }))}</dd>
+            ${r.estado === "cancelada" && r.cancelada_por === "clienta" ? `<dt>Aviso</dt><dd>La clienta canceló con el enlace</dd>` : ""}
+            ${r.recordatorio ? `<dt>Recordatorio</dt><dd>Enviado</dd>` : ""}
           </dl>
+          ${yaPaso ? `<div class="asist"><button class="btn btn--gold btn--sm" data-set="atendida" data-id="${r.id}">✓ Asistió</button><button class="btn btn--danger btn--sm" data-set="no_asistio" data-id="${r.id}">✗ No asistió</button></div>` : ""}
           <div class="card__actions">
-            <a class="btn btn--gold" href="${waCliente(r)}" target="_blank" rel="noopener">Escribir por WhatsApp</a>
-            <label class="muted" style="display:flex;align-items:center;gap:.4rem">Estado
-              <select class="estado" data-id="${r.id}" aria-label="Estado de la reserva de ${esc(r.nombre)}">
-                ${Object.entries(ESTADOS).map(([k, v]) => `<option value="${k}" ${k === r.estado ? "selected" : ""}>${v}</option>`).join("")}
-              </select>
-            </label>
+            <a class="btn btn--sm" href="${waCliente(r)}" target="_blank" rel="noopener">WhatsApp a la clienta</a>
+            <select class="estado" data-id="${r.id}" aria-label="Estado de la reserva de ${esc(r.nombre)}">
+              ${Object.entries(ESTADOS).map(([k, v]) => `<option value="${k}" ${k === r.estado ? "selected" : ""}>${v}</option>`).join("")}
+            </select>
           </div>
-        </article>`).join("");
+        </article>`;
+      }).join("");
     }
-
-    function csv() {
+    async function setEstado(id, estado) {
+      try {
+        await api("/api/admin/reservas", "PATCH", { id: Number(id), estado });
+        const r = reservas.find((x) => x.id == id); if (r) r.estado = estado;
+        renderReservas(); toast("Marcado: " + ESTADOS[estado]);
+      } catch (err) { if (err.auth) logout(); else { toast("No se pudo actualizar."); renderReservas(); } }
+    }
+    $$(".chip").forEach((c) => c.addEventListener("click", () => {
+      filtro = c.dataset.f; $$(".chip").forEach((x) => x.setAttribute("aria-pressed", String(x === c))); renderReservas();
+    }));
+    $("#q").addEventListener("input", renderReservas);
+    $("#refresh").addEventListener("click", () => loadReservas().catch(() => toast("No se pudo actualizar.")));
+    $("#list").addEventListener("change", (e) => { const s = e.target.closest(".estado"); if (s) setEstado(s.dataset.id, s.value); });
+    $("#list").addEventListener("click", (e) => { const b = e.target.closest("[data-set]"); if (b) setEstado(b.dataset.id, b.dataset.set); });
+    $("#csv").addEventListener("click", () => {
       const cols = ["id", "fecha", "hora", "nombre", "whatsapp", "correo", "servicio", "comentario", "estado", "creada_en"];
       const head = ["ID", "Fecha", "Hora", "Nombre", "WhatsApp", "Correo", "Servicio", "Comentario", "Estado", "Recibida"];
       const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-      const rows = [head.map(cell).join(";")].concat(filtradas().map((r) => cols.map((c) => cell(r[c])).join(";")));
-      // BOM + ";" para que Excel en español abra bien tildes y columnas
-      const blob = new Blob(["﻿" + rows.join("\r\n")], { type: "text/csv;charset=utf-8" });
+      const rows = [head.map(cell).join(";")].concat(filtradas().map((r) => cols.map((c) => cell(c === "estado" ? ESTADOS[r[c]] : r[c])).join(";")));
       const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `reservas-${hoy}.csv`;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    }
-
-    function logout() {
-      pw = ""; try { sessionStorage.removeItem("erb-admin"); } catch (_) {}
-      $("#view-panel").hidden = true; $("#view-login").hidden = false; $("#pw").value = ""; $("#pw").focus();
-    }
-
-    // Eventos
-    $("#login-form").addEventListener("submit", (e) => {
-      e.preventDefault();
-      pw = $("#pw").value; $("#login-error").textContent = "";
-      try { sessionStorage.setItem("erb-admin", pw); } catch (_) {}
-      load();
+      a.href = URL.createObjectURL(new Blob(["﻿" + rows.join("\r\n")], { type: "text/csv;charset=utf-8" }));
+      a.download = `reservas-${hoy}.csv`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     });
-    document.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
-      filtro = c.dataset.f;
-      document.querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", String(x === c)));
-      render();
-    }));
-    $("#q").addEventListener("input", render);
-    $("#refresh").addEventListener("click", load);
-    $("#csv").addEventListener("click", csv);
-    $("#logout").addEventListener("click", logout);
-    $("#list").addEventListener("change", async (e) => {
-      const sel = e.target.closest(".estado"); if (!sel) return;
-      const id = Number(sel.dataset.id), estado = sel.value;
+
+    /* ======================= Contenido ======================= */
+    const DEF = { servicios: clone(SERVICES), resultados: clone(RESULTADOS), certificaciones: clone(CERTIFICACIONES), textos: {}, fotos: {} };
+    const LABELS = {}; // clave de texto → etiqueta
+    let saved = {};    // lo guardado en el servidor
+    let edit = {};     // copia de trabajo
+    let dirty = null;  // qué sección tiene cambios
+
+    async function loadContenido() {
       try {
-        await api("PATCH", { id, estado });
-        const r = data.find((x) => x.id == id); if (r) r.estado = estado;
-        render(); toast("Estado actualizado: " + ESTADOS[estado]);
-      } catch (err) { if (err.auth) logout(); else { toast("No se pudo actualizar."); render(); } }
+        // Textos y fotos por defecto: se leen de la propia página
+        const html = await fetch("../index.html", { cache: "no-store" }).then((r) => r.text());
+        const doc = new DOMParser().parseFromString(html, "text/html");
+        $$("[data-edit]", doc).forEach((el) => { DEF.textos[el.dataset.edit] = el.textContent.trim(); LABELS[el.dataset.edit] = el.dataset.label || el.dataset.edit; });
+        $$("[data-edit-img]", doc).forEach((el) => {
+          const img = el.tagName === "PICTURE" ? el.querySelector("source")?.getAttribute("srcset") || el.querySelector("img")?.getAttribute("src") : el.getAttribute("src");
+          DEF.fotos[el.dataset.editImg] = { url: img, label: el.dataset.label || el.dataset.editImg };
+        });
+        const c = await fetch("/api/contenido", { cache: "no-store" }).then((r) => r.json());
+        saved = c.contenido || {};
+      } catch (_) { toast("No se pudo cargar el contenido."); }
+      resetEdit(); renderAll();
+    }
+    function resetEdit() {
+      edit = {
+        servicios: clone(saved.servicios || DEF.servicios),
+        resultados: clone(saved.resultados || DEF.resultados),
+        textos: clone(saved.textos || {}),
+        certificaciones: clone(saved.certificaciones || DEF.certificaciones),
+        fotos: clone(saved.fotos || {}),
+      };
+    }
+    function renderAll() { renderServicios(); renderResultados(); renderTextos(); renderFotos(); }
+
+    function setDirty(seccion) {
+      dirty = seccion;
+      $("#savebar").classList.toggle("is-on", Boolean(seccion));
+    }
+    window.addEventListener("beforeunload", (e) => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+    function discard() { resetEdit(); renderAll(); setDirty(null); }
+    $("#discard").addEventListener("click", discard);
+
+    $("#save").addEventListener("click", async () => {
+      const btn = $("#save"); btn.disabled = true;
+      try {
+        const secciones = dirty === "textos" ? ["textos", "certificaciones"] : [dirty];
+        for (const s of secciones) {
+          let valor = edit[s];
+          if (s === "textos") valor = Object.fromEntries(Object.entries(valor).filter(([k, v]) => v.trim() && v.trim() !== DEF.textos[k]));
+          if (s === "servicios" && valor.some((x) => !x.nombre.trim())) throw new Error("Cada servicio necesita un nombre.");
+          if (s === "resultados" && valor.some((x) => !x.antes || !x.despues || !x.servicio.trim())) throw new Error("Cada resultado necesita nombre, foto de antes y foto de después.");
+          const r = await api("/api/admin/contenido", "PUT", { clave: s, valor });
+          saved[s] = r.valor;
+        }
+        resetEdit(); renderAll(); setDirty(null);
+        toast("¡Guardado! Se verá en la página en menos de 1 minuto.");
+      } catch (err) {
+        if (err.auth) logout(); else toast(err.message || "No se pudo guardar.");
+      } finally { btn.disabled = false; }
     });
 
-    if (pw) load(); else $("#pw").focus();
+    $$("[data-reset]").forEach((b) => b.addEventListener("click", async () => {
+      const s = b.dataset.reset;
+      if (!confirm("¿Volver a los valores originales? Se perderán los cambios de esta sección.")) return;
+      try { await api("/api/admin/contenido", "DELETE", { clave: s }); delete saved[s]; resetEdit(); renderAll(); setDirty(null); toast("Restaurado."); }
+      catch (err) { if (err.auth) logout(); else toast("No se pudo restaurar."); }
+    }));
+
+    /* ---------- Subir fotos (se reducen y pasan a WebP en el navegador) ---------- */
+    async function prepararFoto(file, maxLado) {
+      if (!/^image\//.test(file.type)) throw new Error("El archivo no es una imagen.");
+      const bmp = await createImageBitmap(file).catch(() => null);
+      if (!bmp) throw new Error("No se pudo leer la imagen (prueba con JPG o PNG).");
+      const k = Math.min(1, maxLado / Math.max(bmp.width, bmp.height));
+      const cv = document.createElement("canvas");
+      cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k);
+      cv.getContext("2d").drawImage(bmp, 0, 0, cv.width, cv.height);
+      let blob = await new Promise((r) => cv.toBlob(r, "image/webp", 0.82));
+      if (!blob || blob.type !== "image/webp") blob = await new Promise((r) => cv.toBlob(r, "image/jpeg", 0.85));
+      return blob;
+    }
+    async function subir(file, nombre, maxLado = 1400) {
+      toast("Subiendo foto…");
+      const blob = await prepararFoto(file, maxLado);
+      const r = await api("/api/admin/fotos?nombre=" + encodeURIComponent(nombre || "foto"), "POST", blob, true);
+      toast("Foto lista. Recuerda guardar los cambios.");
+      return r.url;
+    }
+    const fileBtn = (attrs, texto = "Cambiar foto") => `<span class="btn btn--sm file">${texto}<input type="file" accept="image/*" ${attrs}></span>`;
+    function moverEn(arr, i, d) { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; }
+
+    /* ---------- Servicios ---------- */
+    function renderServicios() {
+      $("#svc-list").innerHTML = edit.servicios.map((s, i) => `
+        <div class="item" data-i="${i}">
+          <div class="item__top"><span class="item__num">${i + 1}. ${esc(s.nombre || "Nuevo servicio")}</span>
+            <span class="item__move">
+              <button class="btn btn--sm" data-mv="-1" aria-label="Subir">↑</button><button class="btn btn--sm" data-mv="1" aria-label="Bajar">↓</button>
+              <button class="btn btn--sm btn--danger" data-del aria-label="Eliminar servicio">Eliminar</button>
+            </span></div>
+          <div class="photo">
+            ${s.imagen ? `<img class="photo__img" src="${esc(src(s.imagen))}" alt="">` : `<div class="photo__img"></div>`}
+            <div class="photo__bar">${fileBtn(`data-up="imagen"`)}</div>
+          </div>
+          <div style="display:grid;gap:.6rem">
+            <label class="f">Nombre<input type="text" data-k="nombre" value="${esc(s.nombre)}"></label>
+            <label class="f">Descripción corta (se ven 2 líneas)<textarea data-k="descripcion" rows="2">${esc(s.descripcion)}</textarea></label>
+            <div class="grid2">
+              <label class="f">Precio (se muestra “desde …”)<input type="text" data-k="precio" value="${esc(s.precio)}" placeholder="$350.000"></label>
+              <label class="f">Duración<input type="text" data-k="duracion" value="${esc(s.duracion)}" placeholder="45 min"></label>
+            </div>
+            <label class="f">Descripción de la foto (para personas con discapacidad visual)<input type="text" data-k="alt" value="${esc(s.alt)}"></label>
+          </div>
+        </div>`).join("");
+    }
+    $("#svc-add").addEventListener("click", () => {
+      edit.servicios.push({ id: "servicio-" + Date.now().toString(36), nombre: "", descripcion: "", duracion: "", precio: "", imagen: "", alt: "" });
+      renderServicios(); setDirty("servicios");
+      $("#svc-list").lastElementChild?.querySelector("input")?.focus();
+    });
+    bindLista("#svc-list", "servicios", (s) => s.nombre, renderServicios);
+
+    /* ---------- Resultados ---------- */
+    function renderResultados() {
+      $("#res-list").innerHTML = edit.resultados.map((r, i) => `
+        <div class="item item--result" data-i="${i}">
+          <div class="item__top"><span class="item__num">${i + 1}. ${esc(r.servicio || "Nuevo resultado")}</span>
+            <span class="item__move">
+              <button class="btn btn--sm" data-mv="-1" aria-label="Subir">↑</button><button class="btn btn--sm" data-mv="1" aria-label="Bajar">↓</button>
+              <button class="btn btn--sm btn--danger" data-del aria-label="Eliminar resultado">Eliminar</button>
+            </span></div>
+          ${["antes", "despues"].map((k) => `
+          <div class="photo"><b style="font-size:.85rem">${k === "antes" ? "Antes" : "Después"}</b>
+            ${r[k] ? `<img class="photo__img photo__img--sq" src="${esc(src(r[k]))}" alt="">` : `<div class="photo__img photo__img--sq"></div>`}
+            <div class="photo__bar">${fileBtn(`data-up="${k}"`, r[k] ? "Cambiar foto" : "Subir foto")}</div>
+          </div>`).join("")}
+          <div class="grid2">
+            <label class="f">Nombre de la pestaña<input type="text" data-k="servicio" value="${esc(r.servicio)}" placeholder="Labios"></label>
+            <label class="f">Nota bajo la foto<input type="text" data-k="nota" value="${esc(r.nota)}" placeholder="Resultado tras 1 sesión"></label>
+          </div>
+        </div>`).join("");
+    }
+    $("#res-add").addEventListener("click", () => {
+      edit.resultados.push({ servicio: "", antes: "", despues: "", nota: "" });
+      renderResultados(); setDirty("resultados");
+    });
+    bindLista("#res-list", "resultados", (r) => r.servicio, renderResultados);
+
+    /** Eventos comunes de las listas editables (servicios y resultados). */
+    function bindLista(sel, seccion, nombreDe, render) {
+      const cont = $(sel);
+      cont.addEventListener("input", (e) => {
+        const k = e.target.dataset.k; if (!k) return;
+        const i = Number(e.target.closest("[data-i]").dataset.i);
+        edit[seccion][i][k] = e.target.value; setDirty(seccion);
+        if (k === "nombre" || k === "servicio") e.target.closest(".item").querySelector(".item__num").textContent = `${i + 1}. ${e.target.value || "Sin nombre"}`;
+      });
+      cont.addEventListener("click", (e) => {
+        const it = e.target.closest("[data-i]"); if (!it) return;
+        const i = Number(it.dataset.i);
+        if (e.target.closest("[data-mv]")) { moverEn(edit[seccion], i, Number(e.target.closest("[data-mv]").dataset.mv)); render(); setDirty(seccion); }
+        if (e.target.closest("[data-del]") && confirm(`¿Eliminar “${nombreDe(edit[seccion][i]) || "este elemento"}”?`)) { edit[seccion].splice(i, 1); render(); setDirty(seccion); }
+      });
+      cont.addEventListener("change", async (e) => {
+        const k = e.target.dataset.up; if (!k || !e.target.files[0]) return;
+        const i = Number(e.target.closest("[data-i]").dataset.i);
+        try {
+          const url = await subir(e.target.files[0], `${nombreDe(edit[seccion][i]) || seccion}-${k}`, seccion === "resultados" ? 1100 : 1200);
+          edit[seccion][i][k] = url; render(); setDirty(seccion);
+        } catch (err) { if (err.auth) logout(); else toast(err.message || "No se pudo subir la foto."); }
+      });
+    }
+
+    /* ---------- Textos ---------- */
+    function renderTextos() {
+      const grupos = {};
+      Object.keys(DEF.textos).forEach((k) => {
+        const [g, nombre] = (LABELS[k] || k).split(" · ");
+        (grupos[g] ||= []).push({ k, nombre: nombre || g });
+      });
+      $("#txt-list").innerHTML = Object.entries(grupos).map(([g, campos]) => `
+        <div class="group"><h2>${esc(g)}</h2>
+          ${campos.map(({ k, nombre }) => {
+            const v = edit.textos[k] ?? DEF.textos[k];
+            const largo = DEF.textos[k].length > 70;
+            return `<div class="field ${edit.textos[k] && edit.textos[k] !== DEF.textos[k] ? "is-changed" : ""}" data-k="${esc(k)}">
+              <div class="field__head"><span>${esc(nombre)}</span><button class="link" type="button" data-restore>Restaurar</button></div>
+              ${largo ? `<textarea rows="3">${esc(v)}</textarea>` : `<input type="text" value="${esc(v)}">`}
+            </div>`;
+          }).join("")}
+        </div>`).join("");
+      $("#cert-text").value = edit.certificaciones.join("\n");
+    }
+    $("#txt-list").addEventListener("input", (e) => {
+      const f = e.target.closest(".field"); if (!f) return;
+      edit.textos[f.dataset.k] = e.target.value;
+      f.classList.toggle("is-changed", e.target.value.trim() !== DEF.textos[f.dataset.k]);
+      setDirty("textos");
+    });
+    $("#txt-list").addEventListener("click", (e) => {
+      if (!e.target.closest("[data-restore]")) return;
+      const f = e.target.closest(".field"); const k = f.dataset.k;
+      delete edit.textos[k]; f.querySelector("input,textarea").value = DEF.textos[k]; f.classList.remove("is-changed"); setDirty("textos");
+    });
+    $("#cert-text").addEventListener("input", (e) => { edit.certificaciones = e.target.value.split("\n").map((x) => x.trim()).filter(Boolean); setDirty("textos"); });
+    $("#cert-reset").addEventListener("click", () => { edit.certificaciones = clone(DEF.certificaciones); $("#cert-text").value = edit.certificaciones.join("\n"); setDirty("textos"); });
+
+    /* ---------- Fotos principales ---------- */
+    function renderFotos() {
+      $("#img-list").innerHTML = Object.entries(DEF.fotos).map(([k, d]) => `
+        <div class="item" data-k="${esc(k)}">
+          <div class="item__top"><span class="item__num">${esc(d.label)}</span></div>
+          <img class="photo__img photo__img--tall" src="${esc(src(edit.fotos[k] || d.url))}" alt="">
+          <div class="photo__bar" style="align-self:end">
+            ${fileBtn(`data-img="${esc(k)}"`)}
+            ${edit.fotos[k] ? `<button class="link" type="button" data-orig="${esc(k)}">Volver a la foto original</button>` : ""}
+          </div>
+        </div>`).join("");
+    }
+    $("#img-list").addEventListener("change", async (e) => {
+      const k = e.target.dataset.img; if (!k || !e.target.files[0]) return;
+      try { edit.fotos[k] = await subir(e.target.files[0], "foto-" + k, 1400); renderFotos(); setDirty("fotos"); }
+      catch (err) { if (err.auth) logout(); else toast(err.message || "No se pudo subir la foto."); }
+    });
+    $("#img-list").addEventListener("click", (e) => {
+      const k = e.target.dataset.orig; if (!k) return;
+      delete edit.fotos[k]; renderFotos(); setDirty("fotos");
+    });
+
+    if (pw) enter(); else $("#pw").focus();
   })();
   </script>
 </body>
