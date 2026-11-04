@@ -431,6 +431,8 @@
         const secciones = dirty === "textos" ? ["textos", "certificaciones"] : [dirty];
         for (const s of secciones) {
           let valor = edit[s];
+          // Las certificaciones solo se guardan si cambiaron
+          if (s === "certificaciones" && JSON.stringify(valor) === JSON.stringify(saved.certificaciones || DEF.certificaciones)) continue;
           if (s === "textos") valor = Object.fromEntries(Object.entries(valor).filter(([k, v]) => v.trim() && v.trim() !== DEF.textos[k]));
           if (s === "servicios" && valor.some((x) => !x.nombre.trim())) throw new Error("Cada servicio necesita un nombre.");
           if (s === "resultados" && valor.some((x) => !x.antes || !x.despues || !x.servicio.trim())) throw new Error("Cada resultado necesita nombre, foto de antes y foto de después.");
