@@ -687,7 +687,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .wa-float {
   position: fixed;
   right: 1.1rem;
-  bottom: calc(1.1rem + env(safe-area-inset-bottom, 0px));
+  /* 4.75rem: deja libre la esquina donde Netlify muestra su sello "Powered by Netlify" */
+  bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
   z-index: 90;
   width: 58px; height: 58px;
   display: grid; place-items: center;

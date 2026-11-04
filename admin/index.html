@@ -22,7 +22,7 @@
     button, input, select, textarea { font: inherit; color: inherit; }
     :focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
     img { max-width: 100%; display: block; }
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 1rem 1rem 6rem; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 1rem 1rem 10rem; }
     header.top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .5rem 0 1rem; }
     header.top img { height: 42px; width: auto; }
     h1 { font: 600 1.7rem/1.1 var(--serif); margin: 0; letter-spacing: .02em; }
@@ -99,8 +99,9 @@
     .photo__bar { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
     .file { position: relative; overflow: hidden; }
     .file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-    .savebar { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(43,36,32,.96); color: var(--cream); padding: .75rem 1rem; display: flex; justify-content: center; align-items: center; gap: .75rem; flex-wrap: wrap; z-index: 10; transform: translateY(110%); transition: transform .25s; }
-    .savebar.is-on { transform: none; }
+    /* Flota por encima de la esquina inferior, donde Netlify muestra su sello */
+    .savebar { position: fixed; left: .75rem; right: .75rem; bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px)); max-width: 560px; margin: 0 auto; border-radius: 16px; box-shadow: 0 12px 30px -10px rgba(43,36,32,.6); background: rgba(43,36,32,.97); color: var(--cream); padding: .7rem 1rem; display: flex; justify-content: center; align-items: center; gap: .6rem; flex-wrap: wrap; z-index: 10; opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity .2s, transform .2s; }
+    .savebar.is-on { opacity: 1; transform: none; pointer-events: auto; }
     .savebar .btn { border-color: var(--gold); color: var(--cream); }
     .savebar .btn--gold { color: var(--ink); }
     .savebar .btn:hover { background: rgba(248,241,231,.12); color: var(--cream); }
@@ -111,7 +112,7 @@
     .field__head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; font-size: .8rem; color: var(--ink-soft); font-weight: 500; }
     .field.is-changed { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(184,148,90,.18); }
     .link { background: none; border: 0; color: var(--gold-ink); text-decoration: underline; cursor: pointer; font-size: .78rem; padding: 0; }
-    .toast { position: fixed; left: 50%; bottom: 5rem; transform: translateX(-50%); background: var(--ink); color: var(--cream); padding: .65rem 1.1rem; border-radius: 999px; font-size: .85rem; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 20; max-width: 90vw; text-align: center; }
+    .toast { position: fixed; left: 50%; bottom: 9.5rem; transform: translateX(-50%); background: var(--ink); color: var(--cream); padding: .65rem 1.1rem; border-radius: 999px; font-size: .85rem; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 20; max-width: 90vw; text-align: center; }
     .toast.is-on { opacity: 1; }
     [hidden] { display: none !important; }
 
@@ -479,7 +480,7 @@
         <div class="item" data-i="${i}">
           <div class="item__top"><span class="item__num">${i + 1}. ${esc(s.nombre || "Nuevo servicio")}</span>
             <span class="item__move">
-              <button class="btn btn--sm" data-mv="-1" aria-label="Subir">↑</button><button class="btn btn--sm" data-mv="1" aria-label="Bajar">↓</button>
+              <button class="btn btn--sm" data-mv="-1" aria-label="Mover arriba" title="Mover arriba"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></button><button class="btn btn--sm" data-mv="1" aria-label="Mover abajo" title="Mover abajo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
               <button class="btn btn--sm btn--danger" data-del aria-label="Eliminar servicio">Eliminar</button>
             </span></div>
           <div class="photo">
@@ -510,7 +511,7 @@
         <div class="item item--result" data-i="${i}">
           <div class="item__top"><span class="item__num">${i + 1}. ${esc(r.servicio || "Nuevo resultado")}</span>
             <span class="item__move">
-              <button class="btn btn--sm" data-mv="-1" aria-label="Subir">↑</button><button class="btn btn--sm" data-mv="1" aria-label="Bajar">↓</button>
+              <button class="btn btn--sm" data-mv="-1" aria-label="Mover arriba" title="Mover arriba"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></button><button class="btn btn--sm" data-mv="1" aria-label="Mover abajo" title="Mover abajo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
               <button class="btn btn--sm btn--danger" data-del aria-label="Eliminar resultado">Eliminar</button>
             </span></div>
           ${["antes", "despues"].map((k) => `
