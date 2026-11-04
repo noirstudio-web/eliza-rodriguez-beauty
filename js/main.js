@@ -61,7 +61,9 @@
       return `
         <article class="card reveal" style="--d:${(i % 3) * 0.1}s">
           <div class="card__media">
-            <img src="${esc(s.imagen)}" alt="${esc(s.alt || s.nombre)}" width="640" height="480" loading="lazy" decoding="async">
+            ${s.imagen
+              ? `<img src="${esc(s.imagen)}" alt="${esc(s.alt || s.nombre)}" width="640" height="480" loading="lazy" decoding="async">`
+              : `<div class="card__ph" aria-hidden="true"><span>${esc((s.nombre || "?").trim().charAt(0).toUpperCase())}</span></div>`}
           </div>
           <div class="card__body">
             <h3 class="card__title">${esc(s.nombre)}</h3>
