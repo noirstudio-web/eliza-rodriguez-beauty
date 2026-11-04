@@ -228,11 +228,11 @@ Entra a **https://eliza-rodriguez-beauty.netlify.app/admin/** con tu usuario y c
 - Para volver a crear cuentas automáticamente en la 2.ª visita: `CREAR_CUENTA_AUTOMATICA = true` en `netlify/lib/fidelidad.mjs`.
 
 ### Sección “Eliza Beauty” en Visual Studio Code
-Extensión propia (carpeta `vscode-extension/`) que agrega un **ícono en la barra lateral izquierda de VS Code**. Al abrirlo:
+Extensión propia (carpeta `vscode-extension/`) que agrega un **ícono en la barra lateral izquierda de VS Code** con dos pestañas: **Clientes nuevos** (crear cuentas) y **Clientas** (gestionarlas). Al abrirlo:
 
 1. Entras con el **usuario y contraseña del panel** (la sesión queda guardada de forma cifrada en VS Code).
 2. Ves el resumen (clientas con cuenta, regalos por entregar…), los niveles y la lista de clientas con filtros y buscador.
-3. **“+ Crear cuenta de clienta”**: nombre, correo (usuario), WhatsApp y contraseña (vacía = se genera una).
+3. Pestaña **Clientes nuevos**: nombre, correo (usuario), WhatsApp y contraseña (vacía = se genera una) → **Crear cuenta**. En **Clientas**, el botón “Crear cuenta” de una clienta sin cuenta abre esta pestaña con sus datos escritos.
 4. En cada clienta: **Contraseña** (cambiarla), **+1 / −1 sello**, **Entregar regalo**, **Activar / Desactivar**.
 5. Al crear o cambiar una contraseña, VS Code muestra el usuario y la contraseña con botones **“Enviar por WhatsApp”** y **“Copiar mensaje”**.
 

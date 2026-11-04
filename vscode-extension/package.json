@@ -2,36 +2,88 @@
   "name": "eliza-clientas",
   "displayName": "Eliza Beauty – Clientas",
   "description": "Sección exclusiva en VS Code para gestionar las cuentas de clientas y la fidelidad de Eliza Rodriguez Beauty.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "publisher": "noirstudio",
   "license": "UNLICENSED",
   "private": true,
-  "repository": { "type": "git", "url": "https://github.com/noirstudio-web/eliza-rodriguez-beauty" },
-  "engines": { "vscode": "^1.85.0" },
-  "categories": ["Other"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/noirstudio-web/eliza-rodriguez-beauty"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
   "main": "./extension.js",
   "activationEvents": [],
   "contributes": {
     "viewsContainers": {
       "activitybar": [
-        { "id": "elizaBeauty", "title": "Eliza Beauty", "icon": "media/icono.svg" }
+        {
+          "id": "elizaBeauty",
+          "title": "Eliza Beauty",
+          "icon": "media/icono.svg"
+        }
       ]
     },
     "views": {
       "elizaBeauty": [
-        { "type": "webview", "id": "eliza.clientas", "name": "Clientas" }
+        {
+          "type": "webview",
+          "id": "eliza.nuevas",
+          "name": "Clientes nuevos"
+        },
+        {
+          "type": "webview",
+          "id": "eliza.clientas",
+          "name": "Clientas"
+        }
       ]
     },
     "commands": [
-      { "command": "eliza.actualizar", "title": "Actualizar", "icon": "$(refresh)", "category": "Eliza Beauty" },
-      { "command": "eliza.abrirWeb", "title": "Abrir panel web", "icon": "$(link-external)", "category": "Eliza Beauty" },
-      { "command": "eliza.cerrarSesion", "title": "Cerrar sesión", "icon": "$(sign-out)", "category": "Eliza Beauty" }
+      {
+        "command": "eliza.actualizar",
+        "title": "Actualizar",
+        "icon": "$(refresh)",
+        "category": "Eliza Beauty"
+      },
+      {
+        "command": "eliza.abrirWeb",
+        "title": "Abrir panel web",
+        "icon": "$(link-external)",
+        "category": "Eliza Beauty"
+      },
+      {
+        "command": "eliza.cerrarSesion",
+        "title": "Cerrar sesión",
+        "icon": "$(sign-out)",
+        "category": "Eliza Beauty"
+      }
     ],
     "menus": {
       "view/title": [
-        { "command": "eliza.actualizar", "when": "view == eliza.clientas", "group": "navigation@1" },
-        { "command": "eliza.abrirWeb", "when": "view == eliza.clientas", "group": "navigation@2" },
-        { "command": "eliza.cerrarSesion", "when": "view == eliza.clientas", "group": "navigation@3" }
+        {
+          "command": "eliza.actualizar",
+          "when": "view == eliza.clientas",
+          "group": "navigation@1"
+        },
+        {
+          "command": "eliza.abrirWeb",
+          "when": "view == eliza.clientas",
+          "group": "navigation@2"
+        },
+        {
+          "command": "eliza.cerrarSesion",
+          "when": "view == eliza.clientas",
+          "group": "navigation@3"
+        },
+        {
+          "command": "eliza.cerrarSesion",
+          "when": "view == eliza.nuevas",
+          "group": "navigation@1"
+        }
       ]
     }
   }

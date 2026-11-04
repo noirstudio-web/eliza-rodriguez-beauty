@@ -29,8 +29,25 @@ async function api(ctx, ruta, metodo = "GET", cuerpo) {
   return { status: 0, ok: false, error: "Sin conexión a internet (" + (ultimoError?.message || "error") + ")" };
 }
 
+/** Coordina las pestañas: comparten la sesión y se actualizan juntas. */
+const app = {
+  vistas: [],
+  recargar() { this.vistas.forEach((v) => v.cargar()); },
+  async sesionVencida(texto = "La sesión venció. Vuelve a entrar.") {
+    await this.vistas[0]?.ctx.secrets.delete(CLAVE_SESION);
+    this.vistas.forEach((v) => v.enviar({ tipo: "login", error: texto }));
+  },
+  /** Abre la pestaña "Clientes nuevos" con los datos de una clienta ya escritos. */
+  async prellenar(datos) {
+    const nuevas = this.vistas.find((v) => v instanceof VistaNuevas);
+    if (nuevas) nuevas.pendiente = datos;
+    await vscode.commands.executeCommand("eliza.nuevas.focus");
+    nuevas?.enviar({ tipo: "prellenar", datos });
+  },
+};
+
 class VistaClientas {
-  constructor(ctx) { this.ctx = ctx; this.view = null; }
+  constructor(ctx) { this.ctx = ctx; this.view = null; app.vistas.push(this); }
 
   resolveWebviewView(view) {
     this.view = view;
@@ -54,9 +71,10 @@ class VistaClientas {
           const r = await api(ctx, "/api/admin/sesion", "POST", { usuario: m.usuario, clave: m.clave });
           if (!r.ok) return this.enviar({ tipo: "login", error: r.error || "No se pudo entrar." });
           await ctx.secrets.store(CLAVE_SESION, r.token);
-          return this.cargar();
+          return app.recargar();
         }
         case "cargar": return this.cargar();
+        case "prellenar": return app.prellenar(m.datos);
         case "accion": {
           // Contraseñas: se piden con el cuadro seguro de VS Code
           if (m.accion === "clave") {
@@ -95,7 +113,8 @@ class VistaClientas {
           } else {
             vscode.window.showInformationMessage(mensajes[m.accion] || "Listo.");
           }
-          return this.cargar();
+          if (m.accion === "crear") this.enviar({ tipo: "creada", nombre: m.datos.nombre, correo: m.datos.correo });
+          return app.recargar();
         }
         case "web": return vscode.env.openExternal(vscode.Uri.parse(SITIO + "/admin/"));
         case "aviso": return vscode.window.showWarningMessage(m.texto);
@@ -113,10 +132,7 @@ class VistaClientas {
     this.enviar({ tipo: "datos", clientas: r.clientas, resumen: r.resumen, config: r.config });
   }
 
-  async sesionVencida() {
-    await this.ctx.secrets.delete(CLAVE_SESION);
-    this.enviar({ tipo: "login", error: "La sesión venció. Vuelve a entrar." });
-  }
+  sesionVencida() { return app.sesionVencida(); }
 
   /** Muestra usuario y contraseña, con botones para copiar o enviar por WhatsApp. */
   async credenciales(c, clave, titulo) {
@@ -217,17 +233,7 @@ class VistaClientas {
       </div>
       <p class="muted">\${config.niveles.map((n) => esc(n.nombre) + ": " + (resumen.porNivel[n.nombre] || 0)).join(" · ")}</p>
 
-      <details id="crear-box">
-        <summary>+ Crear cuenta de clienta</summary>
-        <form id="f-crear" autocomplete="off">
-          <label>Nombre<input id="c-nombre" required></label>
-          <label>Correo (será su usuario)<input id="c-correo" required></label>
-          <label>WhatsApp<input id="c-wa" placeholder="300 123 4567"></label>
-          <label>Contraseña (vacía = se genera una al azar)<input id="c-clave" type="password" autocomplete="new-password"></label>
-          <button type="submit">Crear cuenta</button>
-          <p class="muted">Usa el mismo correo con el que la clienta reserva para que se sumen sus visitas.</p>
-        </form>
-      </details>
+      <p><button type="button" id="ir-nuevas">+ Crear cuenta (pestaña Clientes nuevos)</button></p>
 
       <div class="chips">
         \${[["con", "Con cuenta"], ["sin", "Sin cuenta"], ["regalo", "Regalo listo"], ["todas", "Todas"]].map(([k, t]) => \`<button type="button" data-f="\${k}" aria-pressed="\${filtro === k}">\${t}</button>\`).join("")}
@@ -235,14 +241,7 @@ class VistaClientas {
       <input id="buscar" placeholder="Buscar clienta…" value="\${esc(busqueda)}">
       <div id="lista">\${lista.length ? lista.map(tarjeta).join("") : '<p class="muted">No hay clientas en esta vista.</p>'}</div>\`;
 
-    document.getElementById("f-crear").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const v = (id) => document.getElementById(id).value.trim();
-      if (!v("c-nombre") || !v("c-correo")) return;
-      const clave = document.getElementById("c-clave").value;
-      if (clave && clave.length < 8) { vscode.postMessage({ tipo: "aviso", texto: "La contraseña debe tener al menos 8 caracteres." }); return; }
-      vscode.postMessage({ tipo: "accion", accion: "crear", datos: { nombre: v("c-nombre"), correo: v("c-correo").toLowerCase(), whatsapp: v("c-wa"), clave } });
-    });
+    document.getElementById("ir-nuevas").addEventListener("click", () => vscode.postMessage({ tipo: "prellenar", datos: {} }));
     document.getElementById("buscar").addEventListener("input", (e) => { busqueda = e.target.value; const pos = e.target.selectionStart; pintar(); const b = document.getElementById("buscar"); b.focus(); b.setSelectionRange(pos, pos); });
     app.querySelectorAll("[data-f]").forEach((b) => b.addEventListener("click", () => { filtro = b.dataset.f; pintar(); }));
     app.querySelectorAll("[data-a]").forEach((b) => b.addEventListener("click", () => accion(b)));
@@ -276,14 +275,8 @@ class VistaClientas {
     const c = datos.clientas.find((x) => x.correo === correo);
     const base = { tipo: "accion", nombre: c.nombre, whatsapp: c.whatsapp, datos: { correo } };
     switch (b.dataset.a) {
-      case "prellenar": {
-        const box = document.getElementById("crear-box"); box.open = true;
-        document.getElementById("c-nombre").value = c.nombre || "";
-        document.getElementById("c-correo").value = c.correo;
-        document.getElementById("c-wa").value = c.whatsapp || "";
-        box.scrollIntoView({ behavior: "smooth" });
-        return;
-      }
+      case "prellenar":
+        return vscode.postMessage({ tipo: "prellenar", datos: { nombre: c.nombre || "", correo: c.correo, whatsapp: c.whatsapp || "" } });
       case "clave": return vscode.postMessage({ ...base, accion: "clave" });
       case "mas": return vscode.postMessage({ ...base, accion: "sellos", datos: { correo, sellos: 1 } });
       case "menos": return vscode.postMessage({ ...base, accion: "sellos", datos: { correo, sellos: -1 } });
@@ -305,6 +298,108 @@ class VistaClientas {
   }
 }
 
+/** Pestaña "Clientes nuevos": solo el formulario para crear cuentas. */
+class VistaNuevas extends VistaClientas {
+  constructor(ctx) { super(ctx); this.pendiente = null; }
+
+  async cargar() {
+    this.enviar({ tipo: "listo" });
+    if (this.pendiente) { this.enviar({ tipo: "prellenar", datos: this.pendiente }); this.pendiente = null; }
+  }
+
+  html() {
+    const nonce = Array.from({ length: 24 }, () => "abcdefghijklmnopqrstuvwxyz0123456789"[Math.floor(Math.random() * 36)]).join("");
+    return /* html */ `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { font-family: var(--vscode-font-family); font-size: var(--vscode-font-size); color: var(--vscode-foreground); padding: 0 10px 24px; }
+  h2 { font-size: 1.05em; margin: 14px 0 4px; font-weight: 600; }
+  .muted { opacity: .75; font-size: .92em; }
+  label { display: block; margin-top: 8px; }
+  input { width: 100%; box-sizing: border-box; padding: 5px 7px; margin: 3px 0 2px; color: var(--vscode-input-foreground); background: var(--vscode-input-background); border: 1px solid var(--vscode-input-border, transparent); border-radius: 3px; font: inherit; }
+  input:focus { outline: 1px solid var(--vscode-focusBorder); }
+  .fila { display: flex; gap: 6px; }
+  .fila input { flex: 1; }
+  button { font: inherit; cursor: pointer; border: 0; border-radius: 3px; padding: 6px 12px; color: var(--vscode-button-foreground); background: var(--vscode-button-background); }
+  button:hover { background: var(--vscode-button-hoverBackground); }
+  button.sec { color: var(--vscode-button-secondaryForeground); background: var(--vscode-button-secondaryBackground); }
+  button.sec:hover { background: var(--vscode-button-secondaryHoverBackground); }
+  button[disabled] { opacity: .6; cursor: wait; }
+  .ok { border: 1px solid var(--vscode-panel-border, #8884); border-radius: 6px; padding: 8px 10px; margin: 12px 0; }
+  .error { color: var(--vscode-errorForeground); }
+</style></head>
+<body>
+  <div id="app"><p class="muted">Cargando…</p></div>
+<script nonce="${nonce}">
+  const vscode = acquireVsCodeApi();
+  const app = document.getElementById("app");
+  const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  let ultima = null;
+
+  function login(error) {
+    app.innerHTML = \`
+      <h2>Clientes nuevos</h2>
+      <p class="muted">Entra con el usuario y la contraseña del panel de admin.</p>
+      <form id="f-login">
+        <label>Usuario<input id="u" autocomplete="username" required></label>
+        <label>Contraseña<input id="p" type="password" autocomplete="current-password" required></label>
+        <p><button type="submit">Entrar</button></p>
+        <p class="error">\${esc(error || "")}</p>
+      </form>\`;
+    document.getElementById("f-login").addEventListener("submit", (e) => {
+      e.preventDefault();
+      app.querySelector("button").disabled = true;
+      vscode.postMessage({ tipo: "login", usuario: document.getElementById("u").value, clave: document.getElementById("p").value });
+    });
+    document.getElementById("u").focus();
+  }
+
+  function formulario(d = {}) {
+    app.innerHTML = \`
+      <h2>Crear cuenta de clienta</h2>
+      <p class="muted">La clienta entrará en la página con su correo y esta contraseña.</p>
+      <form id="f-crear" autocomplete="off">
+        <label>Nombre<input id="c-nombre" value="\${esc(d.nombre)}" required></label>
+        <label>Correo (será su usuario)<input id="c-correo" value="\${esc(d.correo)}" required></label>
+        <label>WhatsApp<input id="c-wa" value="\${esc(d.whatsapp)}" placeholder="300 123 4567"></label>
+        <label>Contraseña
+          <div class="fila"><input id="c-clave" type="password" autocomplete="new-password" placeholder="Vacía = se genera una al azar"><button class="sec" type="button" id="ver">Ver</button></div>
+        </label>
+        <p class="muted">Usa el mismo correo con el que la clienta reserva para que se sumen sus visitas.</p>
+        <p><button type="submit" id="crear">Crear cuenta</button></p>
+      </form>
+      \${ultima ? \`<div class="ok">✓ Última cuenta creada: <b>\${esc(ultima.nombre)}</b><br><span class="muted">\${esc(ultima.correo)}</span></div>\` : ""}\`;
+    const clave = document.getElementById("c-clave");
+    document.getElementById("ver").addEventListener("click", (e) => {
+      clave.type = clave.type === "password" ? "text" : "password";
+      e.target.textContent = clave.type === "password" ? "Ver" : "Ocultar";
+    });
+    document.getElementById("f-crear").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const v = (id) => document.getElementById(id).value.trim();
+      if (!v("c-nombre") || !v("c-correo")) return;
+      if (clave.value && clave.value.length < 8) return vscode.postMessage({ tipo: "aviso", texto: "La contraseña debe tener al menos 8 caracteres." });
+      document.getElementById("crear").disabled = true;
+      vscode.postMessage({ tipo: "accion", accion: "crear", datos: { nombre: v("c-nombre"), correo: v("c-correo").toLowerCase(), whatsapp: v("c-wa"), clave: clave.value } });
+      setTimeout(() => { const b = document.getElementById("crear"); if (b) b.disabled = false; }, 4000);
+    });
+    document.getElementById(d.correo ? "c-clave" : "c-nombre").focus();
+  }
+
+  window.addEventListener("message", ({ data: m }) => {
+    if (m.tipo === "login") login(m.error);
+    if (m.tipo === "listo") formulario();
+    if (m.tipo === "prellenar") formulario(m.datos || {});
+    if (m.tipo === "creada") { ultima = { nombre: m.nombre, correo: m.correo }; formulario(); }
+  });
+  vscode.postMessage({ tipo: "inicio" });
+</script>
+</body></html>`;
+  }
+}
+
 function generarClave() {
   const c = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
   const bytes = require("crypto").randomBytes(10);
@@ -312,16 +407,17 @@ function generarClave() {
 }
 
 function activate(ctx) {
+  const nuevas = new VistaNuevas(ctx);
   const vista = new VistaClientas(ctx);
   ctx.subscriptions.push(
+    vscode.window.registerWebviewViewProvider("eliza.nuevas", nuevas, { webviewOptions: { retainContextWhenHidden: true } }),
     vscode.window.registerWebviewViewProvider("eliza.clientas", vista, { webviewOptions: { retainContextWhenHidden: true } }),
-    vscode.commands.registerCommand("eliza.actualizar", () => vista.cargar()),
+    vscode.commands.registerCommand("eliza.actualizar", () => app.recargar()),
     vscode.commands.registerCommand("eliza.abrirWeb", () => vscode.env.openExternal(vscode.Uri.parse(SITIO + "/admin/"))),
     vscode.commands.registerCommand("eliza.cerrarSesion", async () => {
       const token = await ctx.secrets.get(CLAVE_SESION);
       if (token) await fetch(SITIO + "/api/admin/sesion", { method: "DELETE", headers: { Authorization: "Bearer " + token } }).catch(() => {});
-      await ctx.secrets.delete(CLAVE_SESION);
-      vista.enviar({ tipo: "login", error: "Cerraste sesión." });
+      await app.sesionVencida("Cerraste sesión.");
     })
   );
 }
