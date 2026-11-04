@@ -248,6 +248,15 @@ Luego en VS Code: `Ctrl+Shift+P` → **Developer: Reload Window**.
 
 > Alternativa por terminal (opcional): `npm run clienta -- crear|clave|listar|desactivar|activar` (ver `scripts/clientas.mjs`).
 
+### Cupones de descuento
+- **Crear:** panel → **Fidelidad → Cupones de descuento → “+ Crear cupón”**: nombre, porcentaje o valor fijo, para **todas**, **un nivel en adelante** o **una clienta**, y vencimiento opcional.
+- **La clienta** lo ve en su perfil (`/cuenta/` → “Mis cupones”) con su **código personal** (ej. `LIMPIEZA10-KX4XQ2`), de un solo uso.
+- **Al cobrar:** panel → **Fidelidad → Validar cupón** → escribe el código → ves de quién es, **de cuánto es el descuento** y si está vigente → **Marcar como usado**.
+- Desactivar un cupón lo oculta de los perfiles y sus códigos dejan de servir; eliminarlo lo borra.
+
+### Fidelidad manual al crear una clienta
+En **“+ Crear cuenta de clienta”** (panel y VS Code) hay un bloque **Fidelidad (opcional)**: **Nivel** (automático o fijo), **visitas anteriores**, **consumo anterior** y **sellos iniciales**, para clientas que ya venían antes del sistema. Se puede cambiar luego en cada clienta → **Fidelidad**.
+
 ### Usuario y contraseña del panel de admin
 Variables `ADMIN_USER` (usuario) y `ADMIN_PASSWORD` (contraseña) en Netlify → *Project configuration → Environment variables* → *Edit* → luego *Deploys → Trigger deploy*. Al entrar se abre una sesión de 12 horas; tras 8 intentos fallidos se bloquea 15 minutos.
 

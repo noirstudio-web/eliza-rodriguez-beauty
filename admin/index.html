@@ -114,6 +114,15 @@
     .link { background: none; border: 0; color: var(--gold-ink); text-decoration: underline; cursor: pointer; font-size: .78rem; padding: 0; }
     .toast { position: fixed; left: 50%; bottom: 9.5rem; transform: translateX(-50%); background: var(--ink); color: var(--cream); padding: .65rem 1.1rem; border-radius: 999px; font-size: .85rem; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 20; max-width: 90vw; text-align: center; }
     .toast.is-on { opacity: 1; }
+    .fidset { border: 1px solid var(--line); border-radius: 12px; padding: .6rem .9rem .9rem; margin: .25rem 0 0; }
+    .fidset legend { font-size: .8rem; font-weight: 500; color: var(--gold-ink); padding: 0 .35rem; }
+    .fid-edit { border-top: 1px solid var(--line); padding-top: .6rem; }
+    .fid-edit summary { cursor: pointer; font-size: .85rem; color: var(--gold-ink); font-weight: 500; }
+    .cup-res { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 1rem; margin-top: .75rem; display: grid; gap: .4rem; }
+    .cup-res.is-ok { border-color: var(--ok); box-shadow: 0 0 0 2px rgba(47,107,79,.12); }
+    .cup-res.is-bad { border-color: var(--bad); }
+    .cup-res__valor { font: 600 2rem/1 var(--serif); color: var(--gold-ink); }
+    .codigo { font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: .06em; }
     [hidden] { display: none !important; }
 
     @media (min-width: 720px) {
@@ -236,6 +245,16 @@
             </label>
           </div>
           <p class="muted" style="margin:0;font-size:.8rem">Si la clienta ya reservó antes, usa el mismo correo de sus reservas para que se sumen sus visitas.</p>
+          <fieldset class="fidset">
+            <legend>Fidelidad (opcional)</legend>
+            <div class="grid2">
+              <label class="f">Nivel<select class="input sel-nivel" id="cc-nivel"><option value="auto">Automático (según sus visitas)</option></select></label>
+              <label class="f">Visitas anteriores<input type="text" inputmode="numeric" id="cc-visitas" placeholder="0"></label>
+              <label class="f">Consumo anterior ($)<input type="text" inputmode="numeric" id="cc-consumo" placeholder="0"></label>
+              <label class="f">Sellos iniciales<input type="text" inputmode="numeric" id="cc-sellos" placeholder="0"></label>
+            </div>
+            <p class="muted" style="margin:.4rem 0 0;font-size:.8rem">Para clientas que ya venían antes del sistema: empiezan con su nivel, sus visitas y sus sellos.</p>
+          </fieldset>
           <p><button class="btn btn--gold" type="submit">Crear cuenta</button></p>
         </form>
       </details>
@@ -254,6 +273,15 @@
 
     <!-- Fidelidad -->
     <section id="tab-fidelidad" role="tabpanel" hidden>
+      <div class="group">
+        <h2>Validar cupón</h2>
+        <p class="muted" style="margin:0 0 .6rem">Escribe el código que te muestra la clienta para ver de quién es y de cuánto es el descuento.</p>
+        <form class="tools" id="v-form" style="margin:0">
+          <input type="search" id="v-codigo" class="codigo" placeholder="Ej. LIMPIEZA10-K7P2QX" autocapitalize="characters" aria-label="Código del cupón" style="flex:1 1 220px;border-radius:999px">
+          <button class="btn btn--gold btn--sm" type="submit">Validar</button>
+        </form>
+        <div id="v-res"></div>
+      </div>
       <div class="stats" id="f-stats"></div>
       <div class="group">
         <h2>Clientas por nivel</h2>
@@ -265,6 +293,28 @@
         <div id="fid-form"></div>
         <p style="margin-top:.75rem;display:flex;gap:.75rem;flex-wrap:wrap;align-items:center"><button class="btn btn--gold" type="button" id="fid-save">Guardar niveles y sellos</button>
         <button class="link" type="button" id="fid-reset">Volver a los valores de fábrica</button></p>
+      </div>
+
+      <div class="group">
+        <h2>Cupones de descuento</h2>
+        <details class="item" id="cup-box" style="display:block">
+          <summary class="item__num" style="cursor:pointer">+ Crear cupón</summary>
+          <form id="cup-form" style="display:grid;gap:.6rem;margin-top:.9rem" autocomplete="off">
+            <div class="grid2">
+              <label class="f">Nombre del cupón<input type="text" id="cup-titulo" placeholder="10 % en limpieza facial" required></label>
+              <label class="f">Descripción (opcional)<input type="text" id="cup-desc" placeholder="Válido de lunes a jueves"></label>
+              <label class="f">Tipo de descuento<select class="input" id="cup-tipo"><option value="porcentaje">Porcentaje (%)</option><option value="valor">Valor fijo ($)</option></select></label>
+              <label class="f">Descuento<input type="text" inputmode="numeric" id="cup-valor" placeholder="10" required></label>
+              <label class="f">¿Para quién?<select class="input" id="cup-alcance"><option value="todas">Todas las clientas con cuenta</option><option value="nivel">Un nivel en adelante</option><option value="clienta">Una clienta</option></select></label>
+              <label class="f" id="cup-nivel-box" hidden>Nivel (y superiores)<select class="input" id="cup-nivel"></select></label>
+              <label class="f" id="cup-correo-box" hidden>Correo de la clienta<input type="text" id="cup-correo" list="cup-clientas" placeholder="ana@correo.com"><datalist id="cup-clientas"></datalist></label>
+              <label class="f">Vence (opcional)<input type="date" id="cup-vence" class="input"></label>
+            </div>
+            <p class="muted" style="margin:0;font-size:.8rem">Cada clienta recibe su propio código en su perfil y lo puede usar una sola vez.</p>
+            <p><button class="btn btn--gold" type="submit">Crear cupón</button></p>
+          </form>
+        </details>
+        <div class="list" id="cup-list" style="margin-top:.75rem"></div>
       </div>
     </section>
 
@@ -713,7 +763,7 @@
     async function loadClientas() {
       const r = await api("/api/admin/clientas");
       clientas = r.clientas; fid = r.config; resumen = r.resumen; clientasCargadas = true;
-      renderClientas(); renderFid();
+      renderClientas(); renderFid(); llenarNiveles();
     }
     function renderClientas() {
       const q = $("#cq").value.trim().toLowerCase();
@@ -734,16 +784,26 @@
         <article class="card" data-correo="${esc(c.correo)}">
           <div class="card__head">
             <div><div class="card__when">${esc(c.nombre)}</div><div class="muted">${esc(c.correo)}</div></div>
-            <span class="badge ${tiene ? "badge--confirmada" : "badge--pendiente"}">${tiene ? esc(c.nivel) : "Sin cuenta"}</span>
+            <span class="badge ${tiene ? "badge--confirmada" : "badge--pendiente"}" title="${c.nivelManual ? "Nivel fijado a mano" : "Nivel automático"}">${tiene ? esc(c.nivel) + (c.nivelManual ? " ✎" : "") : "Sin cuenta"}</span>
           </div>
           <dl>
-            <dt>Visitas</dt><dd>${c.visitas}${c.faltas ? ` · ${c.faltas} sin asistir` : ""}</dd>
+            <dt>Visitas</dt><dd>${c.visitas}${c.visitasPrevias ? ` (incluye ${c.visitasPrevias} anteriores)` : ""}${c.faltas ? ` · ${c.faltas} sin asistir` : ""}</dd>
             <dt>Consumo</dt><dd>${esc(peso(c.consumo))}</dd>
             ${tiene ? `<dt>Sellos</dt><dd><b>${Math.min(c.sellos, c.sellosMeta)} de ${c.sellosMeta}</b>${c.sellos >= c.sellosMeta ? " · ¡regalo listo!" : ""}${c.regalos ? ` · ${c.regalos} regalo(s) entregado(s)` : ""}</dd>` : ""}
             ${tiene && c.siguiente ? `<dt>Siguiente</dt><dd>${esc(c.siguiente.nombre)}${c.siguiente.faltanVisitas ? ` · ${c.siguiente.faltanVisitas === 1 ? "falta 1 visita" : `faltan ${c.siguiente.faltanVisitas} visitas`}` : ""}</dd>` : ""}
             <dt>Cuenta</dt><dd>${esc(CUENTA[c.cuenta])}${c.ultimoAcceso ? ` · último acceso ${new Date(c.ultimoAcceso).toLocaleDateString("es-CO", { day: "numeric", month: "short" })}` : ""}</dd>
           </dl>
           ${hist ? `<ul class="muted" style="margin:0;padding-left:1.1rem;font-size:.82rem">${hist}</ul>` : ""}
+          ${tiene ? `
+          <details class="fid-edit">
+            <summary>Fidelidad${c.nivelManual ? " (nivel fijado a mano)" : ""}</summary>
+            <div class="grid2" style="margin-top:.6rem">
+              <label class="f">Nivel<select class="input sel-nivel" data-fid="nivel" data-actual="${esc(c.nivelManual || "auto")}"></select></label>
+              <label class="f">Visitas anteriores<input type="text" inputmode="numeric" data-fid="visitas" value="${c.visitasPrevias || 0}"></label>
+              <label class="f">Consumo anterior ($)<input type="text" inputmode="numeric" data-fid="consumo" value="${c.consumoPrevio || 0}"></label>
+            </div>
+            <p style="margin:.6rem 0 0"><button class="btn btn--gold btn--sm" type="button" data-c="fidelidad">Guardar fidelidad</button></p>
+          </details>` : ""}
           <div class="card__actions">
             ${!tiene ? `<button class="btn btn--gold btn--sm" type="button" data-c="crear">Crear cuenta</button>` : `
               ${c.cuenta !== "desactivada" ? `<button class="btn btn--sm" type="button" data-c="clave">Cambiar contraseña</button>` : ""}
@@ -756,6 +816,16 @@
           </div>
         </article>`;
       }).join("");
+      llenarNiveles();
+    }
+    /** Opciones de nivel (Automático + los 5 niveles) en todos los selectores. */
+    function llenarNiveles() {
+      if (!fid) return;
+      $$(".sel-nivel").forEach((sel) => {
+        const actual = sel.dataset.actual || sel.value || "auto";
+        sel.innerHTML = `<option value="auto">Automático (según sus visitas)</option>` + fid.niveles.map((n) => `<option value="${esc(n.nombre)}">${esc(n.nombre)} (fijo)</option>`).join("");
+        sel.value = actual;
+      });
     }
     $("#c-list").addEventListener("click", async (e) => {
       const b = e.target.closest("[data-c]"); if (!b) return;
@@ -793,6 +863,12 @@
             await post({ accion: "desactivar" }); toast("Cuenta desactivada."); break;
           case "activar":
             await post({ accion: "activar" }); toast("Cuenta activada."); break;
+          case "fidelidad": {
+            const box = b.closest(".fid-edit");
+            const v = (k) => box.querySelector(`[data-fid="${k}"]`).value;
+            await post({ accion: "fidelidad", nivel: v("nivel"), visitas_previas: v("visitas"), consumo_previo: v("consumo") });
+            toast("Fidelidad actualizada."); break;
+          }
         }
         loadClientas();
       } catch (err) { if (err.auth) logout(); else toast(err.message || "No se pudo completar."); }
@@ -800,7 +876,10 @@
     $("#cc-gen").addEventListener("click", () => { $("#cc-clave").value = genClave(); });
     $("#c-crear").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const datos = { accion: "crear", nombre: $("#cc-nombre").value.trim(), correo: $("#cc-correo").value.trim().toLowerCase(), whatsapp: $("#cc-wa").value.trim(), clave: $("#cc-clave").value };
+      const datos = {
+        accion: "crear", nombre: $("#cc-nombre").value.trim(), correo: $("#cc-correo").value.trim().toLowerCase(), whatsapp: $("#cc-wa").value.trim(), clave: $("#cc-clave").value,
+        nivel: $("#cc-nivel").value, visitas_previas: $("#cc-visitas").value, consumo_previo: $("#cc-consumo").value, sellos_iniciales: $("#cc-sellos").value,
+      };
       if (datos.clave.length < 8) return toast("La contraseña debe tener al menos 8 caracteres.");
       try {
         const r = await api("/api/admin/clientas", "POST", datos);
@@ -860,6 +939,94 @@
       try { await api("/api/admin/contenido", "DELETE", { clave: "fidelidad" }); toast("Restaurado."); loadClientas(); }
       catch (err) { if (err.auth) logout(); else toast("No se pudo restaurar."); }
     });
+
+    /* ======================= Cupones ======================= */
+    let cupones = [];
+    const ESTADO_CUPON = { valido: "Válido", usado: "Ya fue usado", vencido: "Vencido", inactivo: "Cupón desactivado", cuenta_desactivada: "La cuenta de la clienta está desactivada" };
+    async function loadCupones() {
+      const r = await api("/api/admin/cupones");
+      cupones = r.cupones;
+      $("#cup-nivel").innerHTML = r.niveles.map((n) => `<option>${esc(n)}</option>`).join("");
+      $("#cup-vence").min = r.hoy;
+      $("#cup-clientas").innerHTML = clientas.filter((c) => c.cuenta !== "no").map((c) => `<option value="${esc(c.correo)}">${esc(c.nombre)}</option>`).join("");
+      renderCupones();
+    }
+    function renderCupones() {
+      if (!cupones.length) { $("#cup-list").innerHTML = '<p class="empty">Aún no hay cupones. Crea el primero con “+ Crear cupón”.</p>'; return; }
+      $("#cup-list").innerHTML = cupones.map((c) => `
+        <article class="card" data-cup="${c.id}" style="${c.activo && !c.vencido ? "" : "opacity:.6"}">
+          <div class="card__head">
+            <div><div class="card__when">${esc(c.descuento)} · ${esc(c.titulo)}</div><div class="muted codigo">${esc(c.prefijo)}-……</div></div>
+            <span class="badge ${c.activo && !c.vencido ? "badge--confirmada" : "badge--cancelada"}">${!c.activo ? "Desactivado" : c.vencido ? "Vencido" : "Activo"}</span>
+          </div>
+          <dl>
+            <dt>Para</dt><dd>${c.alcance === "todas" ? "Todas las clientas" : c.alcance === "nivel" ? "Nivel " + esc(c.nivel) + " en adelante" : esc(c.clienta_nombre || "") + " · " + esc(c.clienta_correo || "")}</dd>
+            ${c.vence ? `<dt>Vence</dt><dd>${esc(c.vence)}</dd>` : ""}
+            ${c.descripcion ? `<dt>Nota</dt><dd>${esc(c.descripcion)}</dd>` : ""}
+            <dt>Uso</dt><dd>${c.usados} usado(s) de ${c.entregados} entregado(s)</dd>
+          </dl>
+          <div class="card__actions">
+            ${c.activo ? `<button class="btn btn--sm" type="button" data-cupa="desactivar">Desactivar</button>` : `<button class="btn btn--sm" type="button" data-cupa="activar">Activar</button>`}
+            <button class="btn btn--sm btn--danger" type="button" data-cupa="eliminar">Eliminar</button>
+          </div>
+        </article>`).join("");
+    }
+    $("#cup-alcance").addEventListener("change", (e) => {
+      $("#cup-nivel-box").hidden = e.target.value !== "nivel";
+      $("#cup-correo-box").hidden = e.target.value !== "clienta";
+    });
+    $("#cup-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      try {
+        await api("/api/admin/cupones", "POST", {
+          accion: "crear", titulo: $("#cup-titulo").value, descripcion: $("#cup-desc").value, tipo: $("#cup-tipo").value,
+          valor: $("#cup-valor").value, alcance: $("#cup-alcance").value, nivel: $("#cup-nivel").value,
+          correo: $("#cup-correo").value, vence: $("#cup-vence").value,
+        });
+        toast("Cupón creado. Ya aparece en el perfil de las clientas.");
+        $("#cup-form").reset(); $("#cup-nivel-box").hidden = true; $("#cup-correo-box").hidden = true; $("#cup-box").open = false;
+        loadCupones();
+      } catch (err) { if (err.auth) logout(); else toast(err.message || "No se pudo crear el cupón."); }
+    });
+    $("#cup-list").addEventListener("click", async (e) => {
+      const b = e.target.closest("[data-cupa]"); if (!b) return;
+      const id = Number(b.closest("[data-cup]").dataset.cup), accion = b.dataset.cupa;
+      if (accion === "eliminar" && !confirm("¿Eliminar este cupón? Desaparecerá del perfil de las clientas y sus códigos dejarán de servir.")) return;
+      try { await api("/api/admin/cupones", "POST", { accion, id }); toast("Listo."); loadCupones(); }
+      catch (err) { if (err.auth) logout(); else toast(err.message || "No se pudo completar."); }
+    });
+    function pintarValidacion(c) {
+      const ok = c.estado === "valido";
+      $("#v-res").innerHTML = `
+        <div class="cup-res ${ok ? "is-ok" : "is-bad"}">
+          <div style="display:flex;justify-content:space-between;gap:.75rem;align-items:center;flex-wrap:wrap">
+            <span class="cup-res__valor">${esc(c.descuento)}</span>
+            <span class="badge ${ok ? "badge--confirmada" : "badge--cancelada"}">${esc(ESTADO_CUPON[c.estado] || c.estado)}</span>
+          </div>
+          <div><b>${esc(c.titulo)}</b></div>
+          <div class="muted">Clienta: <b style="color:var(--ink)">${esc(c.clienta.nombre)}</b> · ${esc(c.clienta.correo)}</div>
+          <div class="muted codigo">${esc(c.codigo)}${c.vence ? " · vence " + esc(c.vence) : ""}</div>
+          ${c.usadoEn ? `<div class="muted">Usado el ${esc(new Date(c.usadoEn).toLocaleString("es-CO", { dateStyle: "medium", timeStyle: "short" }))}${c.notaUso ? " · " + esc(c.notaUso) : ""}</div>` : ""}
+          ${ok ? `<p style="margin:.4rem 0 0"><button class="btn btn--gold btn--sm" type="button" id="v-usar">Marcar como usado</button></p>` : ""}
+        </div>`;
+      $("#v-usar")?.addEventListener("click", async () => {
+        const nota = prompt(`Aplicar ${c.descuento} a ${c.clienta.nombre}. Nota (opcional, ej. servicio):`, "");
+        if (nota === null) return;
+        try { const r = await api("/api/admin/cupones", "POST", { accion: "usar", codigo: c.codigo, nota }); pintarValidacion(r.cupon); toast("Cupón marcado como usado."); loadCupones(); }
+        catch (err) { if (err.auth) logout(); else toast(err.message || "No se pudo marcar."); }
+      });
+    }
+    $("#v-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const codigo = $("#v-codigo").value.trim();
+      if (!codigo) return;
+      try { const r = await api("/api/admin/cupones", "POST", { accion: "validar", codigo }); pintarValidacion(r.cupon); }
+      catch (err) {
+        if (err.auth) return logout();
+        $("#v-res").innerHTML = `<div class="cup-res is-bad"><b>${esc(err.message || "No se pudo validar.")}</b></div>`;
+      }
+    });
+    $('[data-tab="fidelidad"]').addEventListener("click", () => loadCupones().catch(() => toast("No se pudieron cargar los cupones.")));
 
     if (pw) enter(); else $("#user").focus();
   })();

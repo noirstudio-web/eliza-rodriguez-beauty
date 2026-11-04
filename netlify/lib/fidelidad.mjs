@@ -46,11 +46,16 @@ const cumple = (n, visitas, consumo) =>
     ? visitas >= n.visitas && consumo >= n.consumo
     : visitas >= n.visitas || (n.consumo > 0 && consumo >= n.consumo);
 
-/** Nivel actual, siguiente nivel y cuánto falta para llegar. */
-export function nivelDe(visitas, consumo, cfg) {
+/**
+ * Nivel actual, siguiente nivel y cuánto falta para llegar.
+ * @param manual nombre de nivel fijado a mano por Eliza (o null = automático)
+ */
+export function nivelDe(visitas, consumo, cfg, manual = null) {
   let idx = 0;
   cfg.niveles.forEach((n, i) => { if (cumple(n, visitas, consumo)) idx = i; });
-  const actual = { ...cfg.niveles[idx], indice: idx };
+  const fijo = manual ? cfg.niveles.findIndex((n) => n.nombre === manual) : -1;
+  if (fijo >= 0) idx = fijo; // Eliza fijó el nivel a mano
+  const actual = { ...cfg.niveles[idx], indice: idx, manual: fijo >= 0 };
   const sig = cfg.niveles[idx + 1];
   const siguiente = sig && {
     nombre: sig.nombre,
@@ -69,17 +74,23 @@ export async function resumen(sql, correo, clientaId, cfg) {
            coalesce(sum(valor_pagado) FILTER (WHERE estado = 'atendida'), 0)::bigint AS consumo,
            to_char(max(fecha) FILTER (WHERE estado = 'atendida'), 'YYYY-MM-DD') AS ultima
     FROM reservas WHERE correo = ${correo}`;
-  let usados = 0, canjes = 0, ajuste = 0;
+  let usados = 0, canjes = 0, ajuste = 0, previas = 0, consumoPrevio = 0, manual = null;
   if (clientaId) {
     const [c] = await sql`
       SELECT coalesce((SELECT sum(sellos_usados) FROM canjes WHERE clienta_id = ${clientaId}), 0)::int AS usados,
              (SELECT count(*) FROM canjes WHERE clienta_id = ${clientaId})::int AS canjes,
-             coalesce((SELECT sum(sellos) FROM ajustes_sellos WHERE clienta_id = ${clientaId}), 0)::int AS ajuste`;
-    usados = c.usados; canjes = c.canjes; ajuste = c.ajuste;
+             coalesce((SELECT sum(sellos) FROM ajustes_sellos WHERE clienta_id = ${clientaId}), 0)::int AS ajuste,
+             cl.visitas_previas, cl.consumo_previo, cl.nivel_manual
+      FROM clientas cl WHERE cl.id = ${clientaId}`;
+    if (c) {
+      usados = c.usados; canjes = c.canjes; ajuste = c.ajuste;
+      previas = c.visitas_previas; consumoPrevio = Number(c.consumo_previo); manual = c.nivel_manual;
+    }
   }
-  const visitas = r.visitas, consumo = Number(r.consumo);
-  // Sellos = visitas + ajustes manuales de Eliza − sellos ya canjeados por regalos
-  const sellos = Math.max(0, visitas + ajuste - usados);
+  // Visitas y consumo = los registrados en el sistema + los anteriores que anotó Eliza
+  const visitas = r.visitas + previas, consumo = Number(r.consumo) + consumoPrevio;
+  // Sellos = visitas en el sistema + sellos puestos a mano (iniciales o ajustes) − canjeados
+  const sellos = Math.max(0, r.visitas + ajuste - usados);
   return {
     visitas,
     consumo,
@@ -88,7 +99,7 @@ export async function resumen(sql, correo, clientaId, cfg) {
     sellosMeta: cfg.sellos,
     premioListo: sellos >= cfg.sellos,
     premiosCanjeados: canjes,
-    ...nivelDe(visitas, consumo, cfg),
+    ...nivelDe(visitas, consumo, cfg, manual),
   };
 }
 

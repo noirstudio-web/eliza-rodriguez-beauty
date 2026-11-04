@@ -7,6 +7,8 @@
    POST { accion: "canjear",   correo }                → entrega el regalo (descuenta sellos)
    POST { accion: "sellos",    correo, sellos, nota }  → suma o quita sellos a mano (±)
    POST { accion: "activar" | "desactivar", correo }   → habilita o bloquea su cuenta
+   POST { accion: "fidelidad", correo, nivel, visitas_previas, consumo_previo } → fidelidad manual
+   (al crear también se aceptan nivel, visitas_previas, consumo_previo y sellos_iniciales)
    ========================================================================== */
 import { db, json, readJson, isAdmin, denied } from "../lib/shared.mjs";
 import { cargarConfig, nivelDe, nuevoEnlace, correoAcceso, hashClave } from "../lib/fidelidad.mjs";
@@ -15,6 +17,19 @@ export const config = { path: "/api/admin/clientas" };
 
 const correoOk = (c) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(c);
 const claveOk = (c) => typeof c === "string" && c.length >= 8 && c.length <= 200;
+const entero = (v, max) => Math.min(max, Math.max(0, Math.round(Number(String(v ?? "").replace(/[^\d]/g, "")) || 0)));
+
+/** Lee y valida los campos de fidelidad manual que envía el panel. */
+function leerFidelidad(b, cfg) {
+  const nivel = b.nivel && b.nivel !== "auto" ? cfg.niveles.map((n) => n.nombre).find((n) => n === b.nivel) : null;
+  if (b.nivel && b.nivel !== "auto" && !nivel) return { error: "Nivel inválido" };
+  return {
+    nivel,
+    visitas: entero(b.visitas_previas, 10000),
+    consumo: entero(b.consumo_previo, 10_000_000_000),
+    sellos: entero(b.sellos_iniciales, 50),
+  };
+}
 
 export default async (req) => {
   if (!(await isAdmin(req))) return denied();
@@ -41,6 +56,7 @@ export default async (req) => {
                coalesce(b.visitas, 0) AS visitas, coalesce(b.faltas, 0) AS faltas,
                coalesce(b.consumo, 0) AS consumo, b.ultima,
                c.id AS clienta_id, c.clave_hash IS NOT NULL AS con_clave, c.activa, c.ultimo_acceso,
+               coalesce(c.visitas_previas, 0) AS visitas_previas, coalesce(c.consumo_previo, 0)::bigint AS consumo_previo, c.nivel_manual,
                coalesce((SELECT sum(sellos_usados) FROM canjes k WHERE k.clienta_id = c.id), 0)::int AS usados,
                coalesce((SELECT sum(sellos) FROM ajustes_sellos a WHERE a.clienta_id = c.id), 0)::int AS ajuste,
                (SELECT count(*) FROM canjes k WHERE k.clienta_id = c.id)::int AS regalos,
@@ -55,13 +71,16 @@ export default async (req) => {
 
       const porNivel = Object.fromEntries(cfg.niveles.map((n) => [n.nombre, 0]));
       const clientas = filas.map((f) => {
-        const consumo = Number(f.consumo);
-        const n = nivelDe(f.visitas, consumo, cfg);
+        // Totales = lo registrado en el sistema + lo anterior que anotó Eliza
+        const visitasTotal = f.visitas + Number(f.visitas_previas || 0);
+        const consumo = Number(f.consumo) + Number(f.consumo_previo || 0);
+        const n = nivelDe(visitasTotal, consumo, cfg, f.nivel_manual);
         if (f.clienta_id) porNivel[n.actual.nombre] = (porNivel[n.actual.nombre] || 0) + 1;
         return {
           correo: f.correo, nombre: f.nombre, whatsapp: f.whatsapp,
-          visitas: f.visitas, faltas: f.faltas, consumo, ultima: f.ultima,
-          nivel: n.actual.nombre, siguiente: n.siguiente,
+          visitas: visitasTotal, visitasSistema: f.visitas, visitasPrevias: Number(f.visitas_previas || 0),
+          consumoPrevio: Number(f.consumo_previo || 0), faltas: f.faltas, consumo, ultima: f.ultima,
+          nivel: n.actual.nombre, nivelManual: f.nivel_manual || null, siguiente: n.actual.manual ? null : n.siguiente,
           sellos: Math.max(0, f.visitas + f.ajuste - f.usados), sellosMeta: cfg.sellos, ajuste: f.ajuste,
           regalos: f.regalos, historial: f.historial || [],
           cuenta: !f.clienta_id ? "no" : !f.activa ? "desactivada" : f.con_clave ? "activa" : "sin_clave",
@@ -92,13 +111,19 @@ export default async (req) => {
         if (!claveOk(b.clave)) return json(400, { ok: false, error: "La contraseña debe tener al menos 8 caracteres" });
         const [existe] = await sql`SELECT id, clave_hash FROM clientas WHERE correo = ${correo}`;
         if (existe?.clave_hash) return json(409, { ok: false, error: "Ya existe una cuenta con ese correo. Usa “Cambiar contraseña”." });
+        const fid = leerFidelidad(b, cfg);
+        if (fid.error) return json(400, { ok: false, error: fid.error });
         const hash = await hashClave(b.clave);
         const [c] = await sql`
-          INSERT INTO clientas (correo, nombre, whatsapp, clave_hash, clave_creada_en)
-          VALUES (${correo}, ${nombre}, ${whatsapp}, ${hash}, now())
+          INSERT INTO clientas (correo, nombre, whatsapp, clave_hash, clave_creada_en, nivel_manual, visitas_previas, consumo_previo)
+          VALUES (${correo}, ${nombre}, ${whatsapp}, ${hash}, now(), ${fid.nivel}, ${fid.visitas}, ${fid.consumo})
           ON CONFLICT (correo) DO UPDATE SET nombre = EXCLUDED.nombre, whatsapp = coalesce(EXCLUDED.whatsapp, clientas.whatsapp),
-            clave_hash = EXCLUDED.clave_hash, clave_creada_en = now(), activa = true, fallos = 0, bloqueada_hasta = NULL
+            clave_hash = EXCLUDED.clave_hash, clave_creada_en = now(), activa = true, fallos = 0, bloqueada_hasta = NULL,
+            nivel_manual = EXCLUDED.nivel_manual, visitas_previas = EXCLUDED.visitas_previas, consumo_previo = EXCLUDED.consumo_previo
           RETURNING id, nombre, whatsapp, correo`;
+        if (fid.sellos > 0) {
+          await sql`INSERT INTO ajustes_sellos (clienta_id, sellos, nota) VALUES (${c.id}, ${fid.sellos}, 'Sellos iniciales')`;
+        }
         return json(201, { ok: true, clienta: c });
       }
 
@@ -147,6 +172,14 @@ export default async (req) => {
                  - coalesce((SELECT sum(sellos_usados) FROM canjes WHERE clienta_id = ${c.id}), 0))::int AS disponibles`;
         if (disponibles < cfg.sellos) return json(400, { ok: false, error: "Aún no completa la tarjeta de sellos" });
         await sql`INSERT INTO canjes (clienta_id, sellos_usados, premio) VALUES (${c.id}, ${cfg.sellos}, ${cfg.premio})`;
+        return json(200, { ok: true });
+      }
+
+      if (b.accion === "fidelidad") {
+        const fid = leerFidelidad(b, cfg);
+        if (fid.error) return json(400, { ok: false, error: fid.error });
+        const c = await cuenta();
+        await sql`UPDATE clientas SET nivel_manual = ${fid.nivel}, visitas_previas = ${fid.visitas}, consumo_previo = ${fid.consumo} WHERE id = ${c.id}`;
         return json(200, { ok: true });
       }
 

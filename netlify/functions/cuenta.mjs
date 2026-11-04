@@ -12,6 +12,7 @@ import {
   cargarConfig, resumen, hashClave, verificarClave, crearSesion, clientaDeSesion,
   huella, nuevoEnlace, correoAcceso,
 } from "../lib/fidelidad.mjs";
+import { cuponesDeClienta } from "../lib/cupones.mjs";
 
 export const config = { path: "/api/cuenta/*" };
 
@@ -61,6 +62,7 @@ export default async (req) => {
       if (!c) return json(401, { ok: false, error: "Sesión vencida" });
       const cfg = await cargarConfig(sql);
       const r = await resumen(sql, c.correo, c.id, cfg);
+      const cupones = await cuponesDeClienta(sql, c.id, r.actual.indice, cfg);
       const citas = await sql`
         SELECT servicio, estado, to_char(fecha, 'YYYY-MM-DD') AS fecha, to_char(hora, 'HH24:MI') AS hora, cancel_token
         FROM reservas WHERE correo = ${c.correo}
@@ -72,6 +74,7 @@ export default async (req) => {
         ...r,
         premio: cfg.premio,
         niveles: cfg.niveles.map(({ nombre, descripcion }) => ({ nombre, descripcion })),
+        cupones,
         citas: citas.map((x) => ({
           servicio: x.servicio,
           estado: x.estado,

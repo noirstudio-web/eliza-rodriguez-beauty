@@ -307,7 +307,9 @@ class VistaNuevas extends VistaClientas {
   constructor(ctx) { super(ctx); this.pendiente = null; }
 
   async cargar() {
-    this.enviar({ tipo: "listo" });
+    const r = await api(this.ctx, "/api/admin/clientas");
+    if (r.status === 401) return this.sesionVencida();
+    this.enviar({ tipo: "listo", niveles: (r.config?.niveles || []).map((n) => n.nombre) });
     if (this.pendiente) { this.enviar({ tipo: "prellenar", datos: this.pendiente }); this.pendiente = null; }
   }
 
@@ -331,6 +333,9 @@ class VistaNuevas extends VistaClientas {
   button.sec { color: var(--vscode-button-secondaryForeground); background: var(--vscode-button-secondaryBackground); }
   button.sec:hover { background: var(--vscode-button-secondaryHoverBackground); }
   button[disabled] { opacity: .6; cursor: wait; }
+  select { width: 100%; box-sizing: border-box; padding: 5px 7px; margin: 3px 0 2px; color: var(--vscode-input-foreground); background: var(--vscode-input-background); border: 1px solid var(--vscode-input-border, transparent); border-radius: 3px; font: inherit; }
+  details.fid { border: 1px solid var(--vscode-panel-border, #8884); border-radius: 6px; padding: 6px 10px; margin: 10px 0 0; }
+  details.fid summary { cursor: pointer; font-weight: 600; }
   .ok { border: 1px solid var(--vscode-panel-border, #8884); border-radius: 6px; padding: 10px; margin: 14px 0; }
   .ok h3 { margin: 0 0 8px; font-size: 1em; }
   .ok dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; margin: 0 0 10px; }
@@ -345,7 +350,7 @@ class VistaNuevas extends VistaClientas {
   const vscode = acquireVsCodeApi();
   const app = document.getElementById("app");
   const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  let ultima = null, verClave = true;
+  let ultima = null, verClave = true, niveles = [];
   /** Conserva lo escrito en el formulario al volver a pintarlo. */
   const datosForm = () => ({
     nombre: document.getElementById("c-nombre")?.value || "",
@@ -384,6 +389,14 @@ class VistaNuevas extends VistaClientas {
           <div class="fila"><input id="c-clave" type="password" autocomplete="new-password" placeholder="Vacía = se genera una al azar"><button class="sec" type="button" id="ver">Ver</button></div>
         </label>
         <label>WhatsApp (opcional, para enviarle sus datos)<input id="c-wa" value="\${esc(d.whatsapp)}" placeholder="300 123 4567"></label>
+        <details class="fid">
+          <summary>Fidelidad (opcional)</summary>
+          <label>Nivel<select id="c-nivel"><option value="auto">Automático (según sus visitas)</option>\${niveles.map((n) => \`<option value="\${esc(n)}">\${esc(n)} (fijo)</option>\`).join("")}</select></label>
+          <label>Visitas anteriores<input id="c-visitas" inputmode="numeric" placeholder="0"></label>
+          <label>Consumo anterior ($)<input id="c-consumo" inputmode="numeric" placeholder="0"></label>
+          <label>Sellos iniciales<input id="c-sellos" inputmode="numeric" placeholder="0"></label>
+          <p class="muted">Para clientas que ya venían antes del sistema.</p>
+        </details>
         <p class="muted">Usa el mismo correo con el que la clienta reserva para que se sumen sus visitas.</p>
         <p><button type="submit" id="crear">Crear cuenta</button></p>
       </form>
@@ -418,7 +431,8 @@ class VistaNuevas extends VistaClientas {
       if (!v("c-nombre") || !v("c-correo")) return;
       if (clave.value && clave.value.length < 8) return vscode.postMessage({ tipo: "aviso", texto: "La contraseña debe tener al menos 8 caracteres." });
       document.getElementById("crear").disabled = true;
-      vscode.postMessage({ tipo: "accion", accion: "crear", datos: { nombre: v("c-nombre"), correo: v("c-correo").toLowerCase(), whatsapp: v("c-wa"), clave: clave.value } });
+      vscode.postMessage({ tipo: "accion", accion: "crear", datos: { nombre: v("c-nombre"), correo: v("c-correo").toLowerCase(), whatsapp: v("c-wa"), clave: clave.value,
+        nivel: document.getElementById("c-nivel").value, visitas_previas: v("c-visitas"), consumo_previo: v("c-consumo"), sellos_iniciales: v("c-sellos") } });
       setTimeout(() => { const b = document.getElementById("crear"); if (b) b.disabled = false; }, 4000);
     });
     // Vista previa del saludo que verá la clienta
@@ -431,7 +445,7 @@ class VistaNuevas extends VistaClientas {
 
   window.addEventListener("message", ({ data: m }) => {
     if (m.tipo === "login") login(m.error);
-    if (m.tipo === "listo") formulario();
+    if (m.tipo === "listo") { if (m.niveles) niveles = m.niveles; formulario(); }
     if (m.tipo === "prellenar") formulario(m.datos || {});
     if (m.tipo === "creada") { ultima = { nombre: m.nombre, correo: m.correo, clave: m.clave, whatsapp: m.whatsapp }; verClave = true; formulario(); }
   });

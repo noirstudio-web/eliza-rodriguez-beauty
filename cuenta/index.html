@@ -89,6 +89,15 @@
     .prize { background: var(--beige); border-radius: 14px; padding: .8rem 1rem; font-size: .9rem; }
     .prize.is-ready { background: var(--ink); color: var(--cream); }
 
+    /* Cupones */
+    .cupones { display: grid; gap: .75rem; }
+    .cupon { position: relative; display: grid; grid-template-columns: auto 1fr; gap: .25rem 1rem; align-items: center; border: 1.5px dashed var(--gold); border-radius: 16px; padding: 1rem 1.1rem; background: linear-gradient(135deg, #FFFDF9, var(--cream)); }
+    .cupon__valor { grid-row: span 3; font: 600 2rem/1 var(--serif); color: var(--gold-ink); min-width: 4.5rem; text-align: center; }
+    .cupon__titulo { font-weight: 500; }
+    .cupon__meta { font-size: .8rem; color: var(--ink-soft); }
+    .cupon__codigo { font: 600 1.05rem/1.2 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .08em; background: var(--white); border: 1px solid var(--line); border-radius: 8px; padding: .35rem .6rem; justify-self: start; user-select: all; }
+    .cupon.is-usado { opacity: .55; border-style: solid; border-color: var(--line); }
+    .cupon.is-usado .cupon__codigo { text-decoration: line-through; }
     .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; }
     .kpi { background: var(--cream); border-radius: 14px; padding: .85rem 1rem; }
     .kpi b { display: block; font: 600 1.8rem/1 var(--serif); }
@@ -273,6 +282,20 @@
             <p class="prize ${d.premioListo ? "is-ready" : ""}">${d.premioListo
               ? "¡Completaste tu tarjeta! Reclama tu regalo en tu próxima visita."
               : `Llevas <b>${llenos}</b> de ${d.sellosMeta} sellos. Te faltan ${d.sellosMeta - llenos}.`}</p>
+          </section>
+
+          <section class="card span2" aria-label="Mis cupones">
+            <h2>Mis cupones</h2>
+            ${(d.cupones || []).length ? `
+              <p class="muted" style="margin:0 0 .9rem">Muéstrale el código a Eliza al pagar. Cada cupón se usa una sola vez.</p>
+              <div class="cupones">${d.cupones.map((c) => `
+                <div class="cupon ${c.usado ? "is-usado" : ""}">
+                  <div class="cupon__valor">${esc(c.descuento)}</div>
+                  <div class="cupon__titulo">${esc(c.titulo)}</div>
+                  <div class="cupon__codigo" aria-label="Código del cupón">${esc(c.codigo)}</div>
+                  <div class="cupon__meta">${c.usado ? "Ya usado" : esc(c.para) + (c.vence ? " · Vence el " + esc(new Date(c.vence + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })) : "")}${c.descripcion ? " · " + esc(c.descripcion) : ""}</div>
+                </div>`).join("")}
+              </div>` : `<p class="muted" style="margin:0">Por ahora no tienes cupones. ¡Pronto llegarán sorpresas según tu nivel!</p>`}
           </section>
 
           <section class="card span2" aria-label="Resumen">
