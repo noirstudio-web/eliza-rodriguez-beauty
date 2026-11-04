@@ -155,6 +155,7 @@
 
     <nav class="tabs" role="tablist" aria-label="Secciones del panel">
       <button class="tab" role="tab" data-tab="reservas" aria-selected="true">Reservas</button>
+      <button class="tab" role="tab" data-tab="clientas" aria-selected="false">Clientas</button>
       <button class="tab" role="tab" data-tab="servicios" aria-selected="false">Servicios y precios</button>
       <button class="tab" role="tab" data-tab="resultados" aria-selected="false">Resultados</button>
       <button class="tab" role="tab" data-tab="textos" aria-selected="false">Textos</button>
@@ -217,6 +218,24 @@
       </div>
     </section>
 
+    <!-- Clientas y fidelidad -->
+    <section id="tab-clientas" role="tabpanel" hidden>
+      <p class="intro">Las cuentas se crean <b>solas</b> cuando marcas “Asistió” por segunda vez: la clienta recibe un enlace para crear <b>su propia contraseña</b> (usuario = su correo). Con <b>“Enviar acceso”</b> le mandas ese enlace por WhatsApp cuando quieras.</p>
+      <div class="tools">
+        <input id="cq" type="search" placeholder="Buscar clienta…" aria-label="Buscar clienta">
+        <button class="btn btn--sm" type="button" id="c-refresh">Actualizar</button>
+      </div>
+      <div class="list" id="c-list"></div>
+
+      <div class="group" style="margin-top:2rem">
+        <h2>Niveles y tarjeta de sellos</h2>
+        <p class="muted" style="margin:0 0 .75rem">Regla “o”: basta cumplir las visitas <i>o</i> el consumo. Regla “y”: hay que cumplir ambos. Consumo 0 = solo cuentan las visitas.</p>
+        <div id="fid-form"></div>
+        <p style="margin-top:.75rem;display:flex;gap:.75rem;flex-wrap:wrap;align-items:center"><button class="btn btn--gold" type="button" id="fid-save">Guardar niveles y sellos</button>
+        <button class="link" type="button" id="fid-reset">Volver a los valores de fábrica</button></p>
+      </div>
+    </section>
+
     <!-- Fotos -->
     <section id="tab-fotos" role="tabpanel" hidden>
       <p class="intro">Fotos principales de la página. Se ven mejor en <b>vertical</b> (formato 4:5).</p>
@@ -243,6 +262,7 @@
     const clone = (o) => JSON.parse(JSON.stringify(o));
     const src = (u) => (!u ? "" : u.startsWith("/") || /^https?:/.test(u) ? u : "../" + u);
     const ESTADOS = { pendiente: "Pendiente", confirmada: "Confirmada", atendida: "Asistió", no_asistio: "No asistió", cancelada: "Cancelada" };
+    const peso = (n) => "$" + Number(n || 0).toLocaleString("es-CO");
 
     let pw = "";
     try { pw = sessionStorage.getItem("erb-admin") || ""; } catch (_) {}
@@ -349,8 +369,9 @@
             ${r.comentario ? `<dt>Nota</dt><dd>${esc(r.comentario)}</dd>` : ""}
             ${r.estado === "cancelada" && r.cancelada_por === "clienta" ? `<dt>Aviso</dt><dd>La clienta canceló con el enlace</dd>` : ""}
             ${r.recordatorio ? `<dt>Recordatorio</dt><dd>Enviado</dd>` : ""}
+            ${r.valor_pagado != null ? `<dt>Pagó</dt><dd>${esc(peso(r.valor_pagado))}</dd>` : ""}
           </dl>
-          ${yaPaso ? `<div class="asist"><button class="btn btn--gold btn--sm" data-set="atendida" data-id="${r.id}">✓ Asistió</button><button class="btn btn--danger btn--sm" data-set="no_asistio" data-id="${r.id}">✗ No asistió</button></div>` : ""}
+          ${yaPaso ? `<div class="asist"><input type="text" inputmode="numeric" class="valor" placeholder="Valor pagado $" aria-label="Valor pagado por ${esc(r.nombre)}" style="flex:1 1 140px;min-height:36px"><button class="btn btn--gold btn--sm" data-set="atendida" data-id="${r.id}">✓ Asistió</button><button class="btn btn--danger btn--sm" data-set="no_asistio" data-id="${r.id}">✗ No asistió</button></div>` : ""}
           <div class="card__actions">
             <a class="btn btn--sm" href="${waCliente(r)}" target="_blank" rel="noopener">WhatsApp a la clienta</a>
             <select class="estado" data-id="${r.id}" aria-label="Estado de la reserva de ${esc(r.nombre)}">
@@ -360,12 +381,27 @@
         </article>`;
       }).join("");
     }
-    async function setEstado(id, estado) {
+    async function setEstado(id, estado, valor) {
       try {
-        await api("/api/admin/reservas", "PATCH", { id: Number(id), estado });
-        const r = reservas.find((x) => x.id == id); if (r) r.estado = estado;
+        const res = await api("/api/admin/reservas", "PATCH", { id: Number(id), estado, valor_pagado: valor });
+        const r = reservas.find((x) => x.id == id);
+        if (r) { r.estado = estado; r.valor_pagado = res.reserva.valor_pagado; }
         renderReservas(); toast("Marcado: " + ESTADOS[estado]);
-      } catch (err) { if (err.auth) logout(); else { toast("No se pudo actualizar."); renderReservas(); } }
+        clientasCargadas = false;
+        if (res.cuentaNueva) ofrecerAcceso(res.cuentaNueva, true);
+      } catch (err) { if (err.auth) logout(); else { toast(err.message === "Valor pagado inválido" ? err.message : "No se pudo actualizar."); renderReservas(); } }
+    }
+    /** Mensaje de WhatsApp con el enlace de acceso a la cuenta. */
+    function ofrecerAcceso(c, nueva) {
+      const nombre = String(c.nombre || "").split(" ")[0];
+      const pregunta = nueva
+        ? `${nombre} completó su 2.ª visita y ya tiene cuenta de clienta (usuario: ${c.correo}).\n\n¿Le envías por WhatsApp el enlace para crear su contraseña?`
+        : `¿Enviar a ${nombre} el enlace de acceso por WhatsApp?`;
+      if (!c.whatsapp || !confirm(pregunta)) return;
+      let n = String(c.whatsapp).replace(/\D/g, "");
+      if (n.length === 10 && n.startsWith("3")) n = "57" + n;
+      const msg = `Hola ${nombre}, ¡gracias por volver a Eliza Rodriguez Beauty! Ya tienes tu cuenta de clienta, donde verás tu nivel, tus visitas y tu tarjeta de sellos.\n\nCrea tu contraseña aquí (usuario: ${c.correo}):\n${c.url}`;
+      window.open(`https://wa.me/${n}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
     }
     $$(".chip").forEach((c) => c.addEventListener("click", () => {
       filtro = c.dataset.f; $$(".chip").forEach((x) => x.setAttribute("aria-pressed", String(x === c))); renderReservas();
@@ -373,10 +409,14 @@
     $("#q").addEventListener("input", renderReservas);
     $("#refresh").addEventListener("click", () => loadReservas().catch(() => toast("No se pudo actualizar.")));
     $("#list").addEventListener("change", (e) => { const s = e.target.closest(".estado"); if (s) setEstado(s.dataset.id, s.value); });
-    $("#list").addEventListener("click", (e) => { const b = e.target.closest("[data-set]"); if (b) setEstado(b.dataset.id, b.dataset.set); });
+    $("#list").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-set]"); if (!b) return;
+      const valor = b.dataset.set === "atendida" ? b.closest(".asist")?.querySelector(".valor")?.value.trim() : undefined;
+      setEstado(b.dataset.id, b.dataset.set, valor || undefined);
+    });
     $("#csv").addEventListener("click", () => {
-      const cols = ["id", "fecha", "hora", "nombre", "whatsapp", "correo", "servicio", "comentario", "estado", "creada_en"];
-      const head = ["ID", "Fecha", "Hora", "Nombre", "WhatsApp", "Correo", "Servicio", "Comentario", "Estado", "Recibida"];
+      const cols = ["id", "fecha", "hora", "nombre", "whatsapp", "correo", "servicio", "comentario", "estado", "valor_pagado", "creada_en"];
+      const head = ["ID", "Fecha", "Hora", "Nombre", "WhatsApp", "Correo", "Servicio", "Comentario", "Estado", "Valor pagado", "Recibida"];
       const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
       const rows = [head.map(cell).join(";")].concat(filtradas().map((r) => cols.map((c) => cell(c === "estado" ? ESTADOS[r[c]] : r[c])).join(";")));
       const a = document.createElement("a");
@@ -612,6 +652,91 @@
     $("#img-list").addEventListener("click", (e) => {
       const k = e.target.dataset.orig; if (!k) return;
       delete edit.fotos[k]; renderFotos(); setDirty("fotos");
+    });
+
+    /* ======================= Clientas y fidelidad ======================= */
+    let clientas = [], fid = null, clientasCargadas = false;
+    const CUENTA = { activa: "Cuenta activa", sin_clave: "Sin contraseña aún", pendiente: "Cuenta por crear", no: "Sin cuenta (menos de 2 visitas)" };
+    async function loadClientas() {
+      const r = await api("/api/admin/clientas");
+      clientas = r.clientas; fid = r.config; clientasCargadas = true;
+      renderClientas(); renderFid();
+    }
+    function renderClientas() {
+      const q = $("#cq").value.trim().toLowerCase();
+      const list = clientas.filter((c) => !q || [c.nombre, c.correo, c.whatsapp, c.nivel].join(" ").toLowerCase().includes(q));
+      if (!list.length) { $("#c-list").innerHTML = '<p class="empty">Aún no hay clientas con visitas registradas. Marca “Asistió” en las reservas.</p>'; return; }
+      $("#c-list").innerHTML = list.map((c) => `
+        <article class="card">
+          <div class="card__head">
+            <div><div class="card__when">${esc(c.nombre)}</div><div class="muted">${esc(c.correo)}</div></div>
+            <span class="badge badge--confirmada">${esc(c.nivel)}</span>
+          </div>
+          <dl>
+            <dt>Visitas</dt><dd>${c.visitas}${c.faltas ? ` · ${c.faltas} sin asistir` : ""}</dd>
+            <dt>Consumo</dt><dd>${esc(peso(c.consumo))}</dd>
+            <dt>Sellos</dt><dd>${Math.min(c.sellos, c.sellosMeta)} de ${c.sellosMeta}${c.sellos >= c.sellosMeta ? " · <b>¡regalo listo!</b>" : ""}</dd>
+            ${c.siguiente ? `<dt>Siguiente</dt><dd>${esc(c.siguiente.nombre)}${c.siguiente.faltanVisitas ? ` · faltan ${c.siguiente.faltanVisitas} visitas` : ""}</dd>` : ""}
+            <dt>Cuenta</dt><dd>${esc(CUENTA[c.cuenta])}</dd>
+          </dl>
+          <div class="card__actions">
+            <button class="btn btn--sm" type="button" data-acceso="${esc(c.correo)}">Enviar acceso</button>
+            ${c.sellos >= c.sellosMeta && c.cuenta !== "no" ? `<button class="btn btn--gold btn--sm" type="button" data-canje="${esc(c.correo)}">Entregar regalo</button>` : ""}
+          </div>
+        </article>`).join("");
+    }
+    $("#c-list").addEventListener("click", async (e) => {
+      const a = e.target.closest("[data-acceso]"), k = e.target.closest("[data-canje]");
+      try {
+        if (a) {
+          const r = await api("/api/admin/clientas", "POST", { accion: "enlace", correo: a.dataset.acceso });
+          toast(r.correoEnviado ? "Enlace enviado también por correo." : "Enlace listo.");
+          ofrecerAcceso({ ...r, correo: a.dataset.acceso }, false);
+          loadClientas();
+        }
+        if (k && confirm(`¿Entregar el regalo (${fid.premio})? Se descontarán ${fid.sellos} sellos.`)) {
+          await api("/api/admin/clientas", "POST", { accion: "canjear", correo: k.dataset.canje });
+          toast("Regalo registrado. ¡Tarjeta nueva!"); loadClientas();
+        }
+      } catch (err) { if (err.auth) logout(); else toast(err.message || "No se pudo completar."); }
+    });
+    $("#cq").addEventListener("input", renderClientas);
+    $("#c-refresh").addEventListener("click", () => loadClientas().catch(() => toast("No se pudo actualizar.")));
+    $('[data-tab="clientas"]').addEventListener("click", () => { if (!clientasCargadas) loadClientas().catch(() => toast("No se pudieron cargar las clientas.")); });
+
+    function renderFid() {
+      if (!fid) return;
+      $("#fid-form").innerHTML = fid.niveles.map((n, i) => `
+        <div class="field" data-i="${i}">
+          <div class="field__head"><span>Nivel ${i + 1}</span></div>
+          <div class="grid2">
+            <label class="f">Nombre<input type="text" data-k="nombre" value="${esc(n.nombre)}"></label>
+            <label class="f">Descripción<input type="text" data-k="descripcion" value="${esc(n.descripcion)}"></label>
+            <label class="f">Visitas mínimas<input type="text" inputmode="numeric" data-k="visitas" value="${n.visitas}"></label>
+            <label class="f">Consumo mínimo ($)<input type="text" inputmode="numeric" data-k="consumo" value="${n.consumo}"></label>
+            <label class="f">Regla<select class="input" data-k="regla"><option value="o" ${n.regla !== "y" ? "selected" : ""}>Visitas O consumo</option><option value="y" ${n.regla === "y" ? "selected" : ""}>Visitas Y consumo</option></select></label>
+          </div>
+        </div>`).join("") + `
+        <div class="field"><div class="grid2">
+          <label class="f">Sellos para el regalo<input type="text" inputmode="numeric" id="fid-sellos" value="${fid.sellos}"></label>
+          <label class="f">Regalo<input type="text" id="fid-premio" value="${esc(fid.premio)}"></label>
+        </div></div>`;
+    }
+    const num = (v) => Number(String(v).replace(/\D/g, "")) || 0;
+    $("#fid-save").addEventListener("click", async () => {
+      const niveles = $$("#fid-form [data-i]").map((f) => {
+        const v = (k) => f.querySelector(`[data-k="${k}"]`).value;
+        return { nombre: v("nombre"), descripcion: v("descripcion"), visitas: num(v("visitas")), consumo: num(v("consumo")), regla: v("regla") };
+      });
+      try {
+        await api("/api/admin/contenido", "PUT", { clave: "fidelidad", valor: { niveles, sellos: num($("#fid-sellos").value), premio: $("#fid-premio").value } });
+        toast("Niveles guardados."); loadClientas();
+      } catch (err) { if (err.auth) logout(); else toast("No se pudo guardar."); }
+    });
+    $("#fid-reset").addEventListener("click", async () => {
+      if (!confirm("¿Volver a los niveles y sellos de fábrica?")) return;
+      try { await api("/api/admin/contenido", "DELETE", { clave: "fidelidad" }); toast("Restaurado."); loadClientas(); }
+      catch (err) { if (err.auth) logout(); else toast("No se pudo restaurar."); }
     });
 
     if (pw) enter(); else $("#pw").focus();

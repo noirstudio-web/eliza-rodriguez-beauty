@@ -4,6 +4,9 @@
    DELETE { clave }        → vuelve a los valores por defecto del sitio
    ========================================================================== */
 import { db, json, readJson, isAdmin, denied, limpiarContenido } from "../lib/shared.mjs";
+import { limpiarFidelidad } from "../lib/fidelidad.mjs";
+
+const limpiar = (clave, valor) => (clave === "fidelidad" ? limpiarFidelidad(valor) : limpiarContenido(clave, valor));
 
 export const config = { path: "/api/admin/contenido" };
 
@@ -15,7 +18,7 @@ export default async (req) => {
 
   try {
     if (req.method === "PUT") {
-      const valor = limpiarContenido(clave, b.valor);
+      const valor = limpiar(clave, b.valor);
       if (valor === null) return json(400, { ok: false, error: "Datos inválidos" });
       const texto = JSON.stringify(valor);
       if (texto.length > 300_000) return json(413, { ok: false, error: "Demasiado contenido" });
@@ -26,7 +29,7 @@ export default async (req) => {
     }
 
     if (req.method === "DELETE") {
-      if (limpiarContenido(clave, clave === "textos" || clave === "fotos" ? {} : []) === null) {
+      if (clave !== "fidelidad" && limpiarContenido(clave, clave === "textos" || clave === "fotos" ? {} : []) === null) {
         return json(400, { ok: false, error: "Sección inválida" });
       }
       await sql`DELETE FROM contenido WHERE clave = ${clave}`;

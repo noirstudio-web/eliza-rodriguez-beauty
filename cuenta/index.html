@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Mi cuenta | Eliza Rodriguez Beauty</title>
+  <link rel="icon" href="../assets/img/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@300;400;500&display=swap">
+  <style>
+    :root {
+      --cream: #F8F1E7; --beige: #EFE4D6; --gold: #B8945A; --gold-ink: #7E5F30;
+      --ink: #2B2420; --ink-soft: #5A4E46; --white: #FFFFFF; --line: rgba(184,148,90,.35); --bad: #A3412F; --ok: #2F6B4F;
+      --serif: "Cormorant Garamond", Georgia, serif; --sans: "Montserrat", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--cream); color: var(--ink); font: 400 15px/1.6 var(--sans); }
+    button, input { font: inherit; color: inherit; }
+    a { color: var(--gold-ink); }
+    :focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; max-width: 980px; margin: 0 auto; padding: 1rem 1.25rem; }
+    .top img { height: 44px; width: auto; display: block; }
+    main { max-width: 980px; margin: 0 auto; padding: .5rem 1.25rem 8rem; }
+    h1 { font: 500 clamp(2rem, 7vw, 2.8rem)/1.1 var(--serif); margin: 0 0 .4rem; }
+    h2 { font: 600 1.4rem/1.2 var(--serif); margin: 0 0 .75rem; }
+    .muted { color: var(--ink-soft); }
+    .eyebrow { font-size: .75rem; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: var(--gold-ink); margin: 0 0 .6rem; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; min-height: 46px; padding: .6rem 1.3rem; border-radius: 999px; border: 1px solid var(--gold); background: transparent; cursor: pointer; font-weight: 500; font-size: .9rem; text-decoration: none; color: var(--ink); }
+    .btn--gold { background: var(--gold); }
+    .btn--sm { min-height: 38px; padding: .35rem .9rem; font-size: .82rem; }
+    .btn:hover { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+    .btn[disabled] { opacity: .6; cursor: wait; }
+    .link { background: none; border: 0; padding: 0; color: var(--gold-ink); text-decoration: underline; cursor: pointer; font-size: .88rem; }
+
+    /* Formularios */
+    .auth { max-width: 420px; margin: 6vh auto 0; background: var(--white); border: 1px solid var(--line); border-radius: 22px; padding: 2rem 1.5rem; }
+    .auth h1 { font-size: 2rem; text-align: center; }
+    .auth > p { text-align: center; }
+    label { display: grid; gap: .3rem; font-size: .8rem; font-weight: 500; letter-spacing: .06em; color: var(--ink-soft); margin-top: 1rem; }
+    input { width: 100%; min-height: 50px; padding: .7rem 1rem; border: 1px solid rgba(43,36,32,.2); border-radius: 12px; background: var(--cream); font-size: 1rem; }
+    input:focus { outline: none; border-color: var(--gold); background: var(--white); box-shadow: 0 0 0 3px rgba(184,148,90,.22); }
+    .auth .btn { width: 100%; margin-top: 1.25rem; }
+    .msg { margin: 1rem 0 0; font-size: .88rem; text-align: center; min-height: 1.4em; }
+    .msg.is-error { color: var(--bad); }
+    .msg.is-ok { color: var(--ok); }
+    .alt { text-align: center; margin-top: 1rem; }
+
+    /* Panel */
+    .hello { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin: 1rem 0 1.5rem; }
+    .grid { display: grid; gap: 1rem; }
+    .card { background: var(--white); border: 1px solid var(--line); border-radius: 22px; padding: 1.4rem 1.3rem; }
+
+    /* Tarjeta de nivel: cada nivel tiene su acabado */
+    .tier { position: relative; overflow: hidden; border-radius: 22px; padding: 1.5rem 1.4rem 1.3rem; color: var(--ink); border: 1px solid var(--line); min-height: 210px; display: grid; align-content: space-between; gap: 1rem; }
+    .tier::after { content: ""; position: absolute; right: -60px; top: -60px; width: 220px; height: 220px; border-radius: 50%; border: 1px solid rgba(255,255,255,.45); }
+    .tier--0 { background: linear-gradient(135deg, #FFFFFF, #F3E9DC); }
+    .tier--1 { background: linear-gradient(135deg, #F8EBDD, #EBCDB7); }
+    .tier--2 { background: linear-gradient(135deg, #E9D3A6, #C9A465); }
+    .tier--3 { background: linear-gradient(135deg, #3A302A, #1F1915); color: var(--cream); }
+    .tier--4 { background: linear-gradient(135deg, #1B1613, #3B2D1E 55%, #B8945A); color: var(--cream); }
+    .tier__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+    .tier__label { font-size: .7rem; letter-spacing: .26em; text-transform: uppercase; opacity: .8; }
+    .tier__name { font: 600 2.4rem/1 var(--serif); letter-spacing: .04em; margin: .3rem 0 .2rem; }
+    .tier__desc { font-size: .88rem; opacity: .85; margin: 0; }
+    .tier img { height: 34px; width: auto; opacity: .9; }
+    .tier--3 img, .tier--4 img { filter: brightness(1.6); }
+    .bar { height: 6px; border-radius: 999px; background: rgba(43,36,32,.12); overflow: hidden; }
+    .tier--3 .bar, .tier--4 .bar { background: rgba(248,241,231,.2); }
+    .bar span { display: block; height: 100%; background: var(--gold); border-radius: inherit; }
+    .tier--2 .bar span { background: var(--ink); }
+    .tier__next { font-size: .82rem; margin: .5rem 0 0; opacity: .9; }
+
+    /* Escalera de niveles */
+    .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: .3rem; margin-top: .25rem; }
+    .step { text-align: center; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+    .step i { display: block; height: 4px; border-radius: 4px; background: var(--beige); margin-bottom: .35rem; }
+    .step.is-on i { background: var(--gold); }
+    .step.is-now { color: var(--ink); font-weight: 500; }
+
+    /* Sellos */
+    .stamps { display: grid; grid-template-columns: repeat(5, 1fr); gap: .6rem; margin: 1rem 0 .75rem; }
+    .stamp { aspect-ratio: 1; border-radius: 50%; border: 1.5px dashed var(--line); display: grid; place-items: center; }
+    .stamp.is-on { border: 0; background: radial-gradient(circle at 35% 30%, #D9B97F, var(--gold) 60%, #9C7A44); box-shadow: inset 0 0 0 3px rgba(255,255,255,.35); }
+    .stamp svg { width: 46%; height: 46%; }
+    .stamp.is-gift { border-style: solid; border-color: var(--gold); }
+    .prize { background: var(--beige); border-radius: 14px; padding: .8rem 1rem; font-size: .9rem; }
+    .prize.is-ready { background: var(--ink); color: var(--cream); }
+
+    .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+    .kpi { background: var(--cream); border-radius: 14px; padding: .85rem 1rem; }
+    .kpi b { display: block; font: 600 1.8rem/1 var(--serif); }
+    .kpi span { font-size: .78rem; color: var(--ink-soft); }
+
+    .citas { display: grid; gap: .5rem; margin: 0; padding: 0; list-style: none; }
+    .cita { display: flex; justify-content: space-between; align-items: center; gap: .75rem; padding: .75rem 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+    .cita:last-child { border-bottom: 0; }
+    .cita b { font-weight: 500; }
+    .badge { font-size: .7rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; padding: .2rem .6rem; border-radius: 999px; background: var(--beige); color: var(--gold-ink); white-space: nowrap; }
+    .badge--atendida { background: #E3EFE7; color: var(--ok); }
+    .badge--cancelada, .badge--no_asistio { background: #F4E2DE; color: var(--bad); }
+    [hidden] { display: none !important; }
+
+    @media (min-width: 760px) {
+      .grid { grid-template-columns: 1.15fr 1fr; }
+      .span2 { grid-column: 1 / -1; }
+      .kpis { grid-template-columns: repeat(4, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <a href="../" aria-label="Volver al sitio"><img src="../assets/img/logo.svg" alt="Eliza Rodríguez Beauty"></a>
+    <div style="display:flex;gap:.5rem">
+      <a class="btn btn--sm" href="../">Volver al sitio</a>
+      <button class="btn btn--sm" type="button" id="salir" hidden>Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main id="app" aria-live="polite">
+    <p class="muted" style="text-align:center;margin-top:20vh">Cargando…</p>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    const app = document.getElementById("app");
+    const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const KEY = "erb-cuenta";
+    const getTok = () => { try { return localStorage.getItem(KEY) || ""; } catch (_) { return ""; } };
+    const setTok = (t) => { try { t ? localStorage.setItem(KEY, t) : localStorage.removeItem(KEY); } catch (_) {} };
+    const peso = (n) => "$" + Number(n || 0).toLocaleString("es-CO");
+    const ESTADOS = { pendiente: "Pendiente", confirmada: "Confirmada", atendida: "Asistió", no_asistio: "No asistió", cancelada: "Cancelada" };
+    const wa = "https://wa.me/" + String(WHATSAPP_NUMBER).replace(/\D/g, "");
+
+    async function api(path, method = "GET", body) {
+      const headers = {};
+      if (body) headers["Content-Type"] = "application/json";
+      const t = getTok(); if (t) headers.Authorization = "Bearer " + t;
+      const res = await fetch("../api/cuenta/" + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+      const data = await res.json().catch(() => ({ ok: false, error: "Sin conexión" }));
+      data.status = res.status;
+      return data;
+    }
+
+    /* ---------------- Vistas de acceso ---------------- */
+    function vistaLogin(aviso) {
+      document.getElementById("salir").hidden = true;
+      app.innerHTML = `
+        <form class="auth" id="f-login" novalidate>
+          <p class="eyebrow" style="text-align:center">Club de clientas</p>
+          <h1>Iniciar sesión</h1>
+          <p class="muted">Consulta tu nivel, tus visitas y tu tarjeta de sellos.</p>
+          <label>Correo<input type="email" id="correo" autocomplete="email" inputmode="email" required></label>
+          <label>Contraseña<input type="password" id="clave" autocomplete="current-password" required></label>
+          <button class="btn btn--gold" type="submit">Entrar</button>
+          <p class="msg ${aviso ? "is-ok" : ""}" id="msg" role="alert">${esc(aviso || "")}</p>
+          <p class="alt"><button class="link" type="button" id="olvide">¿Olvidaste tu contraseña o aún no la creas?</button></p>
+          <p class="alt muted" style="font-size:.82rem">La cuenta se crea automáticamente a partir de tu segunda visita.</p>
+        </form>`;
+      const f = document.getElementById("f-login");
+      f.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = f.querySelector("button[type=submit]"); btn.disabled = true;
+        const r = await api("login", "POST", { correo: f.correo.value, clave: f.clave.value });
+        btn.disabled = false;
+        if (r.ok) { setTok(r.token); cargarPanel(); }
+        else { const m = document.getElementById("msg"); m.className = "msg is-error"; m.textContent = r.error || "No se pudo iniciar sesión."; }
+      });
+      document.getElementById("olvide").addEventListener("click", () => vistaRecuperar(f.correo.value));
+    }
+
+    function vistaRecuperar(correo) {
+      app.innerHTML = `
+        <form class="auth" id="f-rec" novalidate>
+          <h1>Recibir enlace</h1>
+          <p class="muted">Escribe el correo con el que reservas y te enviaremos un enlace para crear tu contraseña.</p>
+          <label>Correo<input type="email" id="correo" autocomplete="email" inputmode="email" value="${esc(correo || "")}" required></label>
+          <button class="btn btn--gold" type="submit">Enviar enlace</button>
+          <p class="msg" id="msg" role="alert"></p>
+          <p class="alt"><button class="link" type="button" id="volver">Volver a iniciar sesión</button></p>
+          <p class="alt muted" style="font-size:.82rem">¿No te llega? Escríbele a Eliza por <a href="${wa}" target="_blank" rel="noopener">WhatsApp</a>.</p>
+        </form>`;
+      const f = document.getElementById("f-rec");
+      f.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = f.querySelector("button[type=submit]"); btn.disabled = true;
+        const r = await api("recuperar", "POST", { correo: f.correo.value });
+        btn.disabled = false;
+        const m = document.getElementById("msg"); m.className = "msg " + (r.ok ? "is-ok" : "is-error"); m.textContent = r.mensaje || r.error;
+      });
+      document.getElementById("volver").addEventListener("click", () => vistaLogin());
+    }
+
+    async function vistaCrearClave(t) {
+      const info = await api("enlace?t=" + encodeURIComponent(t));
+      if (!info.ok) {
+        app.innerHTML = `<div class="auth"><h1>Enlace vencido</h1><p class="muted">${esc(info.error)}</p><button class="btn btn--gold" id="pedir" type="button">Pedir un enlace nuevo</button></div>`;
+        document.getElementById("pedir").addEventListener("click", () => vistaRecuperar());
+        return;
+      }
+      app.innerHTML = `
+        <form class="auth" id="f-clave" novalidate>
+          <p class="eyebrow" style="text-align:center">${info.nueva ? "Bienvenida al club" : "Nueva contraseña"}</p>
+          <h1>Hola, ${esc(info.nombre)}</h1>
+          <p class="muted">${info.nueva ? "Crea tu contraseña para entrar a tu cuenta de clienta." : "Crea tu nueva contraseña."}</p>
+          <label>Usuario<input type="email" value="${esc(info.correo)}" autocomplete="username" readonly></label>
+          <label>Contraseña (mínimo 8 caracteres)<input type="password" id="c1" autocomplete="new-password" minlength="8" required></label>
+          <label>Repite la contraseña<input type="password" id="c2" autocomplete="new-password" minlength="8" required></label>
+          <button class="btn btn--gold" type="submit">Guardar y entrar</button>
+          <p class="msg" id="msg" role="alert"></p>
+        </form>`;
+      const f = document.getElementById("f-clave");
+      f.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const m = document.getElementById("msg"); m.className = "msg is-error";
+        if (f.c1.value.length < 8) return (m.textContent = "La contraseña debe tener al menos 8 caracteres.");
+        if (f.c1.value !== f.c2.value) return (m.textContent = "Las contraseñas no coinciden.");
+        const btn = f.querySelector("button[type=submit]"); btn.disabled = true;
+        const r = await api("clave", "POST", { t, clave: f.c1.value });
+        btn.disabled = false;
+        if (r.ok) { setTok(r.token); history.replaceState(null, "", location.pathname); cargarPanel(); }
+        else m.textContent = r.error || "No se pudo guardar.";
+      });
+    }
+
+    /* ---------------- Panel de la clienta ---------------- */
+    const iconoSello = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>';
+    const iconoRegalo = '<svg viewBox="0 0 24 24" fill="none" stroke="#B8945A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="9" width="17" height="11" rx="1.5"/><path d="M3.5 13h17M12 9v11M12 9c-2.5 0-4.5-1-4.5-2.7S10.5 4 12 9zm0 0c2.5 0 4.5-1 4.5-2.7S13.5 4 12 9z"/></svg>';
+
+    async function cargarPanel() {
+      const d = await api("yo");
+      if (!d.ok) { setTok(""); return vistaLogin(d.status === 401 ? "" : "No se pudo cargar tu cuenta."); }
+      document.getElementById("salir").hidden = false;
+      const n = d.actual, s = d.siguiente;
+      const faltan = s
+        ? (s.faltanVisitas > 0 ? `${s.faltanVisitas} visita${s.faltanVisitas === 1 ? "" : "s"}` : "") +
+          (s.faltaConsumo > 0 ? (s.faltanVisitas > 0 ? (s.regla === "y" ? " y " : " o ") : "") + `${peso(s.faltaConsumo)} en servicios` : "")
+        : "";
+      const llenos = Math.min(d.sellos, d.sellosMeta);
+      const proximas = d.citas.filter((c) => c.proxima);
+
+      app.innerHTML = `
+        <div class="hello">
+          <div><p class="eyebrow">Club de clientas</p><h1>Hola, ${esc(d.clienta.nombre.split(" ")[0])}</h1></div>
+          <a class="btn btn--gold" href="../#reserva">Agendar una cita</a>
+        </div>
+
+        <div class="grid">
+          <section class="tier tier--${n.indice}" aria-label="Tu nivel">
+            <div class="tier__top">
+              <div><span class="tier__label">Tu nivel</span><div class="tier__name">${esc(n.nombre)}</div><p class="tier__desc">${esc(n.descripcion)}</p></div>
+              <img src="../assets/img/logo.svg" alt="">
+            </div>
+            <div>
+              ${s ? `<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(s.progreso * 100)}" aria-label="Progreso a ${esc(s.nombre)}"><span style="width:${Math.round(s.progreso * 100)}%"></span></div>
+                     <p class="tier__next">Te faltan <b>${esc(faltan)}</b> para llegar a <b>${esc(s.nombre)}</b>.</p>`
+                  : `<p class="tier__next">Estás en el nivel más alto. ¡Gracias por tu confianza!</p>`}
+            </div>
+          </section>
+
+          <section class="card" aria-label="Tarjeta de sellos">
+            <h2>Tarjeta de sellos</h2>
+            <p class="muted" style="margin:0">Un sello por cada visita. Al completar ${d.sellosMeta}: <b style="color:var(--ink)">${esc(d.premio)}</b>.</p>
+            <div class="stamps" role="img" aria-label="${llenos} de ${d.sellosMeta} sellos">
+              ${Array.from({ length: d.sellosMeta }, (_, i) => i < llenos
+                ? `<span class="stamp is-on">${iconoSello}</span>`
+                : i === d.sellosMeta - 1 ? `<span class="stamp is-gift">${iconoRegalo}</span>` : `<span class="stamp"></span>`).join("")}
+            </div>
+            <p class="prize ${d.premioListo ? "is-ready" : ""}">${d.premioListo
+              ? "¡Completaste tu tarjeta! Reclama tu regalo en tu próxima visita."
+              : `Llevas <b>${llenos}</b> de ${d.sellosMeta} sellos. Te faltan ${d.sellosMeta - llenos}.`}</p>
+          </section>
+
+          <section class="card span2" aria-label="Resumen">
+            <div class="kpis">
+              <div class="kpi"><b>${d.visitas}</b><span>Visitas</span></div>
+              <div class="kpi"><b>${proximas.length}</b><span>Próximas citas</span></div>
+              <div class="kpi"><b>${d.premiosCanjeados}</b><span>Regalos recibidos</span></div>
+              <div class="kpi"><b>${esc(n.nombre)}</b><span>Nivel actual</span></div>
+            </div>
+            <div class="steps" style="margin-top:1.1rem" aria-label="Niveles del club">
+              ${d.niveles.map((x, i) => `<div class="step ${i <= n.indice ? "is-on" : ""} ${i === n.indice ? "is-now" : ""}" title="${esc(x.descripcion)}"><i></i>${esc(x.nombre)}</div>`).join("")}
+            </div>
+          </section>
+
+          <section class="card span2" aria-label="Mis citas">
+            <h2>Mis citas</h2>
+            ${d.citas.length ? `<ul class="citas">${d.citas.map((c) => `
+              <li class="cita">
+                <div><b>${esc(c.servicio)}</b><br><span class="muted" style="font-size:.88rem">${esc(c.fecha)} · ${esc(c.hora)}</span></div>
+                <div style="display:flex;gap:.5rem;align-items:center">
+                  <span class="badge badge--${esc(c.estado)}">${esc(ESTADOS[c.estado] || c.estado)}</span>
+                  ${c.cancelar ? `<a class="btn btn--sm" href="../cancelar/?t=${encodeURIComponent(c.cancelar)}">Cancelar</a>` : ""}
+                </div>
+              </li>`).join("")}</ul>` : `<p class="muted">Aún no tienes citas registradas.</p>`}
+          </section>
+        </div>
+        <p class="muted" style="font-size:.8rem;margin-top:1.5rem">Usuario: ${esc(d.clienta.correo)} · <a href="../legal/terminos.html">Términos del programa</a> · <a href="../legal/privacidad.html">Datos personales</a></p>`;
+    }
+
+    document.getElementById("salir").addEventListener("click", async () => {
+      await api("salir", "POST").catch(() => {});
+      setTok(""); vistaLogin("Cerraste sesión.");
+    });
+
+    const t = new URLSearchParams(location.search).get("t");
+    if (t) vistaCrearClave(t);
+    else if (getTok()) cargarPanel();
+    else vistaLogin();
+  })();
+  </script>
+</body>
+</html>

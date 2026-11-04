@@ -1,6 +1,7 @@
 /* ==========================================================================
    Eliza Rodriguez Beauty – Estilos
    Mobile-first. Los breakpoints amplían el diseño hacia tablet y desktop.
+   (El enlace "Iniciar sesión" del menú usa .nav__link--cuenta, al final.)
    ========================================================================== */
 
 /* ---------- 1. Variables de marca ---------- */
@@ -871,3 +872,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .footer__legal { display: flex; flex-wrap: wrap; justify-content: center; gap: .25rem 1rem; }
 .footer__legal a { text-decoration: underline; text-underline-offset: 3px; }
 .form .form__check a { color: var(--gold-ink); text-decoration: underline; }
+
+/* Enlace "Iniciar sesión / Mi cuenta" en el menú de escritorio */
+@media (min-width: 960px) {
+  .nav__link--cuenta { padding-left: 1.1rem; border-left: 1px solid var(--line); }
+}

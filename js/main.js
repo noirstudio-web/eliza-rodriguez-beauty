@@ -506,6 +506,10 @@
   safe(renderContact);
   safe(initForm);
   safe(initReveal); // secciones fijas visibles desde el primer momento
+  // Clienta con sesión iniciada: el enlace dice "Mi cuenta"
+  safe(function marcarCuenta() {
+    if (localStorage.getItem("erb-cuenta")) $$("[data-cuenta]").forEach((el) => (el.textContent = "Mi cuenta"));
+  });
 
   // 2) Contenido editable desde el panel /admin (textos, fotos, servicios, precios,
   //    resultados…). Si no responde a tiempo, se usan los valores por defecto.
