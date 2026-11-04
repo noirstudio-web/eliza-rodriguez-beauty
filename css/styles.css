@@ -721,6 +721,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
   transition-delay: var(--d, 0s);
 }
 .js .reveal.is-visible { opacity: 1; transform: none; }
+/* Seguro: si por cualquier motivo el JavaScript falla o tarda, el contenido
+   aparece solo a los 3 segundos (nunca queda la página en blanco). */
+.js .reveal:not(.is-visible) { animation: reveal-seguro .6s ease 3s forwards; }
+@keyframes reveal-seguro { to { opacity: 1; transform: none; } }
 
 /* ==========================================================================
    Breakpoints

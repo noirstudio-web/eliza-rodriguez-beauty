@@ -475,7 +475,7 @@
      Aparición suave al hacer scroll
      ------------------------------------------------------------------------ */
   function initReveal() {
-    const items = $$(".reveal");
+    const items = $$(".reveal:not(.is-visible)"); // solo los que aún no aparecieron
     if (!("IntersectionObserver" in window) || prefersReducedMotion) {
       items.forEach((el) => el.classList.add("is-visible"));
       return;
@@ -497,21 +497,25 @@
   /* ------------------------------------------------------------------------
      Inicio
      ------------------------------------------------------------------------ */
+  /** Ejecuta un paso sin que un error en él detenga los demás. */
+  const safe = (fn) => { try { fn(); } catch (err) { console.error("[sitio]", fn.name, err); } };
+
   // 1) Lo que no depende del contenido editable: de inmediato
-  initHeader();
-  initSocialLinks();
-  renderContact();
-  initForm();
+  safe(initHeader);
+  safe(initSocialLinks);
+  safe(renderContact);
+  safe(initForm);
+  safe(initReveal); // secciones fijas visibles desde el primer momento
 
   // 2) Contenido editable desde el panel /admin (textos, fotos, servicios, precios,
   //    resultados…). Si no responde a tiempo, se usan los valores por defecto.
   loadContent().finally(() => {
-    renderServices();
-    renderCertifications();
-    initWhatsAppLinks();
-    initResults();
-    initTestimonials();
-    initReveal(); // al final, para incluir los elementos generados
+    safe(renderServices);
+    safe(renderCertifications);
+    safe(initWhatsAppLinks);
+    safe(initResults);
+    safe(initTestimonials);
+    safe(initReveal); // de nuevo, para incluir las tarjetas generadas
   });
 
   /* ------------------------------------------------------------------------
@@ -520,7 +524,7 @@
   function loadContent() {
     if (!/^https?:$/.test(location.protocol)) return Promise.resolve();
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 2500);
+    const timer = setTimeout(() => ctrl.abort(), 1800);
     return fetch("api/contenido", { signal: ctrl.signal })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => { if (d && d.ok) applyContent(d.contenido || {}); })
