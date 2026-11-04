@@ -2,7 +2,7 @@
   "name": "eliza-clientas",
   "displayName": "Eliza Beauty – Clientas",
   "description": "Sección exclusiva en VS Code para gestionar las cuentas de clientas y la fidelidad de Eliza Rodriguez Beauty.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "publisher": "noirstudio",
   "license": "UNLICENSED",
   "private": true,
@@ -17,7 +17,10 @@
     "Other"
   ],
   "main": "./extension.js",
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished",
+    "onUri"
+  ],
   "contributes": {
     "viewsContainers": {
       "activitybar": [
@@ -43,6 +46,11 @@
       ]
     },
     "commands": [
+      {
+        "command": "eliza.abrir",
+        "title": "Abrir sección Eliza Beauty",
+        "category": "Eliza Beauty"
+      },
       {
         "command": "eliza.actualizar",
         "title": "Actualizar",

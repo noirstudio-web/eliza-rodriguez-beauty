@@ -418,8 +418,25 @@ function activate(ctx) {
       const token = await ctx.secrets.get(CLAVE_SESION);
       if (token) await fetch(SITIO + "/api/admin/sesion", { method: "DELETE", headers: { Authorization: "Bearer " + token } }).catch(() => {});
       await app.sesionVencida("Cerraste sesión.");
-    })
+    }),
+    vscode.commands.registerCommand("eliza.abrir", abrirSeccion),
+    // Enlace vscode://noirstudio.eliza-clientas/abrir → abre la sección
+    vscode.window.registerUriHandler({ handleUri: () => abrirSeccion() })
   );
+
+  // Primera vez con esta versión: abre la sección sola y avisa
+  const version = ctx.extension.packageJSON.version;
+  if (ctx.globalState.get("eliza.version") !== version) {
+    ctx.globalState.update("eliza.version", version);
+    abrirSeccion().then(() =>
+      vscode.window.showInformationMessage("Eliza Beauty está lista: usa la pestaña “Clientes nuevos” para crear cuentas y “Clientas” para gestionarlas."));
+  }
+}
+
+/** Muestra la sección Eliza Beauty con la pestaña "Clientes nuevos" al frente. */
+async function abrirSeccion() {
+  await vscode.commands.executeCommand("workbench.view.extension.elizaBeauty");
+  await vscode.commands.executeCommand("eliza.nuevas.focus");
 }
 
 function deactivate() {}
