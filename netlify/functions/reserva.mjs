@@ -25,7 +25,9 @@ export default async (req) => {
     fecha: clean(b.fecha, 10),
     hora: clean(b.hora, 5),
     comentario: clean(b.comentario, 1000) || null,
-    autoriza: b["autorizo-datos"] === "sí" || b["autorizo-datos"] === true,
+    // Acepta "si", "sí", "true", "on" o true (sin depender de tildes/codificación)
+    autoriza: b["autorizo-datos"] === true ||
+      ["si", "true", "on"].includes(String(b["autorizo-datos"] ?? "").normalize("NFD").replace(/[^a-z]/gi, "").toLowerCase()),
   };
 
   const errores = [];

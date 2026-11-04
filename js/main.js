@@ -371,7 +371,7 @@
     ];
 
     const validate = ({ input, error, required, check }) => {
-      const value = input.type === "checkbox" ? (input.checked ? "sí" : "") : input.value.trim();
+      const value = input.type === "checkbox" ? (input.checked ? "si" : "") : input.value.trim();
       const ok = value === "" ? !required : !check || check(value);
       input.setAttribute("aria-invalid", String(!ok));
       if (ok) input.removeAttribute("aria-describedby");
