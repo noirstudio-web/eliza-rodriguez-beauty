@@ -6,11 +6,10 @@
    - Contraseñas cifradas con scrypt; sesiones con token aleatorio (se guarda
      solo su huella SHA-256 en la base de datos)
    ========================================================================== */
-import { randomBytes, randomUUID, scrypt as _scrypt, timingSafeEqual, createHash } from "node:crypto";
-import { promisify } from "node:util";
+import { randomBytes, randomUUID, createHash } from "node:crypto";
 import { sendMail, plantilla, siteUrl } from "./shared.mjs";
+export { hashClave, verificarClave } from "./claves.mjs";
 
-const scrypt = promisify(_scrypt);
 
 export const VISITAS_PARA_CUENTA = 2;
 /** false = las cuentas las crea Eliza a mano desde el panel (Clientas → Crear cuenta). */
@@ -103,19 +102,7 @@ export async function resumen(sql, correo, clientaId, cfg) {
   };
 }
 
-/* ---------------- Contraseñas y sesiones ---------------- */
-export async function hashClave(clave) {
-  const sal = randomBytes(16);
-  const h = await scrypt(clave, sal, 64, { N: 16384, r: 8, p: 1 });
-  return `scrypt$${sal.toString("base64")}$${h.toString("base64")}`;
-}
-export async function verificarClave(clave, guardado) {
-  if (!guardado?.startsWith("scrypt$")) return false;
-  const [, s, h] = guardado.split("$");
-  const esperado = Buffer.from(h, "base64");
-  const calc = await scrypt(clave, Buffer.from(s, "base64"), esperado.length, { N: 16384, r: 8, p: 1 });
-  return timingSafeEqual(calc, esperado);
-}
+/* ---------------- Sesiones (las contraseñas se cifran en claves.mjs) ---------------- */
 export const huella = (token) => createHash("sha256").update(token).digest("hex");
 
 export async function crearSesion(sql, clientaId) {

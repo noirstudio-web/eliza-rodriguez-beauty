@@ -2,8 +2,9 @@
    Utilidades compartidas por las funciones de Netlify (netlify/functions)
    ========================================================================== */
 import { neon } from "@neondatabase/serverless";
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import nodemailer from "nodemailer";
+import { hashClave, verificarClave } from "./claves.mjs";
 
 const env = (k) => (globalThis.Netlify ? Netlify.env.get(k) : process.env[k]) || "";
 
@@ -40,24 +41,43 @@ export async function readJson(req) {
 }
 
 /* ---------------- Acceso al panel de admin ----------------
-   Usuario y contraseña: variables ADMIN_USER y ADMIN_PASSWORD en Netlify.
-   Al entrar se crea una sesión (token aleatorio) que vence a las 12 horas.
-   En la base de datos solo se guarda su huella HMAC-SHA256, firmada con el
-   usuario y la contraseña actuales: si se cambia ADMIN_PASSWORD, TODAS las
-   sesiones abiertas dejan de servir (también una que alguien hubiera robado). */
+   Usuario: variable ADMIN_USER en Netlify (por defecto "admin").
+   Contraseña, en este orden:
+   1) La creada con "¿Olvidaste la contraseña?" en el panel. Se guarda CIFRADA
+      (scrypt) en contenido.admin_cuenta, que nunca se envía a la web pública.
+   2) Si no existe, o si alguien cambia ADMIN_PASSWORD en Netlify después
+      (se detecta con env_huella), manda la variable ADMIN_PASSWORD.
+   Al entrar se crea una sesión (token aleatorio) que vence a las 12 horas. En
+   la base de datos solo se guarda su huella HMAC-SHA256, firmada con la
+   contraseña vigente: al cambiarla, TODAS las sesiones abiertas dejan de servir. */
 export const HORAS_SESION_ADMIN = 12;
 const igual = (a, b) => timingSafeEqual(createHash("sha256").update(String(a)).digest(), createHash("sha256").update(String(b)).digest());
-export const huellaToken = (t) =>
-  createHmac("sha256", `admin-sesion|${env("ADMIN_USER") || "admin"}|${env("ADMIN_PASSWORD")}`).update(String(t)).digest("hex");
+const usuarioAdmin = () => env("ADMIN_USER") || "admin";
+/** Huella de ADMIN_PASSWORD (para saber si alguien la cambió en Netlify). */
+export const huellaEnvAdmin = () => createHash("sha256").update("env|" + env("ADMIN_PASSWORD")).digest("hex");
+export const huellaSimple = (t) => createHash("sha256").update(String(t)).digest("hex");
+export { hashClave };
 
-/** ¿Usuario y contraseña correctos? (comparación en tiempo constante) */
-export function credencialesAdmin(usuario, clave) {
-  const u = env("ADMIN_USER") || "admin";
-  const p = env("ADMIN_PASSWORD");
-  if (!p) return false;
-  // Se evalúan las dos comparaciones siempre, para no revelar cuál falló
-  const okU = igual(String(usuario || "").trim().toLowerCase(), u.trim().toLowerCase());
-  const okP = igual(String(clave || ""), p);
+/** Contraseña vigente del panel (ver orden arriba). */
+export async function credencialAdmin(sql) {
+  const [f] = await sql`SELECT valor FROM contenido WHERE clave = 'admin_cuenta'`;
+  const cuenta = f?.valor || {};
+  const delPanel = Boolean(cuenta.clave_hash) && cuenta.env_huella === huellaEnvAdmin();
+  const pw = env("ADMIN_PASSWORD");
+  return { cuenta, hash: delPanel ? cuenta.clave_hash : null, pw, secreto: delPanel ? cuenta.clave_hash : pw };
+}
+
+export const huellaToken = (t, cred) =>
+  createHmac("sha256", `admin-sesion|${usuarioAdmin()}|${cred.secreto}`).update(String(t)).digest("hex");
+
+/** ¿Es el usuario del panel? (tiempo constante, sin distinguir mayúsculas) */
+export const esUsuarioAdmin = (u) => igual(String(u || "").trim().toLowerCase(), usuarioAdmin().trim().toLowerCase());
+
+/** ¿Usuario y contraseña correctos? Se evalúan ambos siempre, para no revelar cuál falló. */
+export async function credencialesAdmin(cred, usuario, clave) {
+  if (!cred.secreto) return false;
+  const okU = esUsuarioAdmin(usuario);
+  const okP = cred.hash ? await verificarClave(String(clave || ""), cred.hash) : igual(String(clave || ""), cred.pw);
   return okU && okP;
 }
 
@@ -65,9 +85,20 @@ export function credencialesAdmin(usuario, clave) {
 export async function isAdmin(req) {
   const h = req.headers.get("authorization") || "";
   const token = h.startsWith("Bearer ") ? h.slice(7) : "";
-  if (token.length < 30 || token.length > 200 || !env("ADMIN_PASSWORD")) return false;
-  const [s] = await db()`SELECT 1 FROM admin_sesiones WHERE token_hash = ${huellaToken(token)} AND expira_en > now()`;
+  if (token.length < 30 || token.length > 200) return false;
+  const sql = db();
+  const cred = await credencialAdmin(sql);
+  if (!cred.secreto) return false;
+  const [s] = await sql`SELECT 1 FROM admin_sesiones WHERE token_hash = ${huellaToken(token, cred)} AND expira_en > now()`;
   return Boolean(s);
+}
+
+/** Crea una sesión de admin nueva y devuelve su token. */
+export async function crearSesionAdmin(sql, cred, usuario) {
+  const token = randomBytes(32).toString("base64url");
+  await sql`INSERT INTO admin_sesiones (token_hash, usuario, expira_en)
+            VALUES (${huellaToken(token, cred)}, ${String(usuario).trim().toLowerCase().slice(0, 200)}, now() + make_interval(hours => ${HORAS_SESION_ADMIN}))`;
+  return token;
 }
 
 /** Respuesta estándar cuando no hay sesión válida (con pausa anti-fuerza bruta). */

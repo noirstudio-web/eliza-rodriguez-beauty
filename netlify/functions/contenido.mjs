@@ -11,7 +11,9 @@ export default async (req) => {
   if (req.method !== "GET") return json(405, { ok: false, error: "Método no permitido" });
   try {
     const sql = db();
-    const filas = await sql`SELECT clave, valor, actualizado_en FROM contenido WHERE clave <> 'agenda'`; // la agenda va por /api/disponibilidad
+    const filas = await sql`SELECT clave, valor, actualizado_en FROM contenido
+      WHERE clave IN ('textos', 'fotos', 'servicios', 'resultados', 'certificaciones', 'testimonios', 'fidelidad')`;
+    // Solo las secciones públicas: la agenda va por /api/disponibilidad y admin_cuenta (contraseña cifrada) nunca sale
     const contenido = Object.fromEntries(filas.map((f) => [f.clave, f.valor]));
     const version = filas.reduce((m, f) => Math.max(m, new Date(f.actualizado_en).getTime()), 0);
     // Caché corta: los cambios del panel se ven en menos de 1 minuto

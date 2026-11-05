@@ -177,11 +177,46 @@
       </label>
       <div class="lg__fila">
         <label class="lg__check"><input type="checkbox" id="recordar-user"> Recordar usuario</label>
-        <button class="lg__link" type="button" id="pw-olvide" aria-expanded="false" aria-controls="pw-ayuda">¿Olvidaste la contraseña?</button>
+        <button class="lg__link" type="button" id="pw-olvide">¿Olvidaste la contraseña?</button>
       </div>
-      <p class="lg__sub" id="pw-ayuda" hidden style="text-align:left;margin:-.4rem 0 1.1rem">Por seguridad no se puede recuperar desde aquí. Cámbiala en Netlify → <i>Project configuration → Environment variables → ADMIN_PASSWORD</i> y vuelve a publicar.</p>
       <button class="lg__btn" type="submit">Entrar</button>
       <p class="lg__msg is-error" id="login-error" role="alert"></p>
+    </form>
+
+    <!-- ¿Olvidaste la contraseña? → se envía un enlace al correo de administración -->
+    <form class="lg" id="olvide-form" hidden novalidate>
+      <a class="lg__cerrar" href="../" aria-label="Volver al sitio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+      <img class="lg__logo" src="../assets/img/logo.svg" alt="Eliza Rodríguez Beauty">
+      <p class="lg__eyebrow">Acceso privado</p>
+      <h1>Restablecer contraseña</h1>
+      <p class="lg__sub">Escribe tu usuario del panel y te enviaremos un enlace al correo de administración para crear una contraseña nueva.</p>
+      <label class="lg__campo"><span>Usuario</span>
+        <input id="olvide-user" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.6 4-5.4 7.5-5.4s6.3 1.8 7.5 5.4"/></svg>
+      </label>
+      <button class="lg__btn" type="submit">Enviar enlace</button>
+      <p class="lg__msg" id="olvide-msg" role="alert"></p>
+      <p class="lg__pie"><button class="lg__link" type="button" data-volver>Volver a iniciar sesión</button></p>
+    </form>
+
+    <!-- Llegó desde el enlace del correo: crear la contraseña nueva -->
+    <form class="lg" id="reset-form" hidden novalidate>
+      <a class="lg__cerrar" href="../" aria-label="Volver al sitio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+      <img class="lg__logo" src="../assets/img/logo.svg" alt="Eliza Rodríguez Beauty">
+      <p class="lg__eyebrow">Acceso privado</p>
+      <h1>Nueva contraseña</h1>
+      <p class="lg__sub">Crea una contraseña larga y difícil de adivinar (mínimo 10 caracteres). Al guardarla se cierran todas las sesiones abiertas del panel.</p>
+      <label class="lg__campo"><span>Contraseña nueva</span>
+        <input id="reset-pw1" type="password" autocomplete="new-password" minlength="10" required>
+        <button class="lg__ver" type="button" data-ver="reset-pw1" aria-label="Mostrar contraseña" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg></button>
+      </label>
+      <label class="lg__campo"><span>Repite la contraseña</span>
+        <input id="reset-pw2" type="password" autocomplete="new-password" minlength="10" required>
+        <button class="lg__ver" type="button" data-ver="reset-pw2" aria-label="Mostrar contraseña" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg></button>
+      </label>
+      <button class="lg__btn" type="submit">Guardar y entrar</button>
+      <p class="lg__msg is-error" id="reset-msg" role="alert"></p>
+      <p class="lg__pie"><button class="lg__link" type="button" data-volver>Volver a iniciar sesión</button></p>
     </form>
   </main>
 
@@ -488,10 +523,57 @@
       e.currentTarget.setAttribute("aria-pressed", String(ver));
       e.currentTarget.setAttribute("aria-label", ver ? "Ocultar contraseña" : "Mostrar contraseña");
     });
-    $("#pw-olvide").addEventListener("click", (e) => {
-      const abierto = $("#pw-ayuda").hidden;
-      $("#pw-ayuda").hidden = !abierto;
-      e.currentTarget.setAttribute("aria-expanded", String(abierto));
+    /* ----- ¿Olvidaste la contraseña? ----- */
+    function verTarjeta(id) {
+      ["login-form", "olvide-form", "reset-form"].forEach((f) => ($("#" + f).hidden = f !== id));
+      const primero = $("#" + id + " input"); if (primero) primero.focus();
+    }
+    $("#pw-olvide").addEventListener("click", () => {
+      $("#olvide-user").value = $("#user").value; $("#olvide-msg").textContent = "";
+      verTarjeta("olvide-form");
+    });
+    $$("[data-volver]").forEach((b) => b.addEventListener("click", () => {
+      history.replaceState(null, "", location.pathname); verTarjeta("login-form");
+    }));
+    $$("#view-login [data-ver]").forEach((b) => b.addEventListener("click", () => {
+      const inp = $("#" + b.dataset.ver), ver = inp.type === "password";
+      inp.type = ver ? "text" : "password";
+      b.setAttribute("aria-pressed", String(ver));
+      b.setAttribute("aria-label", ver ? "Ocultar contraseña" : "Mostrar contraseña");
+    }));
+    $("#olvide-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const m = $("#olvide-msg"), btn = $("#olvide-form button[type=submit]");
+      if (!$("#olvide-user").value.trim()) { m.className = "lg__msg is-error"; m.textContent = "Escribe tu usuario."; return; }
+      btn.disabled = true; m.textContent = "";
+      try {
+        const res = await fetch("/api/admin/recuperar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ usuario: $("#olvide-user").value }) });
+        const d = await res.json().catch(() => ({}));
+        m.className = "lg__msg " + (res.ok ? "is-ok" : "is-error");
+        m.textContent = d.mensaje || d.error || "No se pudo enviar el enlace.";
+      } catch (_) { m.className = "lg__msg is-error"; m.textContent = "Sin conexión. Revisa tu internet."; }
+      finally { btn.disabled = false; }
+    });
+    $("#reset-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const m = $("#reset-msg"), btn = $("#reset-form button[type=submit]");
+      const c1 = $("#reset-pw1").value, c2 = $("#reset-pw2").value;
+      if (c1.length < 10) { m.textContent = "La contraseña debe tener al menos 10 caracteres."; return; }
+      if (c1 !== c2) { m.textContent = "Las contraseñas no coinciden."; return; }
+      btn.disabled = true; m.textContent = "";
+      try {
+        const token = new URLSearchParams(location.search).get("restablecer") || "";
+        const res = await fetch("/api/admin/recuperar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, clave: c1 }) });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) { m.textContent = d.error || "No se pudo guardar."; return; }
+        $("#reset-pw1").value = ""; $("#reset-pw2").value = "";
+        history.replaceState(null, "", location.pathname); // el enlace ya no sirve
+        pw = d.token; try { sessionStorage.setItem("erb-admin-sesion", pw); } catch (_) {}
+        verTarjeta("login-form");
+        enter();
+        toast("Contraseña cambiada. ¡Bienvenida!");
+      } catch (_) { m.textContent = "Sin conexión. Revisa tu internet."; }
+      finally { btn.disabled = false; }
     });
     $("#logout").addEventListener("click", () => { if (!dirty || confirm("Tienes cambios sin guardar. ¿Salir igual?")) { setDirty(null); logout(); } });
 
@@ -1288,7 +1370,8 @@
     });
     $('[data-tab="fidelidad"]').addEventListener("click", () => loadCupones().catch(() => toast("No se pudieron cargar los cupones.")));
 
-    if (pw) enter(); else $("#user").focus();
+    if (new URLSearchParams(location.search).has("restablecer")) verTarjeta("reset-form");
+    else if (pw) enter(); else $("#user").focus();
   })();
   </script>
 </body>

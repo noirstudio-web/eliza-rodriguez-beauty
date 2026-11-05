@@ -258,7 +258,9 @@ Luego en VS Code: `Ctrl+Shift+P` → **Developer: Reload Window**.
 En **“+ Crear cuenta de clienta”** (panel y VS Code) hay un bloque **Fidelidad (opcional)**: **Nivel** (automático o fijo), **visitas anteriores**, **consumo anterior** y **sellos iniciales**, para clientas que ya venían antes del sistema. Se puede cambiar luego en cada clienta → **Fidelidad**.
 
 ### Usuario y contraseña del panel de admin
-Variables `ADMIN_USER` (usuario) y `ADMIN_PASSWORD` (contraseña) en Netlify → *Project configuration → Environment variables* → *Edit* → luego *Deploys → Trigger deploy*. Al entrar se abre una sesión de 12 horas; tras 8 intentos fallidos se bloquea 15 minutos.
+Variables `ADMIN_USER` (usuario) y `ADMIN_PASSWORD` (contraseña inicial) en Netlify → *Project configuration → Environment variables* → *Edit* → luego *Deploys → Trigger deploy*. Al entrar se abre una sesión de 12 horas; tras 8 intentos fallidos se bloquea 15 minutos.
+
+**¿Olvidaste la contraseña?** (en el inicio de sesión del panel): se escribe el usuario y llega un enlace al correo de administración (`AVISOS_EMAIL`, o `SMTP_USER` si no existe; nunca a un correo que escriba alguien). El enlace dura 30 minutos y sirve una vez; con él se crea la contraseña nueva (mínimo 10 caracteres), que se guarda **cifrada** en la base de datos (`contenido`, clave `admin_cuenta`, que nunca sale por `/api/contenido`) y cierra todas las sesiones abiertas. Desde ese momento manda la contraseña nueva; si después alguien cambia `ADMIN_PASSWORD` en Netlify, vuelve a mandar la de Netlify. Requiere el correo configurado (`SMTP_USER` y `SMTP_PASS`).
 
 ### Correos automáticos
 | Cuándo | A quién |

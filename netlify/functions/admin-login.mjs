@@ -8,9 +8,8 @@
      acceso se pausa 15 min para todos (frena ataques repartidos entre muchas IP).
    Cuando una conexión queda bloqueada, se avisa por correo a Eliza.
    ========================================================================== */
-import { randomBytes } from "node:crypto";
 import {
-  db, json, readJson, credencialesAdmin, huellaToken, HORAS_SESION_ADMIN,
+  db, json, readJson, credencialAdmin, credencialesAdmin, crearSesionAdmin, huellaToken, HORAS_SESION_ADMIN,
   sendMail, plantilla, correoEliza, siteUrl,
 } from "../lib/shared.mjs";
 
@@ -32,7 +31,8 @@ export default async (req, context) => {
       return json(429, { ok: false, error: "Demasiados intentos. Espera 15 minutos e inténtalo de nuevo." });
     }
     const b = await readJson(req);
-    if (!credencialesAdmin(String(b.usuario ?? "").slice(0, 200), String(b.clave ?? "").slice(0, 500))) {
+    const cred = await credencialAdmin(sql);
+    if (!(await credencialesAdmin(cred, String(b.usuario ?? "").slice(0, 200), String(b.clave ?? "").slice(0, 500)))) {
       await sql`INSERT INTO admin_fallos (ip) VALUES (${ip})`;
       await new Promise((r) => setTimeout(r, 700));
       const quedan = MAX_FALLOS - fallos - 1;
@@ -47,7 +47,7 @@ export default async (req, context) => {
               : "Hubo muchos intentos fallidos de entrar al panel desde varias conexiones. El acceso quedó pausado 15 minutos.",
             filas: [["Conexión (IP)", ip], ["Hora", new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" })]],
             boton: { texto: "Abrir el panel", url: `${siteUrl()}/admin/` },
-            nota: "Si no fuiste tú, cambia la contraseña del panel (variable ADMIN_PASSWORD en Netlify) por una larga y difícil de adivinar.",
+            nota: "Si no fuiste tú, cambia la contraseña del panel con “¿Olvidaste la contraseña?” por una larga y difícil de adivinar.",
           }),
         });
         if (context?.waitUntil) context.waitUntil(aviso);
@@ -55,9 +55,7 @@ export default async (req, context) => {
       }
       return json(401, { ok: false, error: quedan <= 3 && quedan > 0 ? `Usuario o contraseña incorrectos. Te quedan ${quedan} intentos.` : "Usuario o contraseña incorrectos." });
     }
-    const token = randomBytes(32).toString("base64url");
-    await sql`INSERT INTO admin_sesiones (token_hash, usuario, expira_en)
-              VALUES (${huellaToken(token)}, ${String(b.usuario).trim().toLowerCase().slice(0, 200)}, now() + make_interval(hours => ${HORAS_SESION_ADMIN}))`;
+    const token = await crearSesionAdmin(sql, cred, b.usuario);
     // Limpieza: sesiones vencidas e intentos viejos
     await sql`DELETE FROM admin_sesiones WHERE expira_en < now()`;
     await sql`DELETE FROM admin_fallos WHERE creado_en < now() - interval '1 day' OR ip = ${ip}`;
@@ -66,7 +64,7 @@ export default async (req, context) => {
 
   if (req.method === "DELETE") {
     const h = req.headers.get("authorization") || "";
-    if (h.startsWith("Bearer ")) await sql`DELETE FROM admin_sesiones WHERE token_hash = ${huellaToken(h.slice(7))}`;
+    if (h.startsWith("Bearer ")) await sql`DELETE FROM admin_sesiones WHERE token_hash = ${huellaToken(h.slice(7), await credencialAdmin(sql))}`;
     return json(200, { ok: true });
   }
 
