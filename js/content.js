@@ -10,6 +10,24 @@
  */
 const RESULTADOS = [
   {
+    servicio: "Limpieza facial",
+    antes: "assets/img/resultados/limpieza-facial-antes.webp?v=20261105",
+    despues: "assets/img/resultados/limpieza-facial-despues.webp?v=20261105",
+    nota: "Limpieza profunda con extracción: piel con acné, antes y después.",
+  },
+  {
+    servicio: "Dermapen",
+    antes: "assets/img/resultados/dermapen-antes.webp?v=20261105",
+    despues: "assets/img/resultados/dermapen-despues.webp?v=20261105",
+    nota: "Microagujas para manchas y marcas de acné.",
+  },
+  {
+    servicio: "Botox",
+    antes: "assets/img/resultados/botox-antes.webp?v=20261105",
+    despues: "assets/img/resultados/botox-despues.webp?v=20261105",
+    nota: "Toxina botulínica en la frente: líneas de expresión suavizadas.",
+  },
+  {
     servicio: "Labios",
     antes: "assets/img/resultados/labios-antes.webp?v=202611041312",
     despues: "assets/img/resultados/labios-despues.webp?v=202611041312",
@@ -22,28 +40,10 @@ const RESULTADOS = [
     nota: "Rinomodelación sin cirugía, resultado inmediato.",
   },
   {
-    servicio: "Botox",
-    antes: "assets/img/resultados/botox-antes.webp?v=202611041312",
-    despues: "assets/img/resultados/botox-despues.webp?v=202611041312",
-    nota: "Frente y entrecejo, 15 días después de la aplicación.",
-  },
-  {
-    servicio: "Limpieza facial",
-    antes: "assets/img/resultados/limpieza-facial-antes.webp?v=202611041312",
-    despues: "assets/img/resultados/limpieza-facial-despues.webp?v=202611041312",
-    nota: "Limpieza profunda con extracción e hidratación.",
-  },
-  {
     servicio: "Peeling",
     antes: "assets/img/resultados/peeling-antes.webp?v=202611041312",
     despues: "assets/img/resultados/peeling-despues.webp?v=202611041312",
     nota: "Protocolo de 3 sesiones para manchas.",
-  },
-  {
-    servicio: "Dermapen",
-    antes: "assets/img/resultados/dermapen-antes.webp?v=202611041312",
-    despues: "assets/img/resultados/dermapen-despues.webp?v=202611041312",
-    nota: "4 sesiones para marcas de acné.",
   },
 ];
 
