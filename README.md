@@ -203,7 +203,7 @@ Cada vez que alguien usa el formulario **Agenda tu cita**:
 El servidor vuelve a validar todo (no se fía del navegador), rechaza fechas pasadas y descarta los envíos de bots (campo trampa oculto).
 
 ### Panel privado `/admin`
-Entra a **https://eliza-rodriguez-beauty.netlify.app/admin/** con tu usuario y contraseña. Pestañas: Reservas, **Clientas**, **Fidelidad**, Servicios y precios, Resultados, Textos y Fotos.
+Entra a **https://eliza-rodriguez-beauty.netlify.app/admin/** con tu usuario y contraseña. Pestañas: Reservas, **Clientas**, **Fidelidad**, **Tráfico**, Servicios y precios, Resultados, Textos y Fotos.
 
 | Pestaña | Qué se puede hacer |
 |---|---|
@@ -217,6 +217,18 @@ Entra a **https://eliza-rodriguez-beauty.netlify.app/admin/** con tu usuario y c
 - Los cambios se ven en la página en menos de 1 minuto. Si la base de datos no responde, la página muestra los textos y fotos originales.
 - Los valores originales siguen estando en `index.html`, `js/services.js` y `js/content.js`.
 
+
+### Tráfico (quién visita el sitio)
+Panel → **Tráfico**. Contador propio: sin Google Analytics, sin cookies y sin guardar la IP. Los datos van a la tabla `visitas` de Neon (se crea sola la primera vez).
+
+- **Resumen** de hoy, 7, 30 o 90 días: personas que entraron, páginas vistas, cuántas venían por primera vez y cuántas volvieron, tiempo promedio, y la comparación con el periodo anterior. Arriba se ve cuántas personas están en el sitio **en este momento**.
+- **De dónde llegan** (Instagram, Facebook, TikTok, WhatsApp, Google, Directo…), **ciudades**, **celular o computador**, navegador, páginas más vistas y **horas con más visitas**.
+- **Qué hicieron:** clics en WhatsApp, reservas enviadas, Instagram, Facebook, llamadas y mapa.
+- **Clientas con cuenta que entraron:** si la clienta tiene la sesión iniciada, se ve su nombre. Las demás visitas son anónimas ("Visitante #a1b2c3").
+- **Últimas visitas** en vivo (se actualiza cada minuto).
+- **Para saber qué publicación funciona**, agrega `?fuente=` al enlace que compartes: `https://eliza-rodriguez-beauty.netlify.app/?fuente=instagram` o `?utm_source=tiktok&utm_campaign=promo-noviembre`.
+- **Tus propias visitas no cuentan** en el navegador donde abres el panel. En otro celular o computador, entra al panel una vez (o marca “No contar mis visitas”).
+- Los robots y buscadores no se cuentan. Los registros se borran a los 13 meses. Las funciones son `netlify/functions/visita.mjs` (registro), `netlify/functions/admin-trafico.mjs` (resumen) y `js/visitas.js` (el contador en las páginas).
 
 ### Club de clientas (cuentas y fidelidad)
 - **Crear la cuenta (a mano):** panel → **Clientas → “+ Crear cuenta de clienta”**: nombre, correo (= su usuario), WhatsApp y contraseña (botón **Generar** para una al azar). Al crearla, el panel ofrece **enviarle el usuario y la contraseña por WhatsApp**. Usa el mismo correo con el que reserva para que se sumen sus visitas.

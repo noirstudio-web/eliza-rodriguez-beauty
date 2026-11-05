@@ -143,6 +143,35 @@
     .cup-clientas label span { color: var(--ink-soft); font-size: .78rem; overflow-wrap: anywhere; }
     .cup-clientas input { width: 1.05rem; height: 1.05rem; accent-color: var(--gold-ink); flex: none; }
     .codigo { font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: .06em; }
+    .t-grid { display: grid; gap: .9rem; margin-bottom: 1.25rem; }
+    .t-box { background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 1rem 1.1rem; min-width: 0; }
+    .t-box h2 { font-size: 1.15rem; margin-bottom: .6rem; }
+    .t-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .15rem .6rem; font-size: .86rem; margin-bottom: .55rem; }
+    .t-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .t-row b { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .t-bar { grid-column: 1 / -1; height: 6px; border-radius: 999px; background: var(--beige); overflow: hidden; }
+    .t-bar i { display: block; height: 100%; border-radius: 999px; background: var(--gold); }
+    .t-chart { background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 1rem 1rem .6rem; display: flex; align-items: flex-end; gap: 3px; height: 190px; overflow-x: auto; }
+    .t-col { flex: 1 0 14px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: .25rem; min-width: 14px; }
+    .t-col i { display: block; width: 100%; max-width: 38px; background: var(--gold); border-radius: 4px 4px 0 0; min-height: 2px; }
+    .t-col i.is-hoy { background: var(--gold-ink); }
+    .t-col small { font-size: .62rem; color: var(--ink-soft); white-space: nowrap; }
+    .t-col em { font-style: normal; font-size: .68rem; font-weight: 600; }
+    .t-horas { display: flex; align-items: flex-end; gap: 2px; height: 120px; }
+    .t-horas div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; align-items: center; gap: 2px; }
+    .t-horas i { display: block; width: 100%; background: var(--gold); border-radius: 3px 3px 0 0; min-height: 1px; }
+    .t-horas small { font-size: .58rem; color: var(--ink-soft); height: .8rem; }
+    .t-feed { display: grid; gap: .4rem; }
+    .t-item { background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: .55rem .85rem; font-size: .84rem; display: flex; flex-wrap: wrap; gap: .2rem .7rem; align-items: baseline; }
+    .t-item time { font-weight: 600; min-width: 4.6rem; }
+    .t-item .muted { font-size: .78rem; }
+    .t-item.is-evento { border-color: var(--gold); background: #fdf8f0; }
+    .t-delta { display: block; font-size: .72rem; margin-top: .2rem; }
+    .t-delta.up { color: var(--ok); } .t-delta.down { color: var(--bad); }
+    table.t-tabla { width: 100%; border-collapse: collapse; font-size: .85rem; background: var(--white); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+    .t-tabla th, .t-tabla td { text-align: left; padding: .55rem .8rem; border-bottom: 1px solid var(--line); }
+    .t-tabla th { font-weight: 500; color: var(--ink-soft); font-size: .78rem; }
+    .t-tabla td:nth-child(n+2), .t-tabla th:nth-child(n+2) { text-align: right; white-space: nowrap; }
     [hidden] { display: none !important; }
 
     @media (min-width: 720px) {
@@ -153,8 +182,9 @@
       .item--result { grid-template-columns: 1fr 1fr; }
       .item--result .grid2 { grid-column: 1 / -1; }
       .grid2 { grid-template-columns: 1fr 1fr; }
+      .t-grid { grid-template-columns: 1fr 1fr; }
     }
-    @media (min-width: 1040px) { .list { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 1040px) { .list { grid-template-columns: repeat(3, 1fr); } .t-grid { grid-template-columns: repeat(3, 1fr); } }
   </style>
 </head>
 <body>
@@ -235,6 +265,7 @@
       <button class="tab" role="tab" data-tab="agenda" aria-selected="false">Agenda</button>
       <button class="tab" role="tab" data-tab="clientas" aria-selected="false">Clientas</button>
       <button class="tab" role="tab" data-tab="fidelidad" aria-selected="false">Fidelidad</button>
+      <button class="tab" role="tab" data-tab="trafico" aria-selected="false">Tráfico</button>
       <button class="tab" role="tab" data-tab="servicios" aria-selected="false">Servicios y precios</button>
       <button class="tab" role="tab" data-tab="resultados" aria-selected="false">Resultados</button>
       <button class="tab" role="tab" data-tab="textos" aria-selected="false">Textos</button>
@@ -439,6 +470,43 @@
         <p style="margin-top:.75rem;display:flex;gap:.75rem;flex-wrap:wrap;align-items:center"><button class="btn btn--gold" type="button" id="fid-save">Guardar niveles y sellos</button>
         <button class="link" type="button" id="fid-reset">Volver a los valores de fábrica</button></p>
       </div>
+    </section>
+
+    <!-- Tráfico -->
+    <section id="tab-trafico" role="tabpanel" hidden>
+      <div class="tools">
+        <div class="chips" role="group" aria-label="Periodo">
+          <button class="chip" type="button" data-td="1" aria-pressed="false">Hoy</button>
+          <button class="chip" type="button" data-td="7" aria-pressed="true">7 días</button>
+          <button class="chip" type="button" data-td="30" aria-pressed="false">30 días</button>
+          <button class="chip" type="button" data-td="90" aria-pressed="false">90 días</button>
+        </div>
+        <button class="btn btn--sm" type="button" id="t-refresh">Actualizar</button>
+        <span class="muted" id="t-online"></span>
+      </div>
+      <div class="stats" id="t-stats"></div>
+      <div class="group">
+        <h2>Visitantes por día</h2>
+        <div class="t-chart" id="t-dias"></div>
+      </div>
+      <div class="t-grid">
+        <div class="t-box"><h2>¿De dónde llegan?</h2><div id="t-fuentes"></div></div>
+        <div class="t-box"><h2>¿Qué hicieron?</h2><div id="t-eventos"></div></div>
+        <div class="t-box"><h2>Ciudades</h2><div id="t-ciudades"></div></div>
+        <div class="t-box"><h2>Dispositivo</h2><div id="t-disp"></div><h2 style="margin-top:1rem">Navegador</h2><div id="t-nav"></div></div>
+        <div class="t-box"><h2>Páginas más vistas</h2><div id="t-paginas"></div></div>
+        <div class="t-box"><h2>Horas con más visitas</h2><div class="t-horas" id="t-horas"></div></div>
+      </div>
+      <div class="group">
+        <h2>Clientas con cuenta que entraron</h2>
+        <p class="muted" style="margin:0 0 .6rem">Solo aparecen las clientas que tenían la sesión iniciada en su navegador. Las demás visitas son anónimas.</p>
+        <div id="t-clientas"></div>
+      </div>
+      <div class="group">
+        <h2>Últimas visitas</h2>
+        <div class="t-feed" id="t-recientes"></div>
+      </div>
+      <label class="ag-switch" style="margin-top:1rem"><input type="checkbox" id="t-yo"> <span>No contar mis visitas en este navegador <span class="muted">(se activa sola al entrar al panel; actívala también en tu celular entrando aquí)</span></span></label>
     </section>
 
     <!-- Fotos -->
@@ -1369,6 +1437,93 @@
       }
     });
     $('[data-tab="fidelidad"]').addEventListener("click", () => loadCupones().catch(() => toast("No se pudieron cargar los cupones.")));
+
+    /* ======================= Tráfico ======================= */
+    const NO_CONTAR = "erb-no-contar";
+    try { localStorage.setItem(NO_CONTAR, "1"); } catch (_) {} // tus visitas al sitio no cuentan desde este navegador
+    let tdias = 7, tTimer = 0;
+    const EV = { whatsapp: "Abrieron WhatsApp", reserva: "Enviaron una reserva", instagram: "Fueron a Instagram", facebook: "Fueron a Facebook", llamada: "Llamaron", mapa: "Abrieron el mapa" };
+    const PAG = { "/": "Inicio", "/index.html": "Inicio", "/cuenta/": "Mi cuenta", "/cancelar/": "Cancelar cita", "/legal/privacidad.html": "Privacidad", "/legal/terminos.html": "Términos" };
+    const tnum = (n) => Number(n || 0).toLocaleString("es-CO");
+    const dur = (s) => !s ? "—" : s < 60 ? s + " s" : Math.floor(s / 60) + " min " + String(s % 60).padStart(2, "0") + " s";
+    const hace = (f) => {
+      const m = Math.round((Date.now() - new Date(f)) / 60000);
+      if (m < 1) return "ahora"; if (m < 60) return "hace " + m + " min";
+      const d = new Date(f), hoyD = new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" }), dia = d.toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
+      const h = d.toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit", timeZone: "America/Bogota" });
+      return dia === hoyD ? h : d.toLocaleDateString("es-CO", { day: "numeric", month: "short", timeZone: "America/Bogota" }) + " " + h;
+    };
+    const delta = (a, b) => {
+      if (!b) return a ? `<span class="t-delta up">nuevo en este periodo</span>` : "";
+      const p = Math.round(((a - b) / b) * 100);
+      return `<span class="t-delta ${p >= 0 ? "up" : "down"}">${p >= 0 ? "▲" : "▼"} ${Math.abs(p)} % vs. periodo anterior</span>`;
+    };
+    const barras = (arr, nombre = (x) => x.nombre, extra) => {
+      if (!arr.length) return `<p class="muted">Aún no hay datos.</p>`;
+      const max = Math.max(...arr.map((x) => x.n), 1), total = arr.reduce((a, x) => a + x.n, 0);
+      return arr.map((x) => `<div class="t-row"><span title="${esc(nombre(x))}">${esc(nombre(x))}</span><b>${tnum(x.n)}${extra ? extra(x) : ` <span class="muted">${Math.round((x.n / total) * 100)} %</span>`}</b><span class="t-bar"><i style="width:${(x.n / max) * 100}%"></i></span></div>`).join("");
+    };
+
+    async function loadTrafico() {
+      const r = await api("/api/admin/trafico?dias=" + tdias);
+      const t = r.totales;
+      $("#t-online").textContent = t.enLinea ? `● ${t.enLinea} ${t.enLinea === 1 ? "persona" : "personas"} en el sitio ahora` : "Nadie en el sitio en este momento";
+      $("#t-stats").innerHTML = `
+        <div class="stat"><b>${tnum(t.visitantes)}</b><span>Personas que entraron</span>${delta(t.visitantes, r.anterior.visitantes)}</div>
+        <div class="stat"><b>${tnum(t.vistas)}</b><span>Páginas vistas</span>${delta(t.vistas, r.anterior.vistas)}</div>
+        <div class="stat"><b>${tnum(t.nuevos)}</b><span>Primera vez · ${tnum(t.recurrentes)} volvieron</span></div>
+        <div class="stat"><b>${dur(t.duracion)}</b><span>Tiempo promedio por página</span></div>`;
+      // Por día
+      const maxD = Math.max(...r.porDia.map((d) => d.visitantes), 1);
+      const hoyStr = new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
+      const etiqueta = (f) => { const [y, m, d] = f.split("-").map(Number); const x = new Date(y, m - 1, d); return r.porDia.length <= 7 ? x.toLocaleDateString("es-CO", { weekday: "short" }) : x.getDate() + "/" + (x.getMonth() + 1); };
+      const salto = Math.ceil(r.porDia.length / 16);
+      $("#t-dias").innerHTML = r.porDia.length <= 1
+        ? `<p class="muted" style="margin:auto">Hoy: <b>${tnum(t.visitantes)}</b> ${t.visitantes === 1 ? "persona" : "personas"}. Mira abajo las horas con más visitas.</p>`
+        : r.porDia.map((d, i) => `<div class="t-col" title="${esc(fFecha(d.dia))}: ${d.visitantes} personas · ${d.vistas} páginas">
+        ${r.porDia.length <= 31 ? `<em>${d.visitantes || ""}</em>` : ""}<i class="${d.dia === hoyStr ? "is-hoy" : ""}" style="height:${(d.visitantes / maxD) * 100}%"></i><small>${i % salto === 0 ? etiqueta(d.dia) : ""}</small></div>`).join("");
+      // Listas
+      $("#t-fuentes").innerHTML = barras(r.fuentes);
+      $("#t-ciudades").innerHTML = barras(r.ciudades);
+      $("#t-disp").innerHTML = barras(r.dispositivos);
+      $("#t-nav").innerHTML = barras(r.navegadores);
+      $("#t-paginas").innerHTML = barras(r.paginas, (x) => PAG[x.nombre] || x.nombre);
+      const wa = r.eventos.find((e) => e.nombre === "whatsapp")?.personas || 0;
+      $("#t-eventos").innerHTML = r.eventos.length
+        ? barras(r.eventos, (x) => EV[x.nombre] || x.nombre, (x) => ` <span class="muted">· ${tnum(x.personas)} pers.</span>`)
+          + (t.visitantes ? `<p class="muted" style="margin:.4rem 0 0;font-size:.78rem">De cada 100 personas que entran, ${Math.round((wa / t.visitantes) * 100)} abren WhatsApp.</p>` : "")
+        : `<p class="muted">Aún nadie hizo clic en WhatsApp, redes o reservas en este periodo.</p>`;
+      // Horas
+      const h = Array.from({ length: 24 }, (_, i) => r.porHora.find((x) => x.hora === i)?.n || 0), maxH = Math.max(...h, 1);
+      const hEt = (i) => i === 0 ? "12a" : i === 12 ? "12p" : i < 12 ? i + "a" : (i - 12) + "p";
+      $("#t-horas").innerHTML = h.map((n, i) => `<div title="${fHora(i + ":00")}: ${n} personas"><i style="height:${(n / maxH) * 100}%"></i><small>${i % 6 === 0 ? hEt(i) : ""}</small></div>`).join("");
+      // Clientas
+      $("#t-clientas").innerHTML = r.clientas.length
+        ? `<table class="t-tabla"><thead><tr><th>Clienta</th><th>Páginas</th><th>Clics</th><th>Última vez</th></tr></thead><tbody>${r.clientas.map((c) => `<tr><td><b>${esc(c.nombre)}</b><br><span class="muted">${esc(c.correo)}</span></td><td>${c.vistas}</td><td>${c.acciones}</td><td>${hace(c.ultima)}</td></tr>`).join("")}</tbody></table>`
+        : `<p class="empty" style="padding:1.5rem">Ninguna clienta con sesión iniciada entró en este periodo.</p>`;
+      // Últimas visitas
+      const quien = (v) => v.clienta ? "<b>" + esc(v.clienta) + "</b>" : "Visitante #" + esc(v.quien);
+      $("#t-recientes").innerHTML = r.recientes.length ? r.recientes.map((v) => v.tipo === "evento"
+        ? `<div class="t-item is-evento"><time>${hace(v.creado_en)}</time><span>⚡ ${esc(EV[v.evento] || v.evento)}</span><span class="muted">${quien(v)}</span></div>`
+        : `<div class="t-item"><time>${hace(v.creado_en)}</time><span>${esc(PAG[v.ruta] || v.ruta)}</span>
+            <span class="muted">${quien(v)} · ${v.nuevo ? "primera vez · " : ""}${esc(v.ciudad || "Ciudad desconocida")}${v.pais && v.pais !== "Colombia" ? ", " + esc(v.pais) : ""} · ${esc(v.dispositivo || "")} · desde ${esc(v.fuente || "Directo")}${v.duracion ? " · " + dur(v.duracion) : ""}</span></div>`).join("")
+        : `<p class="empty">Todavía no hay visitas registradas. Aparecerán aquí en cuanto alguien entre al sitio.</p>`;
+    }
+    const trafico = () => loadTrafico().catch((err) => { if (err.auth) logout(); else toast("No se pudo cargar el tráfico."); });
+    $('[data-tab="trafico"]').addEventListener("click", () => {
+      trafico();
+      clearInterval(tTimer);
+      tTimer = setInterval(() => { if (!$("#tab-trafico").hidden && document.visibilityState === "visible") trafico(); }, 60000);
+    });
+    $$("[data-td]").forEach((b) => b.addEventListener("click", () => {
+      tdias = Number(b.dataset.td); $$("[data-td]").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); trafico();
+    }));
+    $("#t-refresh").addEventListener("click", trafico);
+    try { $("#t-yo").checked = Boolean(localStorage.getItem(NO_CONTAR)); } catch (_) {}
+    $("#t-yo").addEventListener("change", (e) => {
+      try { if (e.target.checked) localStorage.setItem(NO_CONTAR, "1"); else localStorage.removeItem(NO_CONTAR); } catch (_) {}
+      toast(e.target.checked ? "Tus visitas desde este navegador ya no cuentan." : "Tus visitas desde este navegador vuelven a contar.");
+    });
 
     if (new URLSearchParams(location.search).has("restablecer")) verTarjeta("reset-form");
     else if (pw) enter(); else $("#user").focus();

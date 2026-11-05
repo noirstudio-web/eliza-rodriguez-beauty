@@ -427,6 +427,7 @@
       // 1) Guardar la reserva en la base de datos (en segundo plano).
       //    keepalive permite que el envío termine aunque la página cambie a WhatsApp.
       const saved = saveBooking(data);
+      if (window.erbEvento) window.erbEvento("reserva");
 
       // 2) Abrir WhatsApp de inmediato (debe ser en el mismo clic para que el
       //    navegador no lo bloquee).
