@@ -150,7 +150,7 @@
         if (t) (recordar ? localStorage : sessionStorage).setItem(KEY, t);
       } catch (_) {}
     };
-    const peso = (n) => "$" + Number(n || 0).toLocaleString("es-CO");
+    const peso = (n) => "$" + Number(n || 0).toLocaleString("es-CO") + " COP";
     const ESTADOS = { pendiente: "Pendiente", confirmada: "Confirmada", atendida: "Asistió", no_asistio: "No asistió", cancelada: "Cancelada" };
     const wa = "https://wa.me/" + String(WHATSAPP_NUMBER).replace(/\D/g, "");
 

@@ -12,7 +12,7 @@ const SERVICES = [
     nombre: "Perfilamiento y aumento de labios",
     descripcion: "Define el contorno y aporta volumen con ácido hialurónico, cuidando la armonía de tu rostro.",
     duracion: "45–60 min",
-    precio: "$XXX", // Se muestra como "desde $XXX"
+    precio: "$XXX", // Escribe el valor (ej. 350000): se muestra como "desde $350.000 COP"
     imagen: "assets/img/servicios/labios.webp?v=202611041312",
     alt: "Labios perfilados con acabado natural",
   },

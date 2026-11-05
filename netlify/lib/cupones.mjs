@@ -15,7 +15,7 @@ export const nuevoCodigo = (prefijo) =>
   `${prefijo}-${Array.from(randomBytes(6), (b) => LETRAS[b % LETRAS.length]).join("")}`;
 
 export const textoDescuento = (c) =>
-  c.tipo === "porcentaje" ? `${c.valor} %` : `$${Number(c.valor).toLocaleString("es-CO")}`;
+  c.tipo === "porcentaje" ? `${c.valor} %` : `$${Number(c.valor).toLocaleString("es-CO")} COP`;
 
 const hoyBogota = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
 

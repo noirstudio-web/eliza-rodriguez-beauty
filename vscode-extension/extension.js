@@ -273,7 +273,7 @@ class VistaClientas {
   const vscode = acquireVsCodeApi();
   const app = document.getElementById("app");
   const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const peso = (n) => "$" + Number(n || 0).toLocaleString("es-CO");
+  const peso = (n) => "$" + Number(n || 0).toLocaleString("es-CO") + " COP";
   const ESTADO = { activa: "Cuenta activa", sin_clave: "Sin contraseña", desactivada: "Desactivada", no: "Sin cuenta" };
   let datos = null, filtro = "con", busqueda = "";
 

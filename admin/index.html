@@ -316,7 +316,7 @@
             <div class="grid2">
               <label class="f">Nivel<select class="input sel-nivel" id="cc-nivel"><option value="auto">Automático (según sus visitas)</option></select></label>
               <label class="f">Visitas anteriores<input type="text" inputmode="numeric" id="cc-visitas" placeholder="0"></label>
-              <label class="f">Consumo anterior ($)<input type="text" inputmode="numeric" id="cc-consumo" placeholder="0"></label>
+              <label class="f">Consumo anterior (COP)<input type="text" inputmode="numeric" id="cc-consumo" placeholder="0"></label>
               <label class="f">Sellos iniciales<input type="text" inputmode="numeric" id="cc-sellos" placeholder="0"></label>
             </div>
             <p class="muted" style="margin:.4rem 0 0;font-size:.8rem">Para clientas que ya venían antes del sistema: empiezan con su nivel, sus visitas y sus sellos.</p>
@@ -400,7 +400,7 @@
             <div class="grid2">
               <label class="f">Nombre del cupón<input type="text" id="cup-titulo" placeholder="10 % en limpieza facial" required></label>
               <label class="f">Descripción (opcional)<input type="text" id="cup-desc" placeholder="Válido de lunes a jueves"></label>
-              <label class="f">Tipo de descuento<select class="input" id="cup-tipo"><option value="porcentaje">Porcentaje (%)</option><option value="valor">Valor fijo ($)</option></select></label>
+              <label class="f">Tipo de descuento<select class="input" id="cup-tipo"><option value="porcentaje">Porcentaje (%)</option><option value="valor">Valor fijo (COP)</option></select></label>
               <label class="f"><span id="cup-valor-label">Descuento (%)</span><input type="text" inputmode="numeric" id="cup-valor" placeholder="10" required></label>
               <label class="f">¿Para quién?<select class="input" id="cup-alcance"><option value="todas">Todas las clientas con cuenta</option><option value="nivel">Un nivel en adelante</option><option value="clienta">Clientas que yo elija</option></select></label>
               <label class="f" id="cup-nivel-box" hidden>Nivel (y superiores)<select class="input" id="cup-nivel"></select></label>
@@ -467,7 +467,7 @@
     const clone = (o) => JSON.parse(JSON.stringify(o));
     const src = (u) => (!u ? "" : u.startsWith("/") || /^https?:/.test(u) ? u : "../" + u);
     const ESTADOS = { pendiente: "Pendiente", confirmada: "Confirmada", atendida: "Asistió", no_asistio: "No asistió", cancelada: "Cancelada" };
-    const peso = (n) => "$" + Number(n || 0).toLocaleString("es-CO");
+    const peso = (n) => "$" + Number(n || 0).toLocaleString("es-CO") + " COP";
 
     // Sesión del panel: token que entrega el servidor al entrar (no se guarda la contraseña)
     let pw = "";
@@ -646,7 +646,7 @@
             ${r.recordatorio ? `<dt>Recordatorio</dt><dd>Enviado</dd>` : ""}
             ${r.valor_pagado != null ? `<dt>Pagó</dt><dd>${esc(peso(r.valor_pagado))}</dd>` : ""}
           </dl>
-          ${yaPaso ? `<div class="asist"><input type="text" inputmode="numeric" class="valor" placeholder="Valor pagado $" aria-label="Valor pagado por ${esc(r.nombre)}" style="flex:1 1 140px;min-height:36px"><button class="btn btn--gold btn--sm" data-set="atendida" data-id="${r.id}">✓ Asistió</button><button class="btn btn--danger btn--sm" data-set="no_asistio" data-id="${r.id}">✗ No asistió</button></div>` : ""}
+          ${yaPaso ? `<div class="asist"><input type="text" inputmode="numeric" class="valor" placeholder="Valor pagado (COP)" aria-label="Valor pagado por ${esc(r.nombre)}" style="flex:1 1 140px;min-height:36px"><button class="btn btn--gold btn--sm" data-set="atendida" data-id="${r.id}">✓ Asistió</button><button class="btn btn--danger btn--sm" data-set="no_asistio" data-id="${r.id}">✗ No asistió</button></div>` : ""}
           <div class="card__actions">
             <a class="btn btn--sm" href="${waCliente(r)}" target="_blank" rel="noopener">WhatsApp a la clienta</a>
             <select class="estado" data-id="${r.id}" aria-label="Estado de la reserva de ${esc(r.nombre)}">
@@ -807,7 +807,7 @@
             <label class="f">Nombre<input type="text" data-k="nombre" value="${esc(s.nombre)}"></label>
             <label class="f">Descripción corta (se ven 2 líneas)<textarea data-k="descripcion" rows="2">${esc(s.descripcion)}</textarea></label>
             <div class="grid2">
-              <label class="f">Precio (se muestra “desde …”)<input type="text" data-k="precio" value="${esc(s.precio)}" placeholder="$350.000"></label>
+              <label class="f">Precio en pesos COP (se muestra “desde $350.000 COP”)<input type="text" data-k="precio" value="${esc(s.precio)}" placeholder="350000" inputmode="numeric"></label>
               <label class="f">Duración<input type="text" data-k="duracion" value="${esc(s.duracion)}" placeholder="45 min"></label>
             </div>
             <label class="f">Descripción de la foto (para personas con discapacidad visual)<input type="text" data-k="alt" value="${esc(s.alt)}"></label>
@@ -984,7 +984,7 @@
             <div class="grid2" style="margin-top:.6rem">
               <label class="f">Nivel<select class="input sel-nivel" data-fid="nivel" data-actual="${esc(c.nivelManual || "auto")}"></select></label>
               <label class="f">Visitas anteriores<input type="text" inputmode="numeric" data-fid="visitas" value="${c.visitasPrevias || 0}"></label>
-              <label class="f">Consumo anterior ($)<input type="text" inputmode="numeric" data-fid="consumo" value="${c.consumoPrevio || 0}"></label>
+              <label class="f">Consumo anterior (COP)<input type="text" inputmode="numeric" data-fid="consumo" value="${c.consumoPrevio || 0}"></label>
             </div>
             <p style="margin:.6rem 0 0"><button class="btn btn--gold btn--sm" type="button" data-c="fidelidad">Guardar fidelidad</button></p>
           </details>` : ""}
@@ -1098,7 +1098,7 @@
             <label class="f">Nombre<input type="text" data-k="nombre" value="${esc(n.nombre)}"></label>
             <label class="f">Descripción<input type="text" data-k="descripcion" value="${esc(n.descripcion)}"></label>
             <label class="f">Visitas mínimas<input type="text" inputmode="numeric" data-k="visitas" value="${n.visitas}"></label>
-            <label class="f">Consumo mínimo ($)<input type="text" inputmode="numeric" data-k="consumo" value="${n.consumo}"></label>
+            <label class="f">Consumo mínimo (COP)<input type="text" inputmode="numeric" data-k="consumo" value="${n.consumo}"></label>
             <label class="f">Regla<select class="input" data-k="regla"><option value="o" ${n.regla !== "y" ? "selected" : ""}>Visitas O consumo</option><option value="y" ${n.regla === "y" ? "selected" : ""}>Visitas Y consumo</option></select></label>
           </div>
         </div>`).join("") + `
@@ -1284,7 +1284,7 @@
     });
     $("#cup-tipo").addEventListener("change", (e) => {
       const pct = e.target.value === "porcentaje";
-      $("#cup-valor-label").textContent = pct ? "Descuento (%)" : "Descuento ($)";
+      $("#cup-valor-label").textContent = pct ? "Descuento (%)" : "Descuento (COP)";
       $("#cup-valor").placeholder = pct ? "10" : "20000";
     });
     function renderCupones() {

@@ -11,6 +11,17 @@
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /** Escapa texto antes de insertarlo como HTML. */
+  /**
+   * Precio en pesos colombianos: "350000", "$350.000" o "350.000 - 500.000"
+   * se muestran como "$350.000 COP" / "$350.000 - $500.000 COP".
+   * Si no tiene números (p. ej. "Consultar"), se muestra tal cual.
+   */
+  const precioCOP = (p) => {
+    const t = String(p ?? "").trim();
+    if (!/\d/.test(t)) return t;
+    const sinMoneda = t.replace(/\s*(cop|pesos?)\s*$/i, "").replace(/\$\s*/g, "");
+    return sinMoneda.replace(/\d[\d.,]*/g, (num) => "$" + Number(num.replace(/[.,]/g, "")).toLocaleString("es-CO")) + " COP";
+  };
   const esc = (str) =>
     String(str).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -70,7 +81,7 @@
             <p class="card__desc">${esc(s.descripcion)}</p>
             <div class="card__meta">
               <span class="card__duration">${clockIcon}${esc(s.duracion)}</span>
-              <span class="card__price">desde <strong>${esc(s.precio)}</strong></span>
+              <span class="card__price">desde <strong>${esc(precioCOP(s.precio))}</strong></span>
             </div>
             <a class="btn btn--gold btn--sm" href="${waLink(msg)}" target="_blank" rel="noopener"
                aria-label="Agendar ${esc(s.nombre)} por WhatsApp">Agendar</a>
