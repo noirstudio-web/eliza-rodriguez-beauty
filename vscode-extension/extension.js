@@ -29,6 +29,81 @@ async function api(ctx, ruta, metodo = "GET", cuerpo) {
   return { status: 0, ok: false, error: "Sin conexión a internet (" + (ultimoError?.message || "error") + ")" };
 }
 
+/* ---------------------------------------------------------------------------
+   Inicio de sesión con el mismo diseño que la web (css/login.css del sitio):
+   paisaje en los tonos de la marca + tarjeta de cristal esmerilado.
+   --------------------------------------------------------------------------- */
+function loginCss(webview, extensionUri) {
+  const fondo = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "media", "login-fondo.svg"));
+  return `
+  .lg-fondo { position: fixed; inset: 0; z-index: -1; background: #E9D2B0 url("${fondo}") center bottom / cover no-repeat; }
+  .lg-fondo::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 40%, transparent 35%, rgba(43,36,32,.22)); }
+  .lg { position: relative; margin: 18px 0 24px; padding: 22px 16px 16px; border-radius: 18px; color: #2B2420; font-family: Montserrat, "Segoe UI", system-ui, sans-serif;
+        background: linear-gradient(160deg, rgba(255,251,245,.8), rgba(255,248,238,.6)); border: 1px solid rgba(255,255,255,.75);
+        box-shadow: 0 24px 50px -26px rgba(43,36,32,.6), inset 0 1px 0 rgba(255,255,255,.8); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); }
+  .lg__eyebrow { margin: 0 0 2px; text-align: center; font-size: 10px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: #7E5F30; }
+  .lg h1 { margin: 0; text-align: center; font: 600 24px/1.1 "Cormorant Garamond", Georgia, serif; color: #2B2420; }
+  .lg__sub { margin: 6px 0 16px; text-align: center; font-size: 12px; line-height: 1.5; color: #5A4E46; }
+  .lg__sub b { color: #2B2420; }
+  .lg__campo { position: relative; display: block; margin: 0 0 14px; }
+  .lg__campo span { display: block; font-size: 11px; font-weight: 600; letter-spacing: .05em; color: #5A4E46; }
+  .lg .lg__campo input { width: 100%; box-sizing: border-box; min-height: 34px; margin: 0; padding: 6px 28px 5px 0; border: 0; border-bottom: 1.5px solid rgba(43,36,32,.35);
+        border-radius: 0; background: transparent; color: #2B2420; font: 14px Montserrat, "Segoe UI", system-ui, sans-serif; outline: none; }
+  .lg .lg__campo input:focus { border-bottom-color: #7E5F30; box-shadow: 0 1px 0 0 #7E5F30; outline: none; }
+  .lg__campo svg { position: absolute; right: 2px; bottom: 9px; width: 16px; height: 16px; color: #5A4E46; pointer-events: none; }
+  .lg .lg__ver { position: absolute; right: 0; bottom: 3px; width: 28px; height: 28px; padding: 0; border: 0; background: none; color: #5A4E46; display: grid; place-items: center; }
+  .lg .lg__ver:hover { background: none; color: #2B2420; }
+  .lg__ver svg { position: static; }
+  .lg__check { display: flex; align-items: center; gap: 6px; margin: -2px 0 14px; font-size: 12px; color: #2B2420; cursor: pointer; }
+  .lg .lg__check input { width: 14px; height: 14px; margin: 0; accent-color: #7E5F30; }
+  .lg .lg__btn { width: 100%; min-height: 38px; border: 0; border-radius: 999px; background: linear-gradient(180deg, #3A302A, #2B2420); color: #F8F1E7;
+        font: 600 12px/1 Montserrat, "Segoe UI", system-ui, sans-serif; letter-spacing: .14em; text-transform: uppercase; box-shadow: 0 10px 22px -14px rgba(43,36,32,.8); }
+  .lg .lg__btn:hover { background: #B8945A; color: #2B2420; }
+  .lg .lg__btn[disabled] { opacity: .6; }
+  .lg__error { min-height: 1.2em; margin: 10px 0 0; text-align: center; font-size: 12px; color: #9A3A28; }
+  .lg__pie { margin: 10px 0 0; text-align: center; font-size: 11px; line-height: 1.45; color: #5A4E46; }
+  @media (prefers-reduced-transparency: reduce) { .lg { background: rgba(255,250,243,.96); backdrop-filter: none; -webkit-backdrop-filter: none; } }`;
+}
+
+/** Código del navegador de la pestaña: dibuja la tarjeta y envía el usuario y la contraseña. */
+const LOGIN_JS = `
+  function pantallaLogin(opciones) {
+    const estado = vscode.getState() || {};
+    const usuario = estado.usuario || "";
+    const ICONO_U = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.6 4-5.4 7.5-5.4s6.3 1.8 7.5 5.4"/></svg>';
+    const ICONO_OJO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>';
+    app.innerHTML =
+      '<div class="lg-fondo" aria-hidden="true"></div>' +
+      '<form class="lg" id="f-login">' +
+        '<p class="lg__eyebrow">' + (opciones.paso || "Acceso privado") + '</p>' +
+        '<h1>Panel de Eliza</h1>' +
+        '<p class="lg__sub">Escribe <b>tus</b> datos de administradora (los del panel de admin). No son los de una clienta.</p>' +
+        '<label class="lg__campo"><span>Usuario</span><input id="u" autocomplete="username" autocapitalize="none" spellcheck="false" required value="' + esc(usuario) + '">' + ICONO_U + '</label>' +
+        '<label class="lg__campo"><span>Contraseña</span><input id="p" type="password" autocomplete="current-password" required>' +
+          '<button class="lg__ver" type="button" id="ver-p" aria-label="Mostrar contraseña" aria-pressed="false">' + ICONO_OJO + '</button></label>' +
+        '<label class="lg__check"><input type="checkbox" id="recordar"' + (usuario ? " checked" : "") + '> Recordar usuario</label>' +
+        '<button class="lg__btn" type="submit">Entrar</button>' +
+        '<p class="lg__error" role="alert">' + esc(opciones.error || "") + '</p>' +
+        (opciones.pie ? '<p class="lg__pie">' + opciones.pie + '</p>' : '') +
+      '</form>';
+    document.getElementById("ver-p").addEventListener("click", (e) => {
+      const p = document.getElementById("p"), ver = p.type === "password";
+      p.type = ver ? "text" : "password";
+      e.currentTarget.setAttribute("aria-pressed", String(ver));
+      e.currentTarget.setAttribute("aria-label", ver ? "Ocultar contraseña" : "Mostrar contraseña");
+    });
+    document.getElementById("f-login").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const u = document.getElementById("u").value;
+      // "Recordar usuario": solo el nombre de usuario, nunca la contraseña
+      vscode.setState(Object.assign({}, vscode.getState() || {}, { usuario: document.getElementById("recordar").checked ? u.trim() : "" }));
+      app.querySelector(".lg__btn").disabled = true;
+      vscode.postMessage({ tipo: "login", usuario: u, clave: document.getElementById("p").value });
+    });
+    document.getElementById(usuario ? "p" : "u").focus();
+  }
+`;
+
 /** Coordina las pestañas: comparten la sesión y se actualizan juntas. */
 const app = {
   vistas: [],
@@ -159,7 +234,7 @@ class VistaClientas {
     const nonce = Array.from({ length: 24 }, () => "abcdefghijklmnopqrstuvwxyz0123456789"[Math.floor(Math.random() * 36)]).join("");
     return /* html */ `<!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   :root { --gold: #B8945A; }
@@ -190,6 +265,7 @@ class VistaClientas {
   .chips button[aria-pressed="false"] { color: var(--vscode-button-secondaryForeground); background: var(--vscode-button-secondaryBackground); }
   .error { color: var(--vscode-errorForeground); }
   [hidden] { display: none !important; }
+  ${loginCss(webview, this.ctx.extensionUri)}
 </style></head>
 <body>
   <div id="app"><p class="muted">Cargando…</p></div>
@@ -201,23 +277,8 @@ class VistaClientas {
   const ESTADO = { activa: "Cuenta activa", sin_clave: "Sin contraseña", desactivada: "Desactivada", no: "Sin cuenta" };
   let datos = null, filtro = "con", busqueda = "";
 
-  function login(error) {
-    app.innerHTML = \`
-      <h2>Entrar al panel</h2>
-      <p class="muted">Escribe <b>tus</b> datos de administradora (los del panel de admin). No son los de una clienta.</p>
-      <form id="f-login">
-        <label>Tu usuario de admin<input id="u" autocomplete="username" required></label>
-        <label>Tu contraseña de admin<input id="p" type="password" autocomplete="current-password" required></label>
-        <button type="submit">Entrar</button>
-        <p class="error">\${esc(error || "")}</p>
-      </form>\`;
-    document.getElementById("f-login").addEventListener("submit", (e) => {
-      e.preventDefault();
-      vscode.postMessage({ tipo: "login", usuario: document.getElementById("u").value, clave: document.getElementById("p").value });
-      app.querySelector("button").disabled = true;
-    });
-    document.getElementById("u").focus();
-  }
+  ${LOGIN_JS}
+  function login(error) { pantallaLogin({ error }); }
 
   function pintar() {
     const { clientas, resumen, config } = datos;
@@ -313,11 +374,11 @@ class VistaNuevas extends VistaClientas {
     if (this.pendiente) { this.enviar({ tipo: "prellenar", datos: this.pendiente }); this.pendiente = null; }
   }
 
-  html() {
+  html(webview) {
     const nonce = Array.from({ length: 24 }, () => "abcdefghijklmnopqrstuvwxyz0123456789"[Math.floor(Math.random() * 36)]).join("");
     return /* html */ `<!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   body { font-family: var(--vscode-font-family); font-size: var(--vscode-font-size); color: var(--vscode-foreground); padding: 0 10px 24px; }
@@ -343,6 +404,7 @@ class VistaNuevas extends VistaClientas {
   .ok dd { margin: 0; font-weight: 600; word-break: break-all; font-family: var(--vscode-editor-font-family, monospace); }
   .ok .fila { flex-wrap: wrap; }
   .error { color: var(--vscode-errorForeground); }
+  ${loginCss(webview, this.ctx.extensionUri)}
 </style></head>
 <body>
   <div id="app"><p class="muted">Cargando…</p></div>
@@ -358,23 +420,10 @@ class VistaNuevas extends VistaClientas {
     whatsapp: document.getElementById("c-wa")?.value || "",
   });
 
+  ${LOGIN_JS}
   function login(error) {
-    app.innerHTML = \`
-      <h2>Entrar al panel</h2>
-      <p class="muted">Paso 1 de 2 · Escribe <b>tus</b> datos de administradora (los del panel de admin). No son los de la clienta.</p>
-      <form id="f-login">
-        <label>Tu usuario de admin<input id="u" autocomplete="username" required></label>
-        <label>Tu contraseña de admin<input id="p" type="password" autocomplete="current-password" required></label>
-        <p><button type="submit">Entrar</button></p>
-        <p class="muted">Después verás el formulario para crear la clienta con su <b>Nombre</b>, <b>Usuario</b> y <b>Contraseña</b>.</p>
-        <p class="error">\${esc(error || "")}</p>
-      </form>\`;
-    document.getElementById("f-login").addEventListener("submit", (e) => {
-      e.preventDefault();
-      app.querySelector("button").disabled = true;
-      vscode.postMessage({ tipo: "login", usuario: document.getElementById("u").value, clave: document.getElementById("p").value });
-    });
-    document.getElementById("u").focus();
+    pantallaLogin({ error, paso: "Paso 1 de 2",
+      pie: "Después verás el formulario para crear la clienta con su <b>Nombre</b>, <b>Usuario</b> y <b>Contraseña</b>." });
   }
 
   function formulario(d = {}) {
