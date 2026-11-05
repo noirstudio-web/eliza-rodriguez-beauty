@@ -7,7 +7,7 @@
    POST /api/cuenta/clave      { t, clave }       → crea / cambia la contraseña
    POST /api/cuenta/recuperar  { correo }         → envía enlace nuevo (si existe)
    ========================================================================== */
-import { db, json, readJson, fechaLarga, hora12 } from "../lib/shared.mjs";
+import { db, json, readJson, fechaLarga, hora12, correoConfigurado } from "../lib/shared.mjs";
 import {
   cargarConfig, resumen, hashClave, verificarClave, crearSesion, clientaDeSesion,
   huella, nuevoEnlace, correoAcceso, DIAS_TOKEN,
@@ -142,6 +142,11 @@ export default async (req) => {
     if (accion === "recuperar" && req.method === "POST") {
       const b = await readJson(req);
       const correo = String(b.correo || "").trim().toLowerCase().slice(0, 160);
+      // Sin correo configurado no se puede enviar el enlace: se dice claramente
+      // (no revela nada de la clienta, solo que la web aún no envía correos)
+      if (!correoConfigurado()) {
+        return json(503, { ok: false, error: "Por ahora no podemos enviarte el enlace por correo. Escríbele a Eliza por WhatsApp y ella te ayuda a crear tu contraseña." });
+      }
       if (correoOk(correo)) {
         // Como máximo un correo cada 10 minutos por clienta (evita llenarle el buzón).
         // El enlace se crea con DIAS_TOKEN de validez, así que "hace < 10 min" ⇔
