@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Montserrat:wght@300;400;500&display=swap">
+  <link rel="stylesheet" href="../css/login.css?v=20261105">
   <style>
     /* Panel privado — mismos colores de la marca */
     :root {
@@ -157,20 +158,30 @@
   </style>
 </head>
 <body>
-  <!-- ===== Inicio de sesión ===== -->
+  <!-- ===== Inicio de sesión (diseño compartido: css/login.css) ===== -->
   <main class="wrap" id="view-login">
-    <form class="login" id="login-form">
-      <img src="../assets/img/logo.svg" alt="Eliza Rodríguez Beauty">
+    <div class="lg-fondo" aria-hidden="true"></div>
+    <form class="lg" id="login-form">
+      <a class="lg__cerrar" href="../" aria-label="Volver al sitio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+      <img class="lg__logo" src="../assets/img/logo.svg" alt="Eliza Rodríguez Beauty">
+      <p class="lg__eyebrow">Acceso privado</p>
       <h1>Panel de Eliza</h1>
-      <p class="muted">Reservas, clientas y contenido de la página.</p>
-      <label class="f" for="user" style="text-align:left;margin-top:1rem">Usuario
+      <p class="lg__sub">Reservas, agenda, clientas y contenido de la página.</p>
+      <label class="lg__campo"><span>Usuario</span>
         <input id="user" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.6 4-5.4 7.5-5.4s6.3 1.8 7.5 5.4"/></svg>
       </label>
-      <label class="f" for="pw" style="text-align:left;margin-top:.75rem">Contraseña
+      <label class="lg__campo"><span>Contraseña</span>
         <input id="pw" type="password" autocomplete="current-password" required>
+        <button class="lg__ver" type="button" id="pw-ver" aria-label="Mostrar contraseña" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg></button>
       </label>
-      <button class="btn btn--gold" type="submit">Entrar</button>
-      <p class="error" id="login-error" role="alert"></p>
+      <div class="lg__fila">
+        <label class="lg__check"><input type="checkbox" id="recordar-user"> Recordar usuario</label>
+        <button class="lg__link" type="button" id="pw-olvide" aria-expanded="false" aria-controls="pw-ayuda">¿Olvidaste la contraseña?</button>
+      </div>
+      <p class="lg__sub" id="pw-ayuda" hidden style="text-align:left;margin:-.4rem 0 1.1rem">Por seguridad no se puede recuperar desde aquí. Cámbiala en Netlify → <i>Project configuration → Environment variables → ADMIN_PASSWORD</i> y vuelve a publicar.</p>
+      <button class="lg__btn" type="submit">Entrar</button>
+      <p class="lg__msg is-error" id="login-error" role="alert"></p>
     </form>
   </main>
 
@@ -463,10 +474,24 @@
         const d = await res.json().catch(() => ({}));
         if (!res.ok) { $("#login-error").textContent = d.error || "No se pudo entrar."; return; }
         pw = d.token; try { sessionStorage.setItem("erb-admin-sesion", pw); } catch (_) {}
+        // "Recordar usuario": solo se guarda el nombre de usuario, nunca la contraseña
+        try { $("#recordar-user").checked ? localStorage.setItem("erb-admin-usuario", $("#user").value.trim()) : localStorage.removeItem("erb-admin-usuario"); } catch (_) {}
         $("#pw").value = "";
         enter();
       } catch (_) { $("#login-error").textContent = "Sin conexión. Revisa tu internet."; }
       finally { btn.disabled = false; }
+    });
+    try { const u = localStorage.getItem("erb-admin-usuario"); if (u) { $("#user").value = u; $("#recordar-user").checked = true; } } catch (_) {}
+    $("#pw-ver").addEventListener("click", (e) => {
+      const ver = $("#pw").type === "password";
+      $("#pw").type = ver ? "text" : "password";
+      e.currentTarget.setAttribute("aria-pressed", String(ver));
+      e.currentTarget.setAttribute("aria-label", ver ? "Ocultar contraseña" : "Mostrar contraseña");
+    });
+    $("#pw-olvide").addEventListener("click", (e) => {
+      const abierto = $("#pw-ayuda").hidden;
+      $("#pw-ayuda").hidden = !abierto;
+      e.currentTarget.setAttribute("aria-expanded", String(abierto));
     });
     $("#logout").addEventListener("click", () => { if (!dirty || confirm("Tienes cambios sin guardar. ¿Salir igual?")) { setDirty(null); logout(); } });
 

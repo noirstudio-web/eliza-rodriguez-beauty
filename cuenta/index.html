@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@300;400;500&display=swap">
+  <link rel="stylesheet" href="../css/login.css?v=20261105">
   <style>
     :root {
       --cream: #F8F1E7; --beige: #EFE4D6; --gold: #B8945A; --gold-ink: #7E5F30;
@@ -120,6 +121,7 @@
   </style>
 </head>
 <body>
+  <div class="lg-fondo" id="fondo" hidden></div>
   <header class="top">
     <a href="../" aria-label="Volver al sitio"><img src="../assets/img/logo.svg" alt="Eliza Rodríguez Beauty"></a>
     <div style="display:flex;gap:.5rem">
@@ -139,8 +141,15 @@
     const app = document.getElementById("app");
     const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const KEY = "erb-cuenta";
-    const getTok = () => { try { return localStorage.getItem(KEY) || ""; } catch (_) { return ""; } };
-    const setTok = (t) => { try { t ? localStorage.setItem(KEY, t) : localStorage.removeItem(KEY); } catch (_) {} };
+    // "Mantener sesión iniciada": marcada = se guarda en este dispositivo; sin marcar = se borra al cerrar el navegador
+    const getTok = () => { try { return localStorage.getItem(KEY) || sessionStorage.getItem(KEY) || ""; } catch (_) { return ""; } };
+    const setTok = (t, recordar) => {
+      try {
+        if (recordar === undefined) recordar = !sessionStorage.getItem(KEY); // se mantiene donde estaba
+        localStorage.removeItem(KEY); sessionStorage.removeItem(KEY);
+        if (t) (recordar ? localStorage : sessionStorage).setItem(KEY, t);
+      } catch (_) {}
+    };
     const peso = (n) => "$" + Number(n || 0).toLocaleString("es-CO");
     const ESTADOS = { pendiente: "Pendiente", confirmada: "Confirmada", atendida: "Asistió", no_asistio: "No asistió", cancelada: "Cancelada" };
     const wa = "https://wa.me/" + String(WHATSAPP_NUMBER).replace(/\D/g, "");
@@ -156,50 +165,80 @@
     }
 
     /* ---------------- Vistas de acceso ---------------- */
-    function vistaLogin(aviso) {
+    const ICONO = {
+      correo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6 8.5-6"/></svg>',
+      ojo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>',
+      cerrar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    };
+    /** Tarjeta de cristal sobre el paisaje de fondo. */
+    function tarjeta(id, contenido) {
+      document.getElementById("fondo").hidden = false;
       document.getElementById("salir").hidden = true;
       app.innerHTML = `
-        <form class="auth" id="f-login" novalidate>
-          <p class="eyebrow" style="text-align:center">Club de clientas</p>
-          <h1>Iniciar sesión</h1>
-          <p class="muted">Consulta tu nivel, tus visitas y tu tarjeta de sellos.</p>
-          <label>Correo<input type="email" id="correo" autocomplete="email" inputmode="email" required></label>
-          <label>Contraseña<input type="password" id="clave" autocomplete="current-password" required></label>
-          <button class="btn btn--gold" type="submit">Entrar</button>
-          <p class="msg ${aviso ? "is-ok" : ""}" id="msg" role="alert">${esc(aviso || "")}</p>
-          <p class="alt"><button class="link" type="button" id="olvide">¿Olvidaste tu contraseña?</button></p>
-          <p class="alt muted" style="font-size:.82rem">Tu cuenta la crea Eliza. ¿Aún no la tienes? <a href="${wa}" target="_blank" rel="noopener">Pídesela por WhatsApp</a>.</p>
+        <form class="lg" id="${id}" novalidate>
+          <a class="lg__cerrar" href="../" aria-label="Volver al sitio">${ICONO.cerrar}</a>
+          ${contenido}
         </form>`;
-      const f = document.getElementById("f-login");
+      return document.getElementById(id);
+    }
+    const campoCorreo = (valor = "", soloLectura = false) =>
+      `<label class="lg__campo"><span>Correo</span><input type="email" id="correo" autocomplete="${soloLectura ? "username" : "email"}" inputmode="email" value="${esc(valor)}" required ${soloLectura ? "readonly" : ""}>${ICONO.correo}</label>`;
+    const campoClave = (id, texto, auto) =>
+      `<label class="lg__campo"><span>${texto}</span><input type="password" id="${id}" autocomplete="${auto}" required>
+        <button class="lg__ver" type="button" data-ver="${id}" aria-label="Mostrar contraseña" aria-pressed="false">${ICONO.ojo}</button></label>`;
+    // Botón de "ojo" para ver u ocultar la contraseña
+    app.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-ver]"); if (!b) return;
+      e.preventDefault();
+      const inp = document.getElementById(b.dataset.ver);
+      const ver = inp.type === "password";
+      inp.type = ver ? "text" : "password";
+      b.setAttribute("aria-pressed", String(ver));
+      b.setAttribute("aria-label", ver ? "Ocultar contraseña" : "Mostrar contraseña");
+    });
+    const mensaje = (texto, tipo = "is-error") => { const m = document.getElementById("msg"); m.className = "lg__msg " + tipo; m.textContent = texto; };
+
+    function vistaLogin(aviso) {
+      const f = tarjeta("f-login", `
+          <p class="lg__eyebrow">Club de clientas</p>
+          <h1>Iniciar sesión</h1>
+          <p class="lg__sub">Consulta tu nivel, tus visitas, tus sellos y tus cupones.</p>
+          ${campoCorreo()}
+          ${campoClave("clave", "Contraseña", "current-password")}
+          <div class="lg__fila">
+            <label class="lg__check"><input type="checkbox" id="recordar" checked> Mantener sesión iniciada</label>
+            <button class="lg__link" type="button" id="olvide">¿Olvidaste tu contraseña?</button>
+          </div>
+          <button class="lg__btn" type="submit">Entrar</button>
+          <p class="lg__msg ${aviso ? "is-ok" : ""}" id="msg" role="alert">${esc(aviso || "")}</p>
+          <p class="lg__pie">¿Aún no tienes cuenta? <a href="${wa}" target="_blank" rel="noopener">Pídesela a Eliza</a></p>`);
       f.addEventListener("submit", async (e) => {
         e.preventDefault();
         const btn = f.querySelector("button[type=submit]"); btn.disabled = true;
         const r = await api("login", "POST", { correo: f.correo.value, clave: f.clave.value });
         btn.disabled = false;
-        if (r.ok) { setTok(r.token); cargarPanel(); }
-        else { const m = document.getElementById("msg"); m.className = "msg is-error"; m.textContent = r.error || "No se pudo iniciar sesión."; }
+        if (r.ok) { setTok(r.token, f.recordar.checked); cargarPanel(); }
+        else mensaje(r.error || "No se pudo iniciar sesión.");
       });
       document.getElementById("olvide").addEventListener("click", () => vistaRecuperar(f.correo.value));
     }
 
     function vistaRecuperar(correo) {
-      app.innerHTML = `
-        <form class="auth" id="f-rec" novalidate>
+      const f = tarjeta("f-rec", `
+          <p class="lg__eyebrow">Club de clientas</p>
           <h1>Recibir enlace</h1>
-          <p class="muted">Escribe el correo con el que reservas y te enviaremos un enlace para crear tu contraseña.</p>
-          <label>Correo<input type="email" id="correo" autocomplete="email" inputmode="email" value="${esc(correo || "")}" required></label>
-          <button class="btn btn--gold" type="submit">Enviar enlace</button>
-          <p class="msg" id="msg" role="alert"></p>
-          <p class="alt"><button class="link" type="button" id="volver">Volver a iniciar sesión</button></p>
-          <p class="alt muted" style="font-size:.82rem">¿No te llega? Escríbele a Eliza por <a href="${wa}" target="_blank" rel="noopener">WhatsApp</a>.</p>
-        </form>`;
-      const f = document.getElementById("f-rec");
+          <p class="lg__sub">Escribe el correo con el que reservas y te enviaremos un enlace para crear tu contraseña.</p>
+          ${campoCorreo(correo)}
+          <button class="lg__btn" type="submit">Enviar enlace</button>
+          <p class="lg__msg" id="msg" role="alert"></p>
+          <p class="lg__pie"><button class="lg__link" type="button" id="volver">Volver a iniciar sesión</button></p>
+          <p class="lg__pie">¿No te llega? Escríbele a Eliza por <a href="${wa}" target="_blank" rel="noopener">WhatsApp</a></p>`);
       f.addEventListener("submit", async (e) => {
         e.preventDefault();
         const btn = f.querySelector("button[type=submit]"); btn.disabled = true;
         const r = await api("recuperar", "POST", { correo: f.correo.value });
         btn.disabled = false;
-        const m = document.getElementById("msg"); m.className = "msg " + (r.ok ? "is-ok" : "is-error"); m.textContent = r.mensaje || r.error;
+        mensaje(r.mensaje || r.error, r.ok ? "is-ok" : "is-error");
       });
       document.getElementById("volver").addEventListener("click", () => vistaLogin());
     }
@@ -207,32 +246,32 @@
     async function vistaCrearClave(t) {
       const info = await api("enlace?t=" + encodeURIComponent(t));
       if (!info.ok) {
-        app.innerHTML = `<div class="auth"><h1>Enlace vencido</h1><p class="muted">${esc(info.error)}</p><button class="btn btn--gold" id="pedir" type="button">Pedir un enlace nuevo</button></div>`;
-        document.getElementById("pedir").addEventListener("click", () => vistaRecuperar());
+        const f = tarjeta("f-vencido", `
+          <p class="lg__eyebrow">Club de clientas</p>
+          <h1>Enlace vencido</h1>
+          <p class="lg__sub">${esc(info.error)}</p>
+          <button class="lg__btn" type="submit">Pedir un enlace nuevo</button>`);
+        f.addEventListener("submit", (e) => { e.preventDefault(); vistaRecuperar(); });
         return;
       }
-      app.innerHTML = `
-        <form class="auth" id="f-clave" novalidate>
-          <p class="eyebrow" style="text-align:center">${info.nueva ? "Bienvenida al club" : "Nueva contraseña"}</p>
+      const f = tarjeta("f-clave", `
+          <p class="lg__eyebrow">${info.nueva ? "Bienvenida al club" : "Nueva contraseña"}</p>
           <h1>Hola, ${esc(info.nombre)}</h1>
-          <p class="muted">${info.nueva ? "Crea tu contraseña para entrar a tu cuenta de clienta." : "Crea tu nueva contraseña."}</p>
-          <label>Usuario<input type="email" value="${esc(info.correo)}" autocomplete="username" readonly></label>
-          <label>Contraseña (mínimo 8 caracteres)<input type="password" id="c1" autocomplete="new-password" minlength="8" required></label>
-          <label>Repite la contraseña<input type="password" id="c2" autocomplete="new-password" minlength="8" required></label>
-          <button class="btn btn--gold" type="submit">Guardar y entrar</button>
-          <p class="msg" id="msg" role="alert"></p>
-        </form>`;
-      const f = document.getElementById("f-clave");
+          <p class="lg__sub">${info.nueva ? "Crea tu contraseña para entrar a tu cuenta de clienta." : "Crea tu nueva contraseña."}</p>
+          ${campoCorreo(info.correo, true)}
+          ${campoClave("c1", "Contraseña (mínimo 8 caracteres)", "new-password")}
+          ${campoClave("c2", "Repite la contraseña", "new-password")}
+          <button class="lg__btn" type="submit">Guardar y entrar</button>
+          <p class="lg__msg" id="msg" role="alert"></p>`);
       f.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const m = document.getElementById("msg"); m.className = "msg is-error";
-        if (f.c1.value.length < 8) return (m.textContent = "La contraseña debe tener al menos 8 caracteres.");
-        if (f.c1.value !== f.c2.value) return (m.textContent = "Las contraseñas no coinciden.");
+        if (f.c1.value.length < 8) return mensaje("La contraseña debe tener al menos 8 caracteres.");
+        if (f.c1.value !== f.c2.value) return mensaje("Las contraseñas no coinciden.");
         const btn = f.querySelector("button[type=submit]"); btn.disabled = true;
         const r = await api("clave", "POST", { t, clave: f.c1.value });
         btn.disabled = false;
         if (r.ok) { setTok(r.token); history.replaceState(null, "", location.pathname); cargarPanel(); }
-        else m.textContent = r.error || "No se pudo guardar.";
+        else mensaje(r.error || "No se pudo guardar.");
       });
     }
 
@@ -244,6 +283,7 @@
       const d = await api("yo");
       if (!d.ok) { setTok(""); return vistaLogin(d.status === 401 ? "" : "No se pudo cargar tu cuenta."); }
       document.getElementById("salir").hidden = false;
+      document.getElementById("fondo").hidden = true;
       const n = d.actual, s = d.siguiente;
       const faltan = s
         ? (s.faltanVisitas > 0 ? `${s.faltanVisitas} visita${s.faltanVisitas === 1 ? "" : "s"}` : "") +

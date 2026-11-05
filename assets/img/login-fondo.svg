@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <!-- Fondo de inicio de sesión: atardecer y colinas en los tonos de la marca -->
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EADCC8"/>
+      <stop offset=".38" stop-color="#F3E3CC"/>
+      <stop offset=".6" stop-color="#E9C99A"/>
+      <stop offset=".75" stop-color="#D8AE74"/>
+    </linearGradient>
+    <radialGradient id="sol" cx=".5" cy=".55" r=".45">
+      <stop offset="0" stop-color="#FFF6E6" stop-opacity=".95"/>
+      <stop offset=".35" stop-color="#F6DDB4" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#F6DDB4" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="agua" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E8C48E"/>
+      <stop offset="1" stop-color="#B98A53"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#cielo)"/>
+  <rect width="1600" height="1000" fill="url(#sol)"/>
+  <!-- Colinas lejanas -->
+  <path fill="#D3A976" d="M0 560 L120 520 L230 540 L340 470 L450 515 L560 480 L660 530 L760 505 L860 540 L980 470 L1090 520 L1200 460 L1320 500 L1440 455 L1600 495 V1000 H0Z"/>
+  <path fill="#C08F5A" d="M0 610 L90 575 L200 600 L320 520 L420 565 L520 545 L610 590 L700 600 L1000 600 L1080 560 L1180 520 L1270 560 L1380 500 L1480 540 L1600 520 V1000 H0Z"/>
+  <!-- Lago -->
+  <path fill="url(#agua)" d="M420 640 C560 610 1040 610 1180 640 L1260 700 C1050 760 560 760 340 700Z"/>
+  <path fill="#FFF3DF" opacity=".35" d="M600 660 H1000 V664 H600Z M660 680 H940 V683 H660Z M720 700 H880 V702 H720Z"/>
+  <!-- Colinas medias -->
+  <path fill="#9C7046" d="M0 680 L110 620 L210 650 L300 590 L380 640 L430 700 L360 760 L0 820Z"/>
+  <path fill="#9C7046" d="M1600 660 L1500 610 L1400 640 L1320 590 L1230 650 L1180 700 L1260 770 L1600 820Z"/>
+  <path fill="#7A5434" d="M0 760 L140 700 L260 740 L360 720 L470 790 L560 800 L0 900Z"/>
+  <path fill="#7A5434" d="M1600 740 L1470 690 L1360 730 L1250 715 L1140 790 L1040 810 L1600 900Z"/>
+  <!-- Primer plano -->
+  <path fill="#5A3E28" d="M0 840 C200 790 380 820 560 860 C760 905 900 870 1060 850 C1260 825 1420 830 1600 800 V1000 H0Z"/>
+  <path fill="#3A2A1E" d="M0 910 C240 870 480 900 760 930 C1000 955 1300 920 1600 890 V1000 H0Z"/>
+  <!-- Pinos estilizados -->
+  <g fill="#3A2A1E">
+    <path d="M70 870 l18 -70 l18 70z M110 880 l14 -55 l14 55z M150 868 l20 -80 l20 80z M196 878 l13 -48 l13 48z"/>
+    <path d="M1380 860 l18 -72 l18 72z M1424 870 l14 -56 l14 56z M1464 856 l21 -84 l21 84z M1512 866 l14 -52 l14 52z M1548 858 l17 -66 l17 66z"/>
+  </g>
+  <g fill="#5A3E28">
+    <path d="M300 830 l12 -46 l12 46z M330 838 l10 -36 l10 36z M1240 820 l12 -46 l12 46z M1270 828 l10 -38 l10 38z"/>
+  </g>
+</svg>

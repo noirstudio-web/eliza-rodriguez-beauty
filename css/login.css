@@ -1,0 +1,82 @@
+/* ==========================================================================
+   Inicio de sesión (clientas /cuenta y panel /admin)
+   Paisaje ilustrado de fondo + tarjeta de cristal esmerilado.
+   Usa las variables de color de cada página (--ink, --gold, --cream…).
+   ========================================================================== */
+.lg-fondo {
+  position: fixed; inset: 0; z-index: -1;
+  background: #E9D2B0 url("../assets/img/login-fondo.svg") center bottom / cover no-repeat;
+}
+.lg-fondo::after { /* leve viñeta para que la tarjeta resalte */
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(43, 36, 32, .18));
+}
+
+.lg {
+  position: relative; width: min(100%, 400px); margin: 7vh auto 3rem;
+  padding: 2.4rem 1.9rem 1.8rem; border-radius: 22px; text-align: left;
+  color: var(--ink);
+  background: linear-gradient(160deg, rgba(255, 251, 245, .72), rgba(255, 248, 238, .5));
+  border: 1px solid rgba(255, 255, 255, .7);
+  box-shadow: 0 30px 70px -30px rgba(43, 36, 32, .55), inset 0 1px 0 rgba(255, 255, 255, .8);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .lg { background: rgba(255, 250, 243, .94); }
+}
+.lg__cerrar {
+  position: absolute; top: .85rem; right: .85rem; width: 34px; height: 34px;
+  display: grid; place-items: center; border-radius: 9px;
+  border: 1px solid rgba(43, 36, 32, .25); color: var(--ink); text-decoration: none; background: rgba(255, 255, 255, .35);
+}
+.lg__cerrar:hover { background: var(--white); }
+.lg__cerrar svg { width: 16px; height: 16px; }
+.lg__logo { display: block; height: 54px; width: auto; margin: 0 auto .6rem; }
+.lg__eyebrow { margin: 0 0 .2rem; text-align: center; font-size: .7rem; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: var(--gold-ink); }
+.lg h1 { margin: 0; text-align: center; font: 600 2.1rem/1.1 var(--serif); }
+.lg__sub { margin: .45rem 0 1.4rem; text-align: center; font-size: .86rem; color: var(--ink-soft); }
+
+/* Campos con línea inferior e ícono a la derecha */
+.lg__campo { position: relative; display: block; margin: 0 0 1.2rem; }
+.lg__campo span { display: block; font-size: .78rem; font-weight: 500; letter-spacing: .06em; color: var(--ink-soft); }
+.lg .lg__campo input {
+  width: 100%; min-height: 46px; margin: 0; padding: .55rem 2.2rem .45rem 0;
+  border: 0; border-bottom: 1.5px solid rgba(43, 36, 32, .35); border-radius: 0;
+  background: transparent; box-shadow: none; font-size: 1rem; color: var(--ink);
+}
+.lg .lg__campo input:focus { outline: none; border-bottom-color: var(--gold-ink); background: transparent; box-shadow: 0 1px 0 0 var(--gold-ink); }
+.lg .lg__campo input[readonly] { color: var(--ink-soft); }
+.lg__campo svg { position: absolute; right: .1rem; bottom: .8rem; width: 19px; height: 19px; color: var(--ink-soft); pointer-events: none; }
+.lg__ver { position: absolute; right: 0; bottom: .45rem; width: 34px; height: 34px; border: 0; background: none; cursor: pointer; color: var(--ink-soft); display: grid; place-items: center; }
+.lg__ver svg { position: static; width: 19px; height: 19px; }
+
+.lg__fila { display: flex; justify-content: space-between; align-items: center; gap: .75rem; flex-wrap: wrap; margin: -.2rem 0 1.3rem; font-size: .82rem; }
+.lg__check { display: inline-flex; align-items: center; gap: .45rem; cursor: pointer; color: var(--ink); margin: 0; font-size: .82rem; font-weight: 400; letter-spacing: 0; }
+.lg .lg__check input { width: 1.05rem; height: 1.05rem; min-height: 0; margin: 0; padding: 0; accent-color: var(--gold-ink); }
+.lg__link { background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink); font-size: .82rem; text-decoration: underline; text-underline-offset: 3px; }
+.lg__link:hover { color: var(--gold-ink); }
+
+.lg__btn {
+  width: 100%; min-height: 50px; margin: 0; border: 0; border-radius: 999px; cursor: pointer;
+  background: linear-gradient(180deg, #3A302A, var(--ink)); color: var(--cream);
+  font: 500 .9rem/1 var(--sans); letter-spacing: .14em; text-transform: uppercase;
+  box-shadow: 0 14px 28px -16px rgba(43, 36, 32, .8);
+  transition: background .3s, color .3s, transform .2s;
+}
+.lg__btn:hover { background: var(--gold); color: var(--ink); }
+.lg__btn:active { transform: translateY(1px); }
+.lg__btn[disabled] { opacity: .6; cursor: wait; }
+
+.lg__msg { min-height: 1.3em; margin: .8rem 0 0; text-align: center; font-size: .85rem; }
+.lg__msg.is-error { color: #9A3A28; }
+.lg__msg.is-ok { color: #2F6B4F; }
+.lg__pie { margin: 1rem 0 0; text-align: center; font-size: .82rem; color: var(--ink-soft); }
+.lg__pie a { color: var(--ink); font-weight: 600; }
+
+@media (max-width: 480px) {
+  .lg { margin-top: 3vh; padding: 2.1rem 1.35rem 1.5rem; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .lg { background: rgba(255, 250, 243, .96); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
