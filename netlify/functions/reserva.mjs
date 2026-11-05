@@ -7,6 +7,7 @@ import {
   db, json, readJson, ahoraColombia, sendMail, plantilla, correoEliza, siteUrl,
   fechaLarga, hora12, HORAS_CANCELACION,
 } from "../lib/shared.mjs";
+import { cargarAgenda, disponibilidad } from "../lib/agenda.mjs";
 
 export const config = { path: "/api/reserva" };
 
@@ -48,10 +49,42 @@ export default async (req, context) => {
   let fila;
   try {
     const sql = db();
-    [fila] = await sql`
-      INSERT INTO reservas (nombre, whatsapp, correo, servicio, fecha, hora, comentario, autoriza_datos)
-      VALUES (${r.nombre}, ${r.whatsapp}, ${r.correo}, ${r.servicio}, ${r.fecha}, ${r.hora}, ${r.comentario}, true)
-      RETURNING id, cancel_token`;
+    // Anti-abuso: como máximo 5 solicitudes por correo en una hora (evita que
+    // alguien use el formulario para llenar de correos el buzón de otra persona).
+    const [{ recientes }] = await sql`
+      SELECT count(*)::int AS recientes FROM reservas WHERE correo = ${r.correo} AND creada_en > now() - interval '1 hour'`;
+    if (recientes >= 5) {
+      return json(429, { ok: false, error: "Ya recibimos varias solicitudes con este correo. Escríbele a Eliza por WhatsApp." });
+    }
+    const agenda = await cargarAgenda(sql);
+    if (!agenda.activa) {
+      [fila] = await sql`
+        INSERT INTO reservas (nombre, whatsapp, correo, servicio, fecha, hora, comentario, autoriza_datos)
+        VALUES (${r.nombre}, ${r.whatsapp}, ${r.correo}, ${r.servicio}, ${r.fecha}, ${r.hora}, ${r.comentario}, true)
+        RETURNING id, cancel_token`;
+    } else {
+      // Agenda activa: solo se acepta un hueco libre de los horarios de Eliza
+      const { dias } = await disponibilidad(sql, agenda);
+      if (!dias[r.fecha]?.includes(r.hora)) {
+        return json(409, { ok: false, error: "Ese horario ya no está disponible. Elige otro, por favor.", campos: ["hora"] });
+      }
+      // Se guarda con un candado: si dos clientas eligen la misma hora al mismo
+      // tiempo, solo entra la primera (la segunda recibe "ya no está disponible").
+      const dur = agenda.duracion;
+      const [, filas] = await sql.transaction([
+        sql`SELECT pg_advisory_xact_lock(hashtext('agenda'))`,
+        sql`
+          INSERT INTO reservas (nombre, whatsapp, correo, servicio, fecha, hora, comentario, autoriza_datos)
+          SELECT ${r.nombre}, ${r.whatsapp}, ${r.correo}, ${r.servicio}, ${r.fecha}, ${r.hora}, ${r.comentario}, true
+          WHERE (SELECT count(*) FROM reservas
+                 WHERE fecha = ${r.fecha}::date AND estado IN ('pendiente', 'confirmada')
+                   AND hora < ${r.hora}::time + make_interval(mins => ${dur})
+                   AND hora + make_interval(mins => ${dur}) > ${r.hora}::time) < ${agenda.capacidad}
+          RETURNING id, cancel_token`,
+      ]);
+      fila = filas[0];
+      if (!fila) return json(409, { ok: false, error: "Ese horario se acaba de ocupar. Elige otro, por favor.", campos: ["hora"] });
+    }
   } catch (err) {
     console.error("[reserva] error al guardar:", err);
     return json(500, { ok: false, error: "No se pudo guardar la reserva" });

@@ -427,16 +427,84 @@
       // 3) Confirmación en pantalla
       saved.then((ok) => {
         status.hidden = false;
-        status.classList.toggle("is-error", !ok);
-        status.textContent = ok
+        status.classList.toggle("is-error", ok !== true);
+        status.textContent = ok === true
           ? "¡Listo! Tu reserva quedó registrada. Termina de enviar el mensaje en WhatsApp para confirmarla."
-          : "Abrimos WhatsApp con tu reserva. Envía el mensaje para confirmarla con Eliza.";
-        if (ok) form.reset();
+          : ok === "ocupado"
+            ? "Ese horario se acaba de ocupar. Envía el mensaje de WhatsApp y Eliza te propondrá otra hora, o elige otro horario aquí."
+            : "Abrimos WhatsApp con tu reserva. Envía el mensaje para confirmarla con Eliza.";
+        if (ok === true) form.reset();
+        agendaRecargar(); // los horarios libres cambian después de reservar
       });
     });
 
     const status = $("#booking-status");
+    initAgenda(fields);
   }
+
+  /* ------------------------------------------------------------------------
+     Agenda en línea (se activa en el panel → Agenda). Si está activa, la
+     clienta solo puede elegir los horarios libres que devuelve el servidor.
+     ------------------------------------------------------------------------ */
+  let agenda = null;
+  function initAgenda(fields) {
+    if (!/^https?:$/.test(location.protocol)) return;
+    const fecha = $("#f-fecha"), hora = $("#f-hora");
+    const box = $("#slots"), diasEl = $("#slots-dias"), horasEl = $("#slots-horas");
+    const campoHora = fields.find((f) => f.input === hora);
+    const DIAS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
+    const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+    const corta = (f) => { const d = new Date(f + "T12:00:00"); return `${DIAS[d.getDay()]} ${d.getDate()} ${MESES[d.getMonth()]}`; };
+
+    function pintarHoras() {
+      const libres = agenda.dias[fecha.value] || [];
+      const proximos = Object.keys(agenda.dias).filter((f) => f !== fecha.value).slice(0, 6);
+      diasEl.innerHTML = (fecha.value && !libres.length
+        ? '<p class="slots__aviso">Ese día no hay horarios libres. Prueba con uno de estos días:</p>'
+        : `<p class="slots__aviso">${fecha.value ? "Otros días disponibles:" : "Próximos días disponibles:"}</p>`) +
+        (proximos.length
+          ? proximos.map((f) => `<button type="button" class="slots__dia" data-fecha="${f}">${esc(corta(f))}</button>`).join("")
+          : '<p class="slots__aviso">No hay horarios libres por ahora. Escríbele a Eliza por WhatsApp.</p>');
+      horasEl.innerHTML = libres.map((h) =>
+        `<button type="button" class="slots__hora" role="radio" aria-checked="${h === hora.value}" data-hora="${h}">${esc(formatTime(h))}</button>`).join("");
+      if (!libres.includes(hora.value)) hora.value = "";
+    }
+
+    function aplicar(d) {
+      agenda = d;
+      box.hidden = false;
+      $("#hora-libre").hidden = true;
+      hora.type = "hidden"; // la hora se elige con los botones de horarios libres
+      campoHora.error = $("#err-slot");
+      fecha.max = d.hasta;
+      const primero = Object.keys(d.dias)[0];
+      if (primero && fecha.min < primero) fecha.min = primero;
+      $("#agenda-hint").textContent = `Elige un día y uno de los horarios libres (cada cita dura unos ${d.duracion} minutos). Eliza te confirmará por WhatsApp.`;
+      pintarHoras();
+    }
+
+    const cargar = () => fetch("api/disponibilidad")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d?.ok && d.activa) aplicar(d); })
+      .catch(() => {}); // sin servidor: se queda el campo de hora normal
+    cargar();
+    agendaRecargar = cargar;
+
+    fecha.addEventListener("change", () => agenda && pintarHoras());
+    diasEl.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-fecha]"); if (!b) return;
+      fecha.value = b.dataset.fecha;
+      fecha.dispatchEvent(new Event("change", { bubbles: true }));
+      horasEl.querySelector("button")?.focus();
+    });
+    horasEl.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-hora]"); if (!b) return;
+      hora.value = b.dataset.hora;
+      horasEl.querySelectorAll("[data-hora]").forEach((x) => x.setAttribute("aria-checked", String(x === b)));
+      $("#err-slot").hidden = true;
+    });
+  }
+  let agendaRecargar = () => {};
 
   /**
    * Guarda la reserva en la base de datos (función /api/reserva en Vercel).
@@ -453,7 +521,7 @@
     })
       .then((res) => {
         if (!res.ok) console.warn("[Reserva] No se guardó. Código:", res.status);
-        return res.ok;
+        return res.ok ? true : res.status === 409 ? "ocupado" : false;
       })
       .catch((err) => {
         console.warn("[Reserva] No se pudo guardar:", err);
@@ -522,6 +590,9 @@
     safe(initResults);
     safe(initTestimonials);
     safe(initReveal); // de nuevo, para incluir las tarjetas generadas
+    // Aviso para otros scripts (p. ej. js/burst.js) de que ya están las fotos del panel
+    window.erbContenido = { servicios: SERVICES, resultados: RESULTADOS };
+    document.dispatchEvent(new CustomEvent("erb:contenido", { detail: window.erbContenido }));
   });
 
   /* ------------------------------------------------------------------------

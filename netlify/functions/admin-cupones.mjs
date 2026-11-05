@@ -55,17 +55,21 @@ export default async (req) => {
       if (tipo === "valor" && valor > 10_000_000) return json(400, { ok: false, error: "Valor de descuento demasiado alto." });
       if (vence && (!/^\d{4}-\d{2}-\d{2}$/.test(vence) || vence < hoy())) return json(400, { ok: false, error: "La fecha de vencimiento debe ser hoy o una fecha futura." });
 
-      let nivel = null, clientaId = null;
+      let nivel = null, clientaIds = [null];
       if (alcance === "nivel") {
         const cfg = await cargarConfig(sql);
         nivel = cfg.niveles.map((n) => n.nombre).find((n) => n === b.nivel);
         if (!nivel) return json(400, { ok: false, error: "Elige el nivel." });
       }
       if (alcance === "clienta") {
-        const correo = String(b.correo || "").trim().toLowerCase();
-        const [c] = await sql`SELECT id FROM clientas WHERE correo = ${correo}`;
-        if (!c) return json(400, { ok: false, error: "Esa clienta no tiene cuenta. Créale una primero (pestaña Clientas)." });
-        clientaId = c.id;
+        // Una o varias clientas elegidas en el panel (se acepta también `correo` suelto)
+        const lista = Array.isArray(b.correos) ? b.correos : [b.correo];
+        const correos = [...new Set(lista.map((c) => String(c || "").trim().toLowerCase().slice(0, 160)).filter(Boolean))].slice(0, 500);
+        if (!correos.length) return json(400, { ok: false, error: "Elige al menos una clienta." });
+        const filas = await sql`SELECT id, correo FROM clientas WHERE correo = ANY(${correos})`;
+        const faltan = correos.filter((c) => !filas.some((f) => f.correo === c));
+        if (faltan.length) return json(400, { ok: false, error: `Sin cuenta: ${faltan.slice(0, 3).join(", ")}${faltan.length > 3 ? "…" : ""}. Créales una primero (pestaña Clientas).` });
+        clientaIds = filas.map((f) => f.id);
       }
       // Prefijo del código: el que escriba Eliza o uno a partir del nombre (ej. "10 % limpieza" → "LIMPIEZA10")
       let prefijo = String(b.prefijo || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
@@ -73,11 +77,13 @@ export default async (req) => {
         const palabra = titulo.normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/[^A-Z ]/g, " ").split(" ").filter((w) => w.length > 3)[0] || "DESC";
         prefijo = (palabra.slice(0, 8) + valor).slice(0, 12);
       }
-      const [nuevo] = await sql`
+      // Para "clientas que yo elija" se crea un cupón por clienta (cada una ve solo el suyo)
+      const nuevos = await sql`
         INSERT INTO cupones (prefijo, titulo, descripcion, tipo, valor, alcance, nivel, clienta_id, vence)
-        VALUES (${prefijo}, ${titulo}, ${descripcion}, ${tipo}, ${valor}, ${alcance}, ${nivel}, ${clientaId}, ${vence})
+        SELECT ${prefijo}, ${titulo}, ${descripcion}, ${tipo}, ${valor}, ${alcance}, ${nivel}, x, ${vence}::date
+        FROM unnest(${clientaIds}::bigint[]) AS x
         RETURNING id, prefijo`;
-      return json(201, { ok: true, cupon: nuevo });
+      return json(201, { ok: true, cupon: nuevos[0], creados: nuevos.length });
     }
 
     /* ----- Validar / usar ----- */

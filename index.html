@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500&display=swap"></noscript>
 
-  <link rel="stylesheet" href="css/styles.css?v=20261104154814">
+  <link rel="stylesheet" href="css/styles.css?v=20261104200000">
 
   <!-- ========== Datos estructurados (Schema.org) ========== -->
   <script type="application/ld+json">
@@ -71,7 +71,8 @@
   <script src="js/config.js?v=202611041312" defer></script>
   <script src="js/services.js?v=202611041312" defer></script>
   <script src="js/content.js?v=202611041312" defer></script>
-  <script src="js/main.js?v=20261104154814" defer></script>
+  <script src="js/main.js?v=20261104200000" defer></script>
+  <script src="js/burst.js?v=20261104190000" defer></script>
 </head>
 
 <body>
@@ -133,6 +134,53 @@
             <img src="assets/img/eliza.jpg?v=20261104131256" alt="Eliza Rodriguez, especialista en estética avanzada" width="900" height="1125" fetchpriority="high" decoding="async">
           </picture>
           <span class="hero__ring" aria-hidden="true"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         2b. ANIMACIÓN DE SCROLL: la foto se queda fija y "dispara" fotos
+             de tratamientos y resultados alrededor (js/burst.js)
+         =================================================================== -->
+    <section class="burst" id="experiencia" aria-labelledby="burst-title">
+      <div class="burst__track">
+        <div class="burst__stage">
+          <h2 class="burst__big" id="burst-title">
+            <span class="burst__big-a" data-edit="animacion.titulo1" data-label="Animación · título grande, línea 1">Tu mejor</span>
+            <span class="burst__big-b" data-edit="animacion.titulo2" data-label="Animación · título grande, línea 2">versión</span>
+          </h2>
+          <div class="burst__intro">
+            <a class="btn btn--dark btn--sm" href="#resultados" data-edit="animacion.boton" data-label="Animación · botón">Ver resultados</a>
+            <p data-edit="animacion.intro" data-label="Animación · texto corto">Tratamientos faciales con resultados naturales, hechos a tu medida.</p>
+          </div>
+          <div class="burst__head">
+            <p class="burst__lead" data-edit="animacion.titulo3" data-label="Animación · segundo título">Donde cada tratamiento se convierte en tu mejor resultado</p>
+            <p class="burst__text" data-edit="animacion.parrafo" data-label="Animación · párrafo">Labios, botox, limpieza facial, peeling y más. Técnicas certificadas, productos de calidad y un acompañamiento cercano en cada sesión.</p>
+          </div>
+
+          <div class="burst__photos" aria-hidden="true">
+            <!-- --x/--y: posición final (% desde el centro) · --w: ancho (vw) · --r: giro · m*: celular · d = solo en pantallas grandes -->
+            <figure class="burst__photo" style="--x:-27;--y:-6;--w:15;--r:-4;--mx:-27;--my:-17;--mw:34"><img src="assets/img/resultados/labios-despues.webp?v=202611041312" alt="" width="393" height="393" loading="lazy" decoding="async"></figure>
+            <figure class="burst__photo" style="--x:27;--y:-9;--w:15;--r:3;--mx:27;--my:-15;--mw:32"><img src="assets/img/servicios/limpieza-facial.webp?v=202611041312" alt="" width="640" height="480" loading="lazy" decoding="async"></figure>
+            <figure class="burst__photo" style="--x:-22;--y:25;--w:13;--r:2;--mx:-26;--my:25;--mw:32"><img src="assets/img/servicios/botox.webp?v=202611041312" alt="" width="640" height="480" loading="lazy" decoding="async"></figure>
+            <figure class="burst__photo" style="--x:24;--y:24;--w:14;--r:-3;--mx:26;--my:27;--mw:34"><img src="assets/img/resultados/peeling-despues.webp?v=202611041312" alt="" width="900" height="900" loading="lazy" decoding="async"></figure>
+            <figure class="burst__photo" style="--x:-41;--y:9;--w:10;--r:5;--mx:-31;--my:5;--mw:26"><img src="assets/img/servicios/dermapen.webp?v=202611041312" alt="" width="640" height="480" loading="lazy" decoding="async"></figure>
+            <figure class="burst__photo" style="--x:41;--y:9;--w:11;--r:-5;--mx:31;--my:7;--mw:26"><img src="assets/img/resultados/nariz-despues.webp?v=202611041312" alt="" width="900" height="900" loading="lazy" decoding="async"></figure>
+            <figure class="burst__photo burst__photo--d" style="--x:-37;--y:-17;--w:9;--r:-2"><img src="assets/img/resultados/botox-despues.webp?v=202611041312" alt="" width="900" height="900" loading="lazy" decoding="async"></figure>
+            <figure class="burst__photo burst__photo--d" style="--x:37;--y:-19;--w:9;--r:4"><img src="assets/img/servicios/labios.webp?v=202611041312" alt="" width="523" height="392" loading="lazy" decoding="async"></figure>
+            <figure class="burst__photo burst__photo--d" style="--x:-9;--y:33;--w:10;--r:-3"><img src="assets/img/resultados/limpieza-facial-despues.webp?v=202611041312" alt="" width="900" height="900" loading="lazy" decoding="async"></figure>
+            <figure class="burst__photo burst__photo--d" style="--x:10;--y:32;--w:9;--r:2"><img src="assets/img/servicios/peeling.webp?v=202611041312" alt="" width="640" height="480" loading="lazy" decoding="async"></figure>
+            <figure class="burst__photo burst__photo--d" style="--x:-44;--y:28;--w:8;--r:3"><img src="assets/img/servicios/nariz.webp?v=202611041312" alt="" width="640" height="480" loading="lazy" decoding="async"></figure>
+            <figure class="burst__photo burst__photo--d" style="--x:42;--y:29;--w:8;--r:-4"><img src="assets/img/resultados/dermapen-despues.webp?v=202611041312" alt="" width="900" height="900" loading="lazy" decoding="async"></figure>
+          </div>
+
+          <div class="burst__center">
+            <!-- Foto central: se cambia desde el panel (pestaña Fotos) -->
+            <picture data-edit-img="animacion" data-label="Foto central de la animación">
+              <source srcset="assets/img/eliza-sobre.webp?v=202611041312" type="image/webp">
+              <img src="assets/img/eliza.jpg?v=20261104131256" alt="Eliza Rodriguez en su consultorio" width="800" height="1000" loading="lazy" decoding="async">
+            </picture>
+          </div>
         </div>
       </div>
     </section>
@@ -385,13 +433,20 @@
                 <input id="f-fecha" name="fecha" type="date" required>
                 <p class="form__error" id="err-fecha" hidden>Elige la fecha de tu cita.</p>
               </div>
-              <div class="form__field">
+              <div class="form__field" id="hora-libre">
                 <label for="f-hora">Hora de la cita</label>
                 <input id="f-hora" name="hora" type="time" step="1800" required>
                 <p class="form__error" id="err-hora" hidden>Elige la hora de tu cita.</p>
               </div>
             </div>
-            <p class="form__hint form__hint--left">Atendemos sobre reserva: Eliza te confirmará por WhatsApp si la fecha y hora están disponibles.</p>
+            <!-- Agenda en línea (se activa desde el panel): huecos libres del día elegido -->
+            <div class="form__field slots" id="slots" hidden>
+              <p class="slots__label" id="slots-label">Horarios disponibles</p>
+              <div class="slots__dias" id="slots-dias" aria-label="Próximos días con horarios libres"></div>
+              <div class="slots__horas" id="slots-horas" role="radiogroup" aria-labelledby="slots-label"></div>
+              <p class="form__error" id="err-slot" hidden>Elige uno de los horarios disponibles.</p>
+            </div>
+            <p class="form__hint form__hint--left" id="agenda-hint">Atendemos sobre reserva: Eliza te confirmará por WhatsApp si la fecha y hora están disponibles.</p>
 
             <div class="form__field">
               <label for="f-comentario">Comentario <span class="optional">(opcional)</span></label>

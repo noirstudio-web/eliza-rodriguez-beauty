@@ -10,7 +10,7 @@
 import { db, json, readJson, fechaLarga, hora12 } from "../lib/shared.mjs";
 import {
   cargarConfig, resumen, hashClave, verificarClave, crearSesion, clientaDeSesion,
-  huella, nuevoEnlace, correoAcceso,
+  huella, nuevoEnlace, correoAcceso, DIAS_TOKEN,
 } from "../lib/fidelidad.mjs";
 import { cuponesDeClienta } from "../lib/cupones.mjs";
 
@@ -127,7 +127,7 @@ export default async (req) => {
       if (!c) return json(401, { ok: false, error: "Sesión vencida" });
       const b = await readJson(req);
       const nueva = String(b.nueva || "");
-      if (!(await verificarClave(String(b.actual || ""), c.clave_hash))) {
+      if (!(await verificarClave(String(b.actual || "").slice(0, 200), c.clave_hash))) {
         await pausa(600);
         return json(400, { ok: false, error: "La contraseña actual no es correcta." });
       }
@@ -143,7 +143,12 @@ export default async (req) => {
       const b = await readJson(req);
       const correo = String(b.correo || "").trim().toLowerCase().slice(0, 160);
       if (correoOk(correo)) {
-        const [c] = await sql`SELECT * FROM clientas WHERE correo = ${correo}`;
+        // Como máximo un correo cada 10 minutos por clienta (evita llenarle el buzón).
+        // El enlace se crea con DIAS_TOKEN de validez, así que "hace < 10 min" ⇔
+        // token_expira > now() + DIAS_TOKEN días − 10 min.
+        const [c] = await sql`
+          SELECT * FROM clientas WHERE correo = ${correo} AND activa
+            AND (token_expira IS NULL OR token_expira < now() + make_interval(days => ${DIAS_TOKEN}) - interval '10 minutes')`;
         if (c) {
           const url = await nuevoEnlace(sql, c.id);
           await correoAcceso(c, url, c.clave_hash ? "recuperar" : "bienvenida");

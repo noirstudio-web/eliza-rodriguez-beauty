@@ -293,7 +293,7 @@
                   <div class="cupon__valor">${esc(c.descuento)}</div>
                   <div class="cupon__titulo">${esc(c.titulo)}</div>
                   <div class="cupon__codigo" aria-label="Código del cupón">${esc(c.codigo)}</div>
-                  <div class="cupon__meta">${c.usado ? "Ya usado" : esc(c.para) + (c.vence ? " · Vence el " + esc(new Date(c.vence + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })) : "")}${c.descripcion ? " · " + esc(c.descripcion) : ""}</div>
+                  <div class="cupon__meta">${c.usado ? "Ya usado" : "<b>✓ Válido</b> · " + esc(c.para) + (c.vence ? " · Vence el " + esc(new Date(c.vence + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })) : "")}${c.descripcion ? " · " + esc(c.descripcion) : ""}</div>
                 </div>`).join("")}
               </div>` : `<p class="muted" style="margin:0">Por ahora no tienes cupones. ¡Pronto llegarán sorpresas según tu nivel!</p>`}
           </section>

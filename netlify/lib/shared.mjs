@@ -2,7 +2,7 @@
    Utilidades compartidas por las funciones de Netlify (netlify/functions)
    ========================================================================== */
 import { neon } from "@neondatabase/serverless";
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import nodemailer from "nodemailer";
 
 const env = (k) => (globalThis.Netlify ? Netlify.env.get(k) : process.env[k]) || "";
@@ -41,11 +41,14 @@ export async function readJson(req) {
 
 /* ---------------- Acceso al panel de admin ----------------
    Usuario y contraseña: variables ADMIN_USER y ADMIN_PASSWORD en Netlify.
-   Al entrar se crea una sesión (token aleatorio; en la base de datos solo se
-   guarda su huella SHA-256) que vence a las 12 horas. */
+   Al entrar se crea una sesión (token aleatorio) que vence a las 12 horas.
+   En la base de datos solo se guarda su huella HMAC-SHA256, firmada con el
+   usuario y la contraseña actuales: si se cambia ADMIN_PASSWORD, TODAS las
+   sesiones abiertas dejan de servir (también una que alguien hubiera robado). */
 export const HORAS_SESION_ADMIN = 12;
 const igual = (a, b) => timingSafeEqual(createHash("sha256").update(String(a)).digest(), createHash("sha256").update(String(b)).digest());
-export const huellaToken = (t) => createHash("sha256").update(t).digest("hex");
+export const huellaToken = (t) =>
+  createHmac("sha256", `admin-sesion|${env("ADMIN_USER") || "admin"}|${env("ADMIN_PASSWORD")}`).update(String(t)).digest("hex");
 
 /** ¿Usuario y contraseña correctos? (comparación en tiempo constante) */
 export function credencialesAdmin(usuario, clave) {
@@ -62,7 +65,7 @@ export function credencialesAdmin(usuario, clave) {
 export async function isAdmin(req) {
   const h = req.headers.get("authorization") || "";
   const token = h.startsWith("Bearer ") ? h.slice(7) : "";
-  if (token.length < 30) return false;
+  if (token.length < 30 || token.length > 200 || !env("ADMIN_PASSWORD")) return false;
   const [s] = await db()`SELECT 1 FROM admin_sesiones WHERE token_hash = ${huellaToken(token)} AND expira_en > now()`;
   return Boolean(s);
 }

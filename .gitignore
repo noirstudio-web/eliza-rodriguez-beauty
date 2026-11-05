@@ -17,3 +17,5 @@ node_modules/
 
 # Paquete de la extensión de VS Code (se genera con vsce)
 *.vsix
+
+**/.claude/settings.local.json
